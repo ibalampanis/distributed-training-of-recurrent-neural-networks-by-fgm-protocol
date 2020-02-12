@@ -1,0 +1,114 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage[table]{xcolor}
+\usepackage{array}
+\usepackage{wrapfig}
+\usepackage{multirow}
+\usepackage{tabu}
+\usepackage{lastpage}
+\usepackage{fancyhdr}
+\usepackage{color}
+\usepackage{blindtext}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{bm}
+% \pgfplotsset{width=11.5cm,compat=1.15}
+\newcommand{\red}[1]{{\color{red}#1}}
+\setlength{\arrayrulewidth}{0.5mm}
+\setlength{\tabcolsep}{10pt}
+\renewcommand{\arraystretch}{2.5}
+\newcolumntype{s}{>{\columncolor[HTML]{AAACED}} p{3cm}}
+
+\cfoot{Page \thepage\ from \pageref{LastPage}}
+
+\begin{document}
+    \begin{center}
+        \LARGE{\textbf{Thesis Proposal}}\\[.5cm]
+    \end{center}
+    \begin{table}[h!]
+        \begin{tabular}{ c c c c }
+            \textbf{Student name:} & Ilias Balampanis & \textbf{Student ID:} & 2014030127  \\
+            \textbf{Email:} & balampanis.ilias@gmail.com &  \textbf{Tel. Number:} & 6981856705 \\
+        \end{tabular}
+    \end{table}
+
+
+    %----------------------------------------------------------------------------------------
+    %	Title
+    %----------------------------------------------------------------------------------------
+    \section*{Title}
+    Distributed training of Recurrent Neural Networks by FGM protocol.
+
+    %----------------------------------------------------------------------------------------
+    %	Keywords
+    %----------------------------------------------------------------------------------------
+    \section*{Keywords}
+    machine learning, recurrent neural networks (RNN), Gating units, LSTM cells, geometric monitoring (GM), rebalancing GM, functional geometric monitoring (FGM), rebalancing FGM, distributed training
+
+    %----------------------------------------------------------------------------------------
+    %	Abstract
+    %----------------------------------------------------------------------------------------
+    \section*{Abstract}
+    Neural networks are appealing because they learn by example and are strongly supported by statistical and optimization theories. The usage of recurrent neural networks as identifiers and predictors in nonlinear dynamic systems has increased significantly. They can present a wide range of dynamics, due to feedback and are also flexible nonlinear maps. Based on this, there is a need for distributed training on these neural nets, because of the enormous datasets. One of the most known protocols for distributed training is the GM protocol. Our conviction is that this is a very expensive protocol regarding the communication of nodes. Recently, the FGM protocol has tested training on convolutional neural nets. Our goal is to extend this work to RNNs.
+
+    %----------------------------------------------------------------------------------------
+    %	Possible issues and solutions
+    %----------------------------------------------------------------------------------------
+    \section*{Possible issues and solutions}
+    Typically, an RNN is an extremely difficult net to train. Since these nets use backpropagation we once again run into the problem of the vanishing gradient. Unfortunately, the vanishing is exponentially worse for an RNN. The reason for this is that each time step is the equivalent of an entire layer in a feed-forward network. For the same reason, a distributed training model possibly has the same difficulties. If the model is not distributed, the most common solution is to introduce gating units in our system, such as LSTM cells. But, if the training process is distributed, we must find a better safe function than the simple norm as a node communication factor.
+
+    %----------------------------------------------------------------------------------------
+    %	Working Plan
+    %----------------------------------------------------------------------------------------
+    \section*{Working Plan}
+    \begin{enumerate}[label=\arabic*)]
+        \item Construct simple RNN models and train these with multiple datasets, each with different target applications
+        \item Construct a distributed training model for RNNs using Kamp's GM protocol
+        \item Measure communication cost on a simulated distributed architeceture.
+        \item Implement a distributed training algorithm for RNNs using FGM/Reb. FGM protocol based on the github.com/vsamtuc/ddssim codebase.
+        \item Evaluate by simulation, as for (3).
+    \end{enumerate}
+
+    %----------------------------------------------------------------------------------------
+    %	Goal
+    %----------------------------------------------------------------------------------------
+    \section*{Goals}
+    The main goal of this thesis is to prove that FGM/Reb. FGM is a better protocol than GM/Reb. GM on RNNs training process. So, \\
+    \begin{itemize}
+        \item Devise a distributed algorithm on the process of learning of RNNs using GM/Reb. GM and FGM/Reb. FGM protocol.
+        \item Compare FGM/Reb. FGM with Kamp's GM/Reb. GM protocols experimentally.
+        \item Hope for a scientific article if this project proves successful.
+    \end{itemize}
+
+    \newpage
+    %----------------------------------------------------------------------------------------
+    %	Timeline of implementation
+    %----------------------------------------------------------------------------------------
+    \section*{Timeline of implementation}
+    \begin{center}
+        \begin{tabular}{|p{3.5cm}|p{0.5cm}|p{0.5cm}|p{0.5cm}|p{0.5cm}|p{0.5cm}|p{0.5cm}|p{0.5cm}|p{0.5cm}|}
+            \hline
+            \cellcolor{gray} & \multicolumn{8}{c|}{Months} \\
+            \hline
+            \textbf{Milestone} & Oct & Nov & Dec & Jan & Feb & Mar & Apr & May \\
+            \hline
+            Research and bibliography definition & X & X & X & X & & & &   \\
+            \hline
+            Construct RNN and distributed training models & & & & X & X & X & &   \\
+            \hline
+            Cross-validation, results collection and comparison with related work & & & & & & X & X &   \\
+            \hline
+            Thesis Writing & & & & & & & X & X  \\
+            \hline
+            Presentation & & & & & & & & X  \\
+            \hline
+        \end{tabular}
+    \end{center}
+
+    %----------------------------------------------------------------------------------------
+    %	Bibliography
+    %----------------------------------------------------------------------------------------
+    \section*{Bibliography}
+\end{document}

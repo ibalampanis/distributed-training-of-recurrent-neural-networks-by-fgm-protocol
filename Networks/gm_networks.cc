@@ -1,4 +1,4 @@
-#include "GM_Networks.hh"
+#include "gm_networks.hh"
 
 using namespace ml_gm_proto;
 using namespace ml_gm_proto::ML_gm_networks;

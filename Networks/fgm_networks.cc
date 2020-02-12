@@ -1,4 +1,4 @@
-#include "FGM_Networks.hh"
+#include "fgm_networks.hh"
 
 using namespace ml_gm_proto;
 using namespace ml_gm_proto::ML_fgm_networks;

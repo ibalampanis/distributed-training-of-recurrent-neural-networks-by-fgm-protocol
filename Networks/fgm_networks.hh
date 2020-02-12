@@ -5,7 +5,7 @@
 #include <boost/shared_ptr.hpp>
 #include <random>
 
-#include "GM_Protocol.hh"
+#include "gm_protocol.hh"
 
 namespace ml_gm_proto {
 

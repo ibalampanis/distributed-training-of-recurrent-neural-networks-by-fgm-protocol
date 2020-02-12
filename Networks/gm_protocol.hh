@@ -13,7 +13,6 @@
 #include "Machine_Learning.hh"
 #include "dsource.hh"
 #include "dsarch.hh"
-//#include <dlib/cuda/tensor_tools.h>
 
 /**
 	\file Distributed stream system architecture simulation classes for distributed machine learning.

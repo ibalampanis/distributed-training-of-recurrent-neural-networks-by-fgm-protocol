@@ -1,4 +1,4 @@
-#include "GM_Protocol.hh"
+#include "gm_protocol.hh"
 
 using namespace ml_gm_proto;
 using namespace ml_gm_proto::MlPack_GM_Proto;

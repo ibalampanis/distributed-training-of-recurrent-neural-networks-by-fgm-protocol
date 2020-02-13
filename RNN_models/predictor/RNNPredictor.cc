@@ -23,7 +23,7 @@ double RNNPredictor::MSECalc(arma::cube &pred, arma::cube &Y) {
     arma::cube diff = pred - Y;
     for (size_t i = 0; i < diff.n_slices; i++) {
         arma::mat temp = diff.slice(i);
-        err_sum += accu(temp);
+        err_sum += accu(temp % temp);
     }
     return (err_sum / (diff.n_elem + 1e-50));
 }

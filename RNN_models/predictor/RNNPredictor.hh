@@ -24,7 +24,7 @@ namespace rnn_predictor {
     class RNNPredictor {
 
     private:
-        double trainTestRatio = 0.15; // Testing data is taken from the dataset in this ratio
+        double trainTestRatio = 0.3; // Testing data is taken from the dataset in this ratio
         int trainingEpochs = 20; // Number of optimization epochs
         int lstmCells = 30;
         int rho = 25; // Number of time steps to look backward for in the RNN.

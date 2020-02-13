@@ -23,7 +23,7 @@ double RNNPredictor::MSECalc(arma::cube &pred, arma::cube &Y) {
     arma::cube diff = pred - Y;
     for (size_t i = 0; i < diff.n_slices; i++) {
         arma::mat temp = diff.slice(i);
-        err_sum += accu(temp % temp);
+        err_sum += accu(temp);
     }
     return (err_sum / (diff.n_elem + 1e-50));
 }
@@ -77,13 +77,13 @@ void RNNPredictor::TrainModel() {
     // Model building
     model.Add<IdentityLayer<> >();
     model.Add<LSTM<> >(inputSize, lstmCells, maxRho);
-//    model.Add<Dropout<> >(0.5);
-    model.Add<TanHLayer<> >();
+    model.Add<Dropout<> >(0.5);
+    model.Add<ReLULayer<> >();
     model.Add<LSTM<> >(lstmCells, lstmCells, maxRho);
-//    model.Add<Dropout<> >(0.5);
-    model.Add<SigmoidLayer<> >();
+    model.Add<Dropout<> >(0.5);
+    model.Add<ReLULayer<> >();
     model.Add<LSTM<> >(lstmCells, lstmCells, maxRho);
-    model.Add<SoftPlusLayer<> >();
+    model.Add<ReLULayer<> >();
     model.Add<Linear<> >(lstmCells, outputSize);
 
 

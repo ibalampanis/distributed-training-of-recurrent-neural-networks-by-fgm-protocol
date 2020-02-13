@@ -9,10 +9,10 @@ int main() {
     **      2. LSTM cells
     **      3. Rho
     **      4. SGD step size
-    **      5. Batch size
-    **      6. Iterations per epoch
+    **      5. SGD batch size
+    **      6. SGD Max iterations
     */
-    auto *predictor = new RNNPredictor(200, 10, 15, 5e-5, 64, 3000);
+    auto *predictor = new RNNPredictor(200, 10, 15, 5e-5, 16, 3000);
 //    auto *predictor = new RNNPredictor(20, 30, 25, 4.5e-5, 128, 10000);
 
 

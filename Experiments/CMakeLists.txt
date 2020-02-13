@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(rnn_models)
+project(Distributed_Training_of_Recurrent_Neural_Networks_by_FGM_protocol)
 
 option(DEBUG "DEBUG" OFF)
 

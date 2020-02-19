@@ -6,7 +6,14 @@ option(DEBUG "DEBUG" OFF)
 set(MODEL_SOURCE_DIR .)
 include_directories("..")
 
-set(SOURCES ${MODEL_SOURCE_DIR}/ ../RNN_models/predictor/RNNPredictor.cc ../RNN_models/predictor/RNNPredictor.hh CentrEEG.cc)
+set(SOURCES ${MODEL_SOURCE_DIR}/ ../RNN_models/predictor/RNNPredictor.cc
+        ../RNN_models/predictor/RNNPredictor.hh
+        CentrEEG.cc)
+set(SOURCES ${MODEL_SOURCE_DIR}/ ../RNN_models/predictor/RNNPredictor.cc
+        ../RNN_models/predictor/RNNPredictor.hh
+        ../Networks/feeders.hh
+        GMNetEEG.cc)
+
 
 if (DEBUG)
     message("Compilation with debug info (with ggdb3 flag)")

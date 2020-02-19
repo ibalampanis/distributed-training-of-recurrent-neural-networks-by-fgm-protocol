@@ -118,7 +118,7 @@ namespace feeders {
     };
 
     template<typename distrNetType>
-    feeder<distrNetType>::feeder(string cfg) :config_file(cfg) {
+    feeder<distrNetType>::feeder(string cfg) : config_file(cfg) {
         Json::Value root;
         std::ifstream cfgfile(config_file); // Parse from JSON file.
         cfgfile >> root;
@@ -286,11 +286,9 @@ namespace feeders {
                 batch_bytes += chnl->bytes_received();
             }
 
-            differential_communication.at(i).at(0)
-                    .push_back(batch_messages - msgs);
+            differential_communication.at(i).at(0).push_back(batch_messages - msgs);
 
-            differential_communication.at(i).at(1)
-                    .push_back(batch_bytes - bts);
+            differential_communication.at(i).at(1).push_back(batch_bytes - bts);
 
             msgs = batch_messages;
             bts = batch_bytes;

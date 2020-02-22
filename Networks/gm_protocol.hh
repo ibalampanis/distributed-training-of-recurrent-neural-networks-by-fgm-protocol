@@ -1,5 +1,5 @@
-#ifndef __gm_protocol_HH__
-#define __gm_protocol_HH__
+#ifndef DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_GM_PROTOCOL_HH
+#define DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_GM_PROTOCOL_HH
 
 #include <cmath>
 #include <map>
@@ -8,17 +8,14 @@
 #include <stdexcept>
 #include <cassert>
 #include <ctime>
-#include "dsource.hh"
+#include <mlpack/core.hpp>
 #include "dsarch.hh"
-#include "RNN_models/predictor/RNNPredictor.hh"
-
-/**
-	\file Distributed stream system architecture simulation classes for distributed deep learning.
-  */
+#include "RNN_models/predictor/RNNPredictor.hh
 
 namespace gm_protocol {
 
     using namespace dds;
+    using namespace arma;
     using namespace rnn_predictor;
     using std::map;
     using std::string;
@@ -26,15 +23,15 @@ namespace gm_protocol {
     using std::cout;
     using std::endl;
 
-/**
-	A channel implementation which accounts a combined network cost.
+    /**
+	    A channel implementation which accounts a combined network cost.
 
-	The network cost is computed as follows:
-	for each transmit of b bytes, there is a total charge of
-	header * ceiling(b/MSS) bytes.
+	    The network cost is computed as follows:
+	    for each transmit of b bytes, there is a total charge of
+	    header * ceiling(b/MSS) bytes.
 
-	This cost is resembling the TPC segment cost.
-  */
+	    This cost is resembling the TCP segment cost.
+    **/
     struct tcp_channel : channel {
         static constexpr size_t tcp_header_bytes = 40;
         static constexpr size_t tcp_mss = 1024;
@@ -43,7 +40,7 @@ namespace gm_protocol {
 
         void transmit(size_t msg_size) override;
 
-        inline size_t tcp_bytes() const { return tcp_byts; }
+        size_t tcp_bytes() const { return tcp_byts; }
 
     protected:
         size_t tcp_byts;
@@ -51,15 +48,17 @@ namespace gm_protocol {
     };
 
     struct float_value {
+
         const float value;
 
-        inline float_value(float qntm) : value(qntm) {}
+        float_value(float qntm) : value(qntm) {}
 
         size_t byte_size() const { return sizeof(float); }
 
     };
 
     struct increment {
+
         const int increase;
 
         inline increment(int inc) : increase(inc) {}
@@ -67,402 +66,367 @@ namespace gm_protocol {
         size_t byte_size() const { return sizeof(int); }
     };
 
-    namespace MlPack_GM_Protocol {
+    /**
+	    Wrapper for a state parameters.
+	
+	    This class wraps a reference to the parameters of a model
+	    together with a count of the updates it contains since the
+	    last synchronization.
+    **/
+    struct model_state {
+        const vector<arma::mat> &_model;
+        size_t updates;
 
-/**
-	Wrapper for a state parameters.
+        model_state(const vector<arma::mat> &_mdl, size_t _updates) : _model(_mdl), updates(_updates) {}
 
-	This class wraps a reference to the parameters of a model
-	together with a count of the updates it contains since the
-	last synchronization.
-  */
-        struct model_state {
-            const vector<arma::mat> &_model;
-            size_t updates;
+        size_t byte_size() const;
+    };
 
-            inline model_state(const vector<arma::mat> &_mdl, size_t _updates)
-                    : _model(_mdl), updates(_updates) {}
+    struct p_model_state {
+        const vector<arma::mat *> &_model;
+        size_t updates;
 
-            size_t byte_size() const;
-        };
+        p_model_state(const vector<arma::mat *> &_mdl, size_t _updates) : _model(_mdl), updates(_updates) {}
 
-        struct p_model_state {
-            const vector<arma::mat *> &_model;
-            size_t updates;
+        size_t byte_size() const;
+    };
 
-            inline p_model_state(const vector<arma::mat *> &_mdl, size_t _updates)
-                    : _model(_mdl), updates(_updates) {}
+    struct int_num {
 
-            size_t byte_size() const;
-        };
+        const size_t number;
 
-        struct int_num {
-            const size_t number;
+        int_num(const size_t nb) : number(nb) {}
 
-            inline int_num(const size_t nb)
-                    : number(nb) {}
+        size_t byte_size() const;
 
-            size_t byte_size() const;
+    };
 
-        };
+    struct matrix_message {
+        const arma::mat &sub_params;
 
-        struct matrix_message {
-            const arma::mat &sub_params;
+        matrix_message(const arma::mat sb_prms) : sub_params(sb_prms) {}
 
-            inline matrix_message(const arma::mat sb_prms)
-                    : sub_params(sb_prms) {}
+        size_t byte_size() const;
+    };
 
-            size_t byte_size() const;
-        };
+    /** The base class of a safezone function for machine learning purposes. **/
+    struct ml_safezone_function {
 
-/**
-	The base class of a safezone function for machine learning purposes.
-	*/
-        struct ml_safezone_function {
+        vector<arma::mat> &GlobalModel; // The global model.
+        vector<float> hyperparameters; // A vector of hyperparameters.
 
-            vector<arma::mat> &GlobalModel; // The global model.
-            vector<float> hyperparameters; // A vector of hyperparameters.
+        ml_safezone_function(vector<arma::mat> &mdl);
 
-            ml_safezone_function(vector<arma::mat> &mdl);
+        ~ml_safezone_function();
 
-            virtual ~ml_safezone_function();
+        const vector<arma::mat> &getGlobalModel() const { return GlobalModel; }
 
-            const vector<arma::mat> &getGlobalModel() const { return GlobalModel; }
+        void updateDrift(vector<arma::mat> &drift, vector<arma::mat *> &vars, float mul) const;
 
-            void updateDrift(vector<arma::mat> &drift, vector<arma::mat *> &vars, float mul) const;
+        float Zeta(const vector<arma::mat> &pars) const { return 0.; }
 
-            virtual float Zeta(const vector<arma::mat> &pars) const { return 0.; }
+        float Zeta(const vector<arma::mat *> &pars) const { return 0.; }
 
-            virtual float Zeta(const vector<arma::mat *> &pars) const { return 0.; }
+        size_t checkIfAdmissible(const size_t counter) const { return 0.; }
 
-            virtual size_t checkIfAdmissible(const size_t counter) const { return 0.; }
+        float checkIfAdmissible(const vector<arma::mat> &mdl) const { return 0.; }
 
-            virtual float checkIfAdmissible(const vector<arma::mat> &mdl) const { return 0.; }
+        float checkIfAdmissible(const vector<arma::mat *> &mdl) const { return 0.; }
 
-            virtual float checkIfAdmissible(const vector<arma::mat *> &mdl) const { return 0.; }
+        float checkIfAdmissible(const vector<arma::mat *> &par1, const vector<arma::mat> &par2) const { return 0.; }
 
-            virtual float
-            checkIfAdmissible(const vector<arma::mat *> &par1, const vector<arma::mat> &par2) const { return 0.; }
+        float checkIfAdmissible_reb(const vector<arma::mat *> &par1, const vector<arma::mat> &par2,
+                                    float coef) const { return 0.; }
 
-            virtual float checkIfAdmissible_reb(const vector<arma::mat *> &par1, const vector<arma::mat> &par2,
-                                                float coef) const { return 0.; }
+        float checkIfAdmissible_v2(const vector<arma::mat> &drift) const { return 0.; }
 
-            virtual float checkIfAdmissible_v2(const vector<arma::mat> &drift) const { return 0.; }
+        float checkIfAdmissible_v2(const vector<arma::mat *> &drift) const { return 0.; }
 
-            virtual float checkIfAdmissible_v2(const vector<arma::mat *> &drift) const { return 0.; }
+        size_t byte_size() const { return 0; }
 
-            virtual size_t byte_size() const { return 0; }
+        vector<float> hyper() const { return hyperparameters; }
 
-            vector<float> hyper() const { return hyperparameters; }
+        void pr() { cout << endl << "Simple safezone function." << endl; }
+    };
 
-            virtual void pr() { cout << endl << "Simple safezone function." << endl; }
-        };
 
+    /**
+	    This safezone function just checks the number of points
+	    a local site has proccesed since the last synchronisation. The threshold
+	    variable basically indicates the batch size. If the proccesed points reach
+	    the batch size, then the function returns an inadmissible region.
+    **/
+    struct Batch_Learning : ml_safezone_function {
 
-/**
-	This safezone function just checks the number of points
-	a local site has proccesed since the last synchronisation. The threshold
-	variable basically indicates the batch size. If the proccesed points reach
-	the batch size, then the function returns an inadmissible region.
- */
-        struct Batch_Learning : ml_safezone_function {
+        size_t threshold; // The maximum number of points fitted by each node before requesting synch from the Hub.
 
-            size_t threshold; // The maximum number of points fitted by each node before requesting synch from the Hub.
+        Batch_Learning(vector<arma::mat> &GlMd);
 
-            Batch_Learning(vector<arma::mat> &GlMd);
+        Batch_Learning(vector<arma::mat> &GlMd, size_t thr);
 
-            Batch_Learning(vector<arma::mat> &GlMd, size_t thr);
+        ~Batch_Learning();
 
-            ~Batch_Learning();
+        size_t checkIfAdmissible(const size_t counter) const;
 
-            size_t checkIfAdmissible(const size_t counter) const override;
+        size_t byte_size() const;
+    };
 
-            size_t byte_size() const override;
-        };
+    /**
+	    This safezone function implements the algorithm presented in
+	    in the paper "Communication-Efficient Distributed Online Prediction
+	    by Dynamic Model Synchronization"
+	    by Michael Kamp, Mario Boley, Assaf Schuster and Izchak Sharfman.
+    **/
+    struct Variance_safezone_func : ml_safezone_function {
 
-/**
-	This safezone function implements the algorithm presented in
-	in the paper "Communication-Efficient Distributed Online Prediction
-	by Dynamic Model Synchronization"
-	by Michael Kamp, Mario Boley, Assaf Schuster and Izchak Sharfman.
- */
-        struct Variance_safezone_func : ml_safezone_function {
+        float threshold; // The threshold of the variance between the models of the network.
+        size_t batch_size; // The number of points seen by the node since the last synchronization.
 
-            float threshold; // The threshold of the variance between the models of the network.
-            size_t batch_size; // The number of points seen by the node since the last synchronization.
+        Variance_safezone_func(vector<arma::mat> &GlMd);
 
-            Variance_safezone_func(vector<arma::mat> &GlMd);
+        Variance_safezone_func(vector<arma::mat> &GlMd, size_t batch_sz);
 
-            Variance_safezone_func(vector<arma::mat> &GlMd, size_t batch_sz);
+        Variance_safezone_func(vector<arma::mat> &GlMd, float thr);
 
-            Variance_safezone_func(vector<arma::mat> &GlMd, float thr);
+        Variance_safezone_func(vector<arma::mat> &GlMd, float thr, size_t batch_sz);
 
-            Variance_safezone_func(vector<arma::mat> &GlMd, float thr, size_t batch_sz);
+        ~Variance_safezone_func();
 
-            ~Variance_safezone_func();
+        float Zeta(const vector<arma::mat> &pars) const;
 
-            float Zeta(const vector<arma::mat> &pars) const override;
+        float Zeta(const vector<arma::mat *> &pars) const;
 
-            float Zeta(const vector<arma::mat *> &pars) const override;
+        size_t checkIfAdmissible(const size_t counter) const;
 
-            size_t checkIfAdmissible(const size_t counter) const override;
+        float checkIfAdmissible(const vector<arma::mat> &mdl) const;
 
-            float checkIfAdmissible(const vector<arma::mat> &mdl) const override;
+        float checkIfAdmissible(const vector<arma::mat *> &mdl) const;
 
-            float checkIfAdmissible(const vector<arma::mat *> &mdl) const override;
+        float checkIfAdmissible(const vector<arma::mat *> &par1, const vector<arma::mat> &par2) const;
 
-            float checkIfAdmissible(const vector<arma::mat *> &par1, const vector<arma::mat> &par2) const override;
+        float checkIfAdmissible_reb(const vector<arma::mat *> &par1, const vector<arma::mat> &par2,
+                                    float coef) const;
 
-            float checkIfAdmissible_reb(const vector<arma::mat *> &par1, const vector<arma::mat> &par2,
-                                        float coef) const override;
+        float checkIfAdmissible_v2(const vector<arma::mat> &drift) const;
 
-            float checkIfAdmissible_v2(const vector<arma::mat> &drift) const override;
+        float checkIfAdmissible_v2(const vector<arma::mat *> &drift) const;
 
-            float checkIfAdmissible_v2(const vector<arma::mat *> &drift) const override;
+        size_t byte_size() const;
+    };
 
-            size_t byte_size() const override;
-        };
+    /**
+	    A wrapper containing the safezone function for machine
+	    learning purposes.
+	
+	    It is essentially a wrapper for the more verbose, polymorphic \c safezone_func API,
+	    but it conforms to the standard functional API. It is copyable and in addition, it
+	    provides a byte_size() method, making it suitable for integration with the middleware.
+	**/
+    class safezone {
+        ml_safezone_function *szone;        // the safezone function, if any
 
-/**
-	A wrapper containing the safezone function for machine
-	learning purposes.
+    public:
+        /// null state
+        safezone();
 
-	It is essentially a wrapper for the more verbose, polymorphic \c safezone_func API,
-	but it conforms to the standard functional API. It is copyable and in addition, it
-	provides a byte_size() method, making it suitable for integration with the middleware.
-	*/
-        class safezone {
-            ml_safezone_function *szone;        // the safezone function, if any
-        public:
+        ~safezone();
 
-            /// null state
-            safezone();
+        /// valid safezone
+        safezone(ml_safezone_function *sz);
+        //~safezone();
 
-            ~safezone();
+        /// Movable
+        safezone(safezone &&);
 
-            /// valid safezone
-            safezone(ml_safezone_function *sz);
-            //~safezone();
+        safezone &operator=(safezone &&);
 
-            /// Movable
-            safezone(safezone &&);
+        /// Copyable
+        safezone(const safezone &);
 
-            safezone &operator=(safezone &&);
+        safezone &operator=(const safezone &);
 
-            /// Copyable
-            safezone(const safezone &);
+        void swap(safezone &other) {
+            std::swap(szone, other.szone);
+        }
 
-            safezone &operator=(const safezone &);
+        ml_safezone_function *getSZone() { return (szone != nullptr) ? szone : nullptr; }
 
-            inline void swap(safezone &other) {
-                std::swap(szone, other.szone);
-            }
+        inline void operator()(vector<arma::mat> &drift, vector<arma::mat *> &vars, float mul) {
+            szone->updateDrift(drift, vars, mul);
+        }
 
-            ml_safezone_function *getSZone() { return (szone != nullptr) ? szone : nullptr; }
+        inline size_t operator()(const size_t counter) {
+            return (szone != nullptr) ? szone->checkIfAdmissible(counter) : NAN;
+        }
 
-            inline void operator()(vector<arma::mat> &drift, vector<arma::mat *> &vars, float mul) {
-                szone->updateDrift(drift, vars, mul);
-            }
+        inline float operator()(const vector<arma::mat> &mdl) {
+            return (szone != nullptr) ? szone->checkIfAdmissible(mdl) : NAN;
+        }
 
-            inline size_t operator()(const size_t counter) {
-                return (szone != nullptr) ? szone->checkIfAdmissible(counter) : NAN;
-            }
+        inline float operator()(const vector<arma::mat *> &mdl) {
+            return (szone != nullptr) ? szone->checkIfAdmissible(mdl) : NAN;
+        }
 
-            inline float operator()(const vector<arma::mat> &mdl) {
-                return (szone != nullptr) ? szone->checkIfAdmissible(mdl) : NAN;
-            }
+        inline float operator()(const vector<arma::mat *> &par1, const vector<arma::mat> &par2) {
+            return (szone != nullptr) ? szone->checkIfAdmissible(par1, par2) : NAN;
+        }
 
-            inline float operator()(const vector<arma::mat *> &mdl) {
-                return (szone != nullptr) ? szone->checkIfAdmissible(mdl) : NAN;
-            }
+        inline size_t byte_size() const {
+            return (szone != nullptr) ? szone->byte_size() : 0;
+        }
 
-            inline float operator()(const vector<arma::mat *> &par1, const vector<arma::mat> &par2) {
-                return (szone != nullptr) ? szone->checkIfAdmissible(par1, par2) : NAN;
-            }
+    };
 
-            inline size_t byte_size() const {
-                return (szone != nullptr) ? szone->byte_size() : 0;
-            }
 
-        };
+    /**
+	    Base class for a query state object.
 
+	    A query state holds the current global estimate model. It also holds the
+	    accuracy of the current global model.
+    **/
+    struct query_state {
+        vector<arma::mat> GlobalModel;  // The global model.
 
-/**
-	Base class for a query state object.
+        float accuracy; // The accuracy of the current global model.
 
-	A query state holds the current global estimate model. It also honls the
-	accuracy of the current global model (percentage of correctly classified
-	datapoins in case of classification and RMSE score in case of regression).
- */
-        struct query_state {
-            vector<arma::mat> GlobalModel;  // The global model.
-            float accuracy; // The accuracy of the current global model.
+        query_state();
 
-            query_state();
+        query_state(vector<arma::SizeMat> vsz);
 
-            query_state(vector<arma::SizeMat> vsz);
+        ~query_state();
 
-            virtual ~query_state();
+        void initializeGlobalModel(vector<arma::SizeMat> vsz);
 
-            void initializeGlobalModel(vector<arma::SizeMat> vsz);
+        /** Update the global model parameters.
 
-            /** Update the global model parameters.
+            After this function, the query estimate, accuracy and
+            safezone should adjust to the new global model.
+            */
+        void update_estimate(vector<arma::mat> &mdl);
 
-                After this function, the query estimate, accuracy and
-                safezone should adjust to the new global model. For now
-                only the global model is adjusted.
-                */
-            void update_estimate(vector<arma::mat> &mdl);
+        void update_estimate(vector<arma::mat *> &mdl);
 
-            void update_estimate(vector<arma::mat *> &mdl);
+        void update_estimate_v2(vector<arma::mat> &mdl);
 
-            void update_estimate_v2(vector<arma::mat> &mdl);
+        void update_estimate_v2(vector<arma::mat *> &mdl);
 
-            void update_estimate_v2(vector<arma::mat *> &mdl);
+        /**
+            Return a ml_safezone_func for the safe zone function.
 
-            /**
-                Return a ml_safezone_func for the safe zone function.
+            The returned object shares state with this object.
+            It is the caller's responsibility to delete the returned object,
+            and do so before this object is destroyed.
+        **/
+        ml_safezone_function *safezone(string cfg, string algo);
 
-                 The returned object shares state with this object.
-                 It is the caller's responsibility to delete the returned object,
-                and do so before this object is destroyed.
-             */
-            ml_safezone_function *safezone(string cfg, string algo);
+        virtual size_t byte_size() const {
+            size_t num_of_params = 0;
+            for (arma::mat param:GlobalModel)
+                num_of_params += param.n_elem;
+            return (1 + num_of_params) * sizeof(float);
+        }
 
-            virtual size_t byte_size() const {
-                size_t num_of_params = 0;
-                for (arma::mat param:GlobalModel)
-                    num_of_params += param.n_elem;
-                return (1 + num_of_params) * sizeof(float);
-            }
+    };
 
-        };
 
+    /** Query and protocol configuration. **/
+    struct protocol_config {
+        string cfgfile;             // The JSON file containing the info for the test.
+        string network_name;        // The name of the network being queried.
+        bool rebalancing = false;   // A boolean determining whether the monitoring protocol should run with rabalancing.
+        float beta_mu = 0.5;        // Beta vector coefficient of rebalancing.
+        int max_rebs = 2;           // Maximum number of rebalances
+    };
 
-/**
-	Query and protocol configuration.
-  */
-        struct protocol_config {
-            string learning_algorithm;              // options : [ PA, KernelPA, MLP, PA_Reg, NN_Reg]
-            string distributed_learning_algorithm;  // options : [ Batch_Learning, Variance_Monitoring ]
-            string cfgfile;                         // The JSON file containing the info for the test.
-            string network_name;                    // The name of the network being queried.
 
-            float precision = 0.01;                 // The precision of the FGM protocol.
-            float reb_mult = -1.;                   // The precision of the FGM protocol.
-            bool rebalancing = false;               // A boolean determining whether the monitoring protocol should run with rabalancing.
-            float beta_mu = 0.5;                    // Beta vector coefficient of rebalancing.
-            int max_rebs = 2;                       // Maximum number of rebalances
-        };
+    /**
+	    A base class for a continuous query.
+	    Objects inheriting this class must override the virtual methods.
+	**/
+    struct continuous_query {
+        // These are attributes requested by the user
+        protocol_config config;
 
+        arma::mat *testSet;         // Test dataset without labels.
+        arma::mat *testResponses;   // Labels of the test dataset.
 
-/**
-	A base class for a continuous query.
-	Objects inheriting this class must override the virtual methods.
-	*/
-        struct continuous_query {
-            // These are attributes requested by the user
-            protocol_config config;
+        continuous_query(arma::mat *tSet, arma::mat *tRes, string cfg, string nm);
 
-            arma::mat *testSet;         // Test dataset without labels.
-            arma::mat *testResponses;   // Labels of the test dataset.
+        virtual ~continuous_query() {}
 
-            continuous_query(arma::mat *tSet, arma::mat *tRes, string cfg, string nm);
+        void setTestSet(arma::mat *tSet, arma::mat *tRes);
 
-            virtual ~continuous_query() {}
+        inline query_state *create_query_state() { return new query_state(); }
 
-            void setTestSet(arma::mat *tSet, arma::mat *tRes);
+        inline query_state *create_query_state(vector<arma::SizeMat> sz) { return new query_state(sz); }
 
-            inline query_state *create_query_state() { return new query_state(); }
+        virtual inline double queryAccuracy(RNNPredictor *lnr);
+    };
 
-            inline query_state *create_query_state(vector<arma::SizeMat> sz) { return new query_state(sz); }
+    struct Classification_query : continuous_query {
+        /** Constructor */
+        Classification_query(arma::mat *tSet, arma::mat *tRes, string cfg, string nm);
 
-            virtual inline double queryAccuracy(MLPACK_Learner *lnr) { return 0.; }
-        };
+        /** Destructor */
+        ~Classification_query() {
+            delete testSet;
+            delete testResponses;
+        }
 
-        struct Classification_query : continuous_query {
-            /** Constructor */
-            Classification_query(arma::mat *tSet, arma::mat *tRes, string cfg, string nm);
+//        double queryAccuracy(MLPACK_Learner *lnr) override;
 
-            /** Destructor */
-            ~Classification_query() {
-                delete testSet;
-                delete testResponses;
-            }
+    };
 
-            double queryAccuracy(MLPACK_Learner *lnr) override;
+    /** The star network topology using the Geometric Method for Distributed Machine Learning. **/
+    template<typename Net, typename Coord, typename Node>
+    struct gm_learning_network : star_network<Net, Coord, Node> {
+        typedef Coord coordinator_t;
+        typedef Node node_t;
+        typedef Net network_t;
+        typedef star_network<network_t, coordinator_t, node_t> star_network_t;
 
-        };
+        continuous_query *Q;
 
-        struct Regression_query : continuous_query {
-            /** Constructor */
-            Regression_query(arma::mat *tSet, arma::mat *tRes, string cfg, string nm);
+        const protocol_config &cfg() const { return Q->config; }
 
-            /** Destructor */
-            ~Regression_query() {
-                delete testSet;
-                delete testResponses;
-            }
+        gm_learning_network(const set<source_id> &_hids, const string &_name, continuous_query *_Q)
+                : star_network_t(_hids), Q(_Q) {
+            this->set_name(_name);
+            this->setup(Q);
+        }
 
-            double queryAccuracy(MLPACK_Learner *lnr) override;
-        };
+        channel *create_channel(host *src, host *dst, rpcc_t endp) const {
+            if (!dst->is_mcast())
+                return new tcp_channel(src, dst, endp);
+            else
+                return create_channel(src, dst, endp);
+        }
 
-/**
-	The star network topology using the Geometric Method
-	for Distributed Machine Learning.
+        /** This is called to update a specific learning node in the network. **/
+        void process_record(size_t randSite, arma::mat &batch, arma::mat &labels) {
+            this->source_site(this->sites.at(randSite)->site_id())->update_stream(batch, labels);
+        }
 
-	*/
-        template<typename Net, typename Coord, typename Node>
-        struct gm_learning_network : star_network<Net, Coord, Node> {
-            typedef Coord coordinator_t;
-            typedef Node node_t;
-            typedef Net network_t;
-            typedef star_network <network_t, coordinator_t, node_t> star_network_t;
+        void warmup(arma::mat &batch, arma::mat &labels) {
+            // let the coordinator initialize the nodes
+            this->hub->warmup(batch, labels);
+        }
 
-            continuous_query *Q;
+        /** This is called to update a specific learning node in the network. **/
+        void end_warmup() {
+            this->hub->end_warmup();
+        }
 
-            const protocol_config &cfg() const { return Q->config; }
+        void start_round() {
+            this->hub->start_round();
+        }
 
-            gm_learning_network(const set<source_id> &_hids, const string &_name, continuous_query *_Q)
-                    : star_network_t(_hids), Q(_Q) {
-                this->set_name(_name);
-                this->setup(Q);
-            }
+        void process_fini() {
+            this->hub->finish_rounds();
+        }
 
-            channel *create_channel(host *src, host *dst, rpcc_t endp) const override {
-                if (!dst->is_mcast())
-                    return new tcp_channel(src, dst, endp);
-                else
-                    return basic_network::create_channel(src, dst, endp);
-            }
-
-            // This is called to update a specific learning node in the network.
-            void process_record(size_t randSite, arma::mat &batch, arma::mat &labels) {
-                this->source_site(this->sites.at(randSite)->site_id())->update_stream(batch, labels);
-            }
-
-            virtual void warmup(arma::mat &batch, arma::mat &labels) {
-                // let the coordinator initialize the nodes
-                this->hub->warmup(batch, labels);
-            }
-
-            /// This is called to update a specific learning node in the network.
-            void end_warmup() {
-                this->hub->end_warmup();
-            }
-
-            virtual void start_round() {
-                this->hub->start_round();
-            }
-
-            virtual void process_fini() {
-                this->hub->finish_rounds();
-            }
-
-            ~gm_learning_network() { delete Q; }
-        };
-
-    } //*  End namespace MlPack_GM_Protocol *//
+        ~gm_learning_network() { delete Q; }
+    };
 
 
 } // end namespace gm_protocol

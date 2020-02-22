@@ -1,14 +1,11 @@
 
 #include <iostream>
-#include <sstream>
 #include <vector>
-#include <cassert>
-
 #include <boost/core/demangle.hpp>
-
 #include "dsarch.hh"
+#include "method.hh"
 
-namespace dsarch {
+namespace dds {
 
     using namespace std;
 
@@ -20,14 +17,7 @@ namespace dsarch {
 
 
 
-    std::string named::anon(named const *ptr) {
-        using namespace std;
-        ostringstream S;
-        S << "<" << boost::core::demangle(typeid(*ptr).name()) << "@" << ptr << ">";
-        return S.str();
-    }
-
-    host::host(network *n, bool _b)
+    host::host(basic_network *n, bool _b)
             : _net(n), _addr(unknown_addr), _mcast(_b) {
         if (!_mcast) {
             _net->_hosts.insert(this);
@@ -35,7 +25,7 @@ namespace dsarch {
             _net->_groups.insert(this);
     }
 
-    host::host(network *n)
+    host::host(basic_network *n)
             : host(n, false) {}
 
     host::~host() {
@@ -80,7 +70,7 @@ namespace dsarch {
 //-------------------
 
 
-    host_group::host_group(network *n)
+    host_group::host_group(basic_network *n)
             : host(n, true) {}
 
 
@@ -147,7 +137,7 @@ namespace dsarch {
 //-------------------
 
 
-    channel *network::create_channel(host *src, host *dst, rpcc_t endp) const {
+    channel *basic_network::create_channel(host *src, host *dst, rpcc_t endp) const {
         if (dst->is_mcast())
             return new multicast_channel(src, static_cast<host_group *>(dst), endp);
         else
@@ -155,7 +145,7 @@ namespace dsarch {
     }
 
 
-    channel *network::connect(host *src, host *dst, rpcc_t endp) {
+    channel *basic_network::connect(host *src, host *dst, rpcc_t endp) {
         // check for existing channel
         for (auto chan : dst->_incoming) {
             assert(chan->dst == dst);
@@ -180,32 +170,32 @@ namespace dsarch {
     }
 
 
-    void network::disconnect(channel *c) {
+    void basic_network::disconnect(channel *c) {
         _channels.erase(c);
         if (c->dst)
             c->dst->_incoming.erase(c);
         delete c;
     }
 
-    rpcc_t network::decl_interface(const std::type_info &ti) {
+    rpcc_t basic_network::decl_interface(const std::type_info &ti) {
         return decl_interface(type_index(ti));
     }
 
-    rpcc_t network::decl_interface(const type_index &tix) {
+    rpcc_t basic_network::decl_interface(const type_index &tix) {
         return decl_interface(boost::core::demangle(tix.name()));
     }
 
-    rpcc_t network::decl_interface(const string &name) {
+    rpcc_t basic_network::decl_interface(const string &name) {
         return rpctab.declare(name);
     }
 
 
-    rpcc_t network::decl_method(rpcc_t ifc, const string &name, bool onew) {
+    rpcc_t basic_network::decl_method(rpcc_t ifc, const string &name, bool onew) {
         return rpctab.declare(ifc, name, onew);
     }
 
 
-    network::network()
+    basic_network::basic_network()
             : all_hosts(this) {
         new_group_addr = -1;
         new_host_addr = 0;
@@ -213,7 +203,7 @@ namespace dsarch {
     }
 
 
-    bool network::assign_address(host *h, host_addr a) {
+    bool basic_network::assign_address(host *h, host_addr a) {
         if (h->_addr != unknown_addr)
             return h->_addr == a;
 
@@ -249,7 +239,7 @@ namespace dsarch {
     }
 
 
-    void network::reserve_addresses(host_addr a) {
+    void basic_network::reserve_addresses(host_addr a) {
         if (a >= 0) {
             if (new_host_addr <= a) new_host_addr = a + 1;
         } else {
@@ -257,12 +247,12 @@ namespace dsarch {
         }
     }
 
-    host *network::by_addr(host_addr a) const {
+    host *basic_network::by_addr(host_addr a) const {
         auto it = addr_map.find(a);
         return it == addr_map.end() ? nullptr : it->second;
     }
 
-    network::~network() {
+    basic_network::~basic_network() {
     }
 
 
@@ -445,7 +435,7 @@ namespace dsarch {
     }
 
     rpc_call::~rpc_call() {
-        network *nw = _proxy->_r_owner->net();
+        basic_network *nw = _proxy->_r_owner->net();
         nw->disconnect(_req_chan);
         if (!one_way)
             nw->disconnect(_resp_chan);
@@ -453,7 +443,7 @@ namespace dsarch {
     }
 
     void rpc_call::connect(host *dst) {
-        network *nw = _proxy->_r_owner->net();
+        basic_network *nw = _proxy->_r_owner->net();
         host *owner = _proxy->_r_owner;
 
         assert(dst->is_mcast() <= one_way);

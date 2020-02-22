@@ -1,4 +1,5 @@
 \documentclass{article}
+
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{float}
@@ -15,24 +16,27 @@
 \usepackage{bm}
 \usepackage[backend=biber]{biblatex}
 
-\newcommand{\red}[1]{{\color{red}#1}}
 \setlength{\arrayrulewidth}{0.5mm}
 \setlength{\tabcolsep}{10pt}
 \renewcommand{\arraystretch}{2.5}
 
 \addbibresource{_bib.bib}
 
-
 \begin{document}
     \begin{center}
         \LARGE{\textbf{Thesis Proposal}}\\[.5cm]
+
+        \begin{table}[h!]
+
+            \begin{tabular}{ c c c c }
+                \hspace{-1.3cm}
+                \textbf{Student name:} & Ilias Balampanis & \textbf{Student ID:} & 2014030127  \\
+                \hspace{-1.5cm}
+                \textbf{Email:} & balampanis.ilias@gmail.com &  \textbf{Tel Number:} & 6981856705 \\
+            \end{tabular}
+        \end{table}
+
     \end{center}
-    \begin{table}[h!]
-        \begin{tabular}{ c c c c }
-            \textbf{Student name:} & Ilias Balampanis & \textbf{Student ID:} & 2014030127  \\
-            \textbf{Email:} & balampanis.ilias@gmail.com &  \textbf{Tel Number:} & 6981856705 \\
-        \end{tabular}
-    \end{table}
 
 
     %----------------------------------------------------------------------------------------
@@ -125,6 +129,5 @@
     %----------------------------------------------------------------------------------------
     \section*{}~\nocite{*}
     \printbibliography
-
 
 \end{document}

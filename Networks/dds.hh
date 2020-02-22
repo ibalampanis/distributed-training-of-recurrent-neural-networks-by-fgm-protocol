@@ -154,7 +154,7 @@ namespace dds {
 
         inline std::string name() const {
             if (n.empty())
-                return anon(this);
+                return "null";//anon(this);
             return n;
         }
     };

@@ -1,4 +1,4 @@
-#include "gm_networks.hh"
+#include "gm_nets.hh"
 
 using namespace ml_gm_proto;
 using namespace ml_gm_proto::ML_gm_networks;
@@ -385,28 +385,17 @@ oneway learning_node::augmentBetaMatrix(int_num cols) {
     _learner->handleRD(cols.number);
 }
 
-
 void learning_node::initializeLearner() {
-    if (cfg().learning_algorithm == "PA") {
-        _learner = new PassiveAgressiveClassifier(cfg().cfgfile, cfg().network_name);
-    } else if (cfg().learning_algorithm == "ELM") {
-        _learner = new ELM_Classifier(cfg().cfgfile, cfg().network_name);
-//	}else if(cfg().learning_algorithm == "MLP"){
-//		_learner = new MLP_Classifier(cfg().cfgfile, cfg().network_name);
-    } else if (cfg().learning_algorithm == "PA_Reg") {
-        _learner = new PassiveAgressiveRegression(cfg().cfgfile, cfg().network_name);
-//	}else if(cfg().learning_algorithm == "NN_Reg"){
-//		_learner = new NN_Regressor(cfg().cfgfile, cfg().network_name);
-    }
-    if (cfg().learning_algorithm != "ELM")
-        _learner->initializeModel(Q->testSet->n_rows);
+
+    _learner = new ELM_Classifier(cfg().cfgfile, cfg().network_name);
+
+    _learner->initializeModel(Q->testSet->n_rows);
 
 }
 
 void learning_node::setup_connections() {
     num_sites = coord.proc()->k;
 }
-
 
 ML_gm_networks::GM_Net::GM_Net(const set<source_id> &_hids, const string &_name, continuous_query *_Q)
         : gm_learning_network_t(_hids, _name, _Q) {

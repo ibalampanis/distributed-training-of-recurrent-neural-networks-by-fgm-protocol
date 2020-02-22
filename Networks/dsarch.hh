@@ -1,3 +1,6 @@
+#ifndef __DSARCH_HH__
+#define __DSARCH_HH__
+
 /**
 	\file Distributed stream system architecture simulation classes.
 
@@ -6,9 +9,6 @@
 	them in a standardized (and therefore auto-processable) manner.
   */
 
-#pragma once
-
-
 #include <unordered_set>
 #include <unordered_map>
 #include <vector>
@@ -16,70 +16,22 @@
 #include <typeindex>
 #include <stdexcept>
 #include <algorithm>
-#include <set>
 #include <map>
+#include "dds.hh"
+#include "gm_protocol.hh"
+#include "gm_nets.hh"
 
-#include "dsarch_types.hh"
+namespace dds {
 
-namespace dsarch {
-
-    using std::set;
-
-    class network;
+    class basic_network;
 
     class host;
 
     class host_group;
 
+    class process;
+
     class channel;
-
-
-/**
-    Named objects are just used to enable human-readable reporting.
-
-	When the object's name is the empty string, a name is constructed from
-	the object's type and location in memory.
-  */
-    class named {
-        std::string n;
-    public:
-        /// Make a name from a pointer, for an anonymoys object.
-        static std::string anon(named const *ptr);
-
-        /**
-              Construct an anonymous object.
-
-              The object's name will be constructed by the type and size of
-              the object. This is equivalent to initializing with an empty string.
-        */
-        named() {}
-
-        /**
-            Construct a named object
-
-            @param _n the name of the object
-          */
-        named(const std::string &_n) : n(_n) {}
-
-        /**
-            Set the name of the object.
-
-            @param _name the new name of the object
-         */
-        inline void set_name(const std::string &_name) { n = _name; }
-
-        /**
-            Return the name of the object.
-
-            @return the name of the object.
-            */
-        inline std::string name() const {
-            if (n.empty())
-                return anon(this);
-            return n;
-        }
-    };
-
 
 /**
 	RPC code type.
@@ -108,15 +60,7 @@ namespace dsarch {
     typedef uint32_t rpcc_t;
 
 
-/**
-	Number of bits per interface.
-
-	This number of bits is reserved for RPCCs belonging to the same
-	interface. The default value of 8 implies that each interface can
-	have up to 128 distinct methods.
-  */
     constexpr int RPCC_BITS_PER_IFC = 8;
-
     constexpr rpcc_t RPCC_ENDP_MASK = (1 << RPCC_BITS_PER_IFC) - 1;
     constexpr rpcc_t RPCC_IFC_MASK = ~RPCC_ENDP_MASK;
     constexpr rpcc_t RPCC_METH_MASK = RPCC_ENDP_MASK - 1;
@@ -151,9 +95,6 @@ namespace dsarch {
   */
     typedef int32_t host_addr;
 
-/**
-	This constant contains the "unknown host address" value.
-  */
     constexpr host_addr unknown_addr = std::numeric_limits<host_addr>::max();
 
 /**
@@ -199,7 +140,6 @@ namespace dsarch {
         channel(host *s, host *d, rpcc_t rpcc);
 
     public:
-        /// Virtual destructor
         virtual ~channel();
 
         /** The source host */
@@ -212,23 +152,23 @@ namespace dsarch {
         inline rpcc_t rpc_code() const { return rpcc; }
 
         /** Number of messages sent */
-        inline auto messages() const { return msgs; }
+        inline size_t messages() const { return msgs; }
 
         /** Number of bytes sent */
-        inline auto bytes() const { return byts; }
+        inline size_t bytes() const { return byts; }
 
         /**
             Number of messages received.
             For broadcast channels this is not the same as
             the number of messages sent.
-          */
+        **/
         virtual size_t messages_received() const { return msgs; }
 
         /**
             Number of bytes received.
             For broadcast channels, this is not the same as the
             bytes sent.
-          */
+        **/
         virtual size_t bytes_received() const { return byts; }
 
         /**
@@ -240,24 +180,12 @@ namespace dsarch {
 
         virtual string repr() const;
 
-        friend class network;
+        friend class basic_network;
 
         friend class host;
     };
 
-/**
-	Multicast channel.
 
-	These channels differentiate between the number (and total size) 
-	of messages transmitted and the number (and total size) of messages 
-	received. 
-
-	When a host transmits a message through this channel, the transmit is
-	counted as one message, but the reveived messages are increased by the
-	number of receivers (and similarly for bytes).
-
-	@see channel
-  */
     class multicast_channel : public channel {
     protected:
         size_t rxmsgs, rxbyts;
@@ -274,20 +202,18 @@ namespace dsarch {
 
         virtual string repr() const override;
 
-        friend class network;
+        friend class basic_network;
 
         friend class host;
 
     };
 
-/// A set of channels
-    typedef std::unordered_set<channel *> channel_set;
 
-/// A set of hosts
+    typedef std::unordered_set<channel *> channel_set;
     typedef std::unordered_set<host *> host_set;
 
 /**
-	Hosts are used as nodes in the network.
+	Hosts are used as nodes in the basic_network.
 
 	Hosts can be named, for more friendly output. A host
 	can represent a single network destination (site), or a set
@@ -299,27 +225,27 @@ namespace dsarch {
 	@see host_group
   */
     class host : public named {
-        host(network *n, bool _bcast);
+        host(basic_network *n, bool _bcast);
 
-        network *_net;
+        basic_network *_net;
         host_addr _addr;
         bool _mcast;
 
         friend class host_group;
 
-        friend class network;
+        friend class basic_network;
 
         channel_set _incoming;
     public:
 
-        host(network *n);
+        host(basic_network *n);
 
         virtual ~host();
 
         /**
             The network this host belongs to
           */
-        inline network *net() const { return _net; }
+        inline basic_network *net() const { return _net; }
 
         /**
             True this is a host group
@@ -370,7 +296,7 @@ namespace dsarch {
     class host_group : public host {
     public:
         /** Constructor  */
-        host_group(network *nw);
+        host_group(basic_network *nw);
 
         /**
             The members of the group
@@ -392,7 +318,7 @@ namespace dsarch {
     public:
         typedef typename Container::iterator iterator;
 
-        inline mcast_group(network *_nw) : host_group(_nw) {}
+        inline mcast_group(basic_network *_nw) : host_group(_nw) {}
 
         inline void join(Process *host) { memb.insert(host); }
 
@@ -546,7 +472,7 @@ namespace dsarch {
 	When host A wants to call a remote method on host B, 
 	it makes the call through an rpc proxy method, so that
 	the network traffic can be accounted for. Host A is the
-	owner of the proxy and host B is the proxied host.
+	owner of the proxy and host B is the proxied host (process).
 
 	Each proxy is associated with an rpc interface, which
 	represents the collection of remote calls (rpc functions)
@@ -646,7 +572,7 @@ namespace dsarch {
 	used, these strings are generated from the C++ classes without
 	any user-code overhead.
   */
-    class network {
+    class basic_network : public virtual named {
     protected:
         host_set _hosts;        // all the simple hosts
         host_set _groups;        // all the host groups
@@ -680,15 +606,15 @@ namespace dsarch {
     public:
 
         /** A default constructor */
-        network();
+        basic_network();
 
-        virtual ~network();
+        virtual ~basic_network();
 
         /// Standard group, every host is added to it, although
         /// not much use, except taking an address.
         /// Maybe in the future...
         struct all_hosts_group : host_group {
-            all_hosts_group(network *_nw) : host_group(_nw) {}
+            all_hosts_group(basic_network *_nw) : host_group(_nw) {}
 
             size_t receivers(host *h) { return net()->_hosts.size() - 1; }
         };
@@ -805,6 +731,140 @@ namespace dsarch {
     };
 
 
+/**
+	A process extends a host with remote methods.
+  */
+    class process : public host {
+    public:
+        using host::host;
+
+        /**
+            This callback is called after network initialization.
+
+            This callback exists so that
+            the process can establish connections and perform overall
+            configuration.
+
+            Subclasses should override this method to customize behaviour.
+            The default implementation does nothing.
+          */
+        virtual void setup_connections() {}
+
+        /**
+            This is called for every node before network finalization.
+         */
+        virtual void finalize() {}
+    };
+
+
+/**
+   A local site accepts the input from streams.
+
+   This is a base class for classes implementing hosts that 
+   process stream records.
+   */
+    class local_site : public process {
+    protected:
+        source_id sid = -1;
+
+    public:
+        local_site(basic_network *nw, source_id _sid)
+                : process(nw), sid(_sid) {
+            if (!set_addr(_sid))
+                throw std::runtime_error("Local site could not acquire the hid address");
+        }
+
+        /**
+          Return the \c source_id of the stream accepted
+          */
+        inline source_id site_id() const { return sid; }
+
+        /**
+           The handler called when a new stream record is available.
+
+           Subclasses should override this method to customize behaviour.
+          */
+        virtual void handle(const dds_record &rec) {}
+    };
+
+
+/**
+	A star network topology.
+
+	In a star network, every regular node (site) is connected to 
+	a central node (hub).
+
+	Nodes in a star network are local sites.
+
+	This class is a mixin. A concrete class \c mynetwork is defined
+	as 
+	\code[c++]
+     class mynetwork 
+       : public star_network<mynetwork, myhub, mysite>, // all 3 types are incomplete
+       public reactive
+     { ... };
+	\endcode
+
+	@tparam Net  the concrete network class composed by this mixin
+	@tparam Hub  the node type for the hub node (aka. coordinator)
+	@tparam Site the node type for local sites
+  */
+    template<typename Net, typename Hub, typename Site>
+    struct star_network : public basic_network {
+        typedef Net network_type;
+        typedef Hub hub_type;
+        typedef Site site_type;
+
+        set<source_id> hids;
+        Hub *hub;
+        vector<Site *> sites;
+
+        star_network(const set<source_id> &_hids)
+                : hids(_hids), hub(nullptr) {
+            // reserve the source_id addresses for the sites
+            if (!hids.empty()) {
+                reserve_addresses(*hids.rbegin());
+            }
+        }
+
+        inline site_type *source_site(source_id hid) const {
+            return static_cast<site_type *>(by_addr(hid));
+        }
+
+        template<typename ... Args>
+        Net *setup(Args...args) {
+            // create the nodes
+            hub = new Hub((Net *) this, args...);
+
+
+            for (auto hid : hids) {
+                Site *n = new Site((Net *) this, hid, args...);
+                n->set_addr(hid);
+                sites.push_back(n);
+            }
+
+            // make the connections
+            hub->setup_connections();
+            for (auto n : sites) {
+                n->setup_connections();
+            }
+
+            return (Net *) this;
+        }
+
+        ~star_network() {
+            // Delete the nodes that we created...
+            for (auto n : sites) {
+                n->finalize();
+            }
+            hub->finalize();
+
+            for (auto n : sites) {
+                delete n;
+            }
+            delete hub;
+        }
+    };
 
 
 /*	----------------------------------------
@@ -874,7 +934,7 @@ namespace dsarch {
         inline operator bool() const { return is_ack; }
 
         inline size_t byte_size() const {
-            return is_ack ? dsarch::byte_size(payload) : 0;
+            return is_ack ? dds::byte_size(payload) : 0;
         }
     };
 
@@ -957,7 +1017,7 @@ namespace dsarch {
         /**
             Construt a proxy object for the given owner.
           */
-        inline remote_proxy(host *owner)
+        inline remote_proxy(process *owner)
                 : rpc_proxy(owner->net()->decl_interface(typeid(Process)), owner) {}
 
         /**
@@ -1055,7 +1115,7 @@ namespace dsarch {
 
         method_type method;
 
-        remote_method(remote_proxy<Dest> *_proxy, method_type _meth, const string &_name)
+        remote_method(gm_protocol::learning_node_proxy *_proxy, method_type _meth, const string &_name)
                 : proxy_method<Dest>(_proxy, true, _name), method(_meth) {}
 
         inline void operator()(Args...args) const {
@@ -1091,7 +1151,7 @@ namespace dsarch {
     }
 
 #define REMOTE_METHOD(RClass, RMethod)\
- decltype(dsarch::make_remote_method((remote_proxy<RClass>*)nullptr,\
+ decltype(dds::make_remote_method((remote_proxy<RClass>*)nullptr,\
     &RClass::RMethod, #RMethod )) RMethod  \
  { this, &RClass::RMethod, #RMethod }
 
@@ -1190,7 +1250,7 @@ namespace dsarch {
         /**
             Create a proxy for the given owner
           */
-        proxy_map(host *_owner) : owner(_owner) {}
+        proxy_map(process *_owner) : owner(_owner) {}
 
         /**
             Destroy proxy map and all proxies it created
@@ -1259,7 +1319,7 @@ namespace dsarch {
 
 
     private:
-        host *owner;
+        process *owner;
         std::map<proxied_type *, proxy_type *> pmap;
         std::map<mcast_group<proxied_type> *, proxy_type *> mpmap;
     };
@@ -1293,9 +1353,9 @@ namespace dsarch {
                 : container(cs.begin(), cs.end()) {}
 
         // Constructor from network
-        chan_frame(const network &nw) : chan_frame(nw.channels()) {}
+        chan_frame(const basic_network &nw) : chan_frame(nw.channels()) {}
 
-        chan_frame(const network *nw) : chan_frame(nw->channels()) {}
+        chan_frame(const basic_network *nw) : chan_frame(nw->channels()) {}
 
         // The protocol of the network
         inline const rpc_protocol &rpc() const {
@@ -1469,5 +1529,8 @@ namespace dsarch {
     };
 
 
-} // end namespace dsarch
+} // end namespace dss
 
+
+
+#endif

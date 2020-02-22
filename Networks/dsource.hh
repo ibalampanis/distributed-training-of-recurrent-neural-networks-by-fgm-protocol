@@ -7,7 +7,6 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
 #include <typeinfo>
-#include "H5Cpp.h"
 
 namespace data_src {
 
@@ -15,7 +14,6 @@ namespace data_src {
     using std::endl;
     using std::vector;
     using std::string;
-    using namespace H5;
 
 /*
  * A main-memory store of stream records.

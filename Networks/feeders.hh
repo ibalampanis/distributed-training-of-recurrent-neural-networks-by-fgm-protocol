@@ -1,27 +1,27 @@
-#ifndef __FEEDERS_HH__
-#define __FEEDERS_HH__
+#ifndef DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_FEEDERS_HH
+#define DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_FEEDERS_HH
 
+
+#include <mlpack/core.hpp>
 #include <fstream>
 #include <iostream>
 #include <jsoncpp/json/json.h>
-#include "gm_networks.hh"
-#include "gm_protocol.hh"
+#include "gm_nets.hh"
 #include "dds.hh"
-
 
 namespace feeders {
 
-    using namespace gm_protocol::gm_networks;
+    using namespace gm_protocol;
+    using namespace arma;
     using namespace dds;
-    using namespace dsarch;
+    using std::vector;
+    using std::string;
 
-    /**
-	*   A vector container for the networks.
-	*/
+    // vector container for the networks.
     template<typename distrNetType>
-    class net_container : public vector<distrNetType *> {
+    class net_container : public std::vector<distrNetType *> {
     public:
-        using vector<distrNetType *>::vector;
+        using std::vector<distrNetType *>::vector;
 
         inline void join(distrNetType *net) { this->push_back(net); }
 
@@ -29,9 +29,7 @@ namespace feeders {
 
     };
 
-    /**
-	*   A vector container for the queries.
-	*/
+    // A vector container for the queries.
     class query_container : public vector<continuous_query *> {
     public:
         using vector<continuous_query *>::vector;
@@ -43,14 +41,13 @@ namespace feeders {
     };
 
     /**
-	*   A feeders purpose is to synchronize the testing of the networks
-	*   by providing the appropriate data stream to the nodes of each net.
-	*/
+	    A feeders purpose is to synchronize the testing of the networks
+	    by providing the appropriate data stream to the nodes of each net.
+	**/
     template<typename distrNetType>
     class feeder {
-
     protected:
-        string config_file; // JSON file to read the hyperparameters.
+        std::string config_file; // JSON file to read the hyperparameters.
         time_t seed; // The seed for the random generator.
         size_t batchSize; // The batch learning size.
         size_t warmupSize; // The size of the warmup dataset.
@@ -65,32 +62,38 @@ namespace feeders {
 
         // Stream Distribution
         bool uniform_distr;
-        vector<vector<set<size_t>>>
-                net_dists;
+        vector<vector<set<size_t>>> net_dists;
         float B_prob;
         float site_ratio;
 
         // Statistics collection.
         vector<chan_frame> stats;
-        vector<vector<vector<size_t>>>
-                differential_communication;
+        vector<vector<vector<size_t>>> differential_communication;
         size_t msgs;
         size_t bts;
         vector<vector<double>> differential_accuracy;
         bool log_diff_acc;
 
     public:
-
-        // Constructor, destructor.
+        /**
+            Constructor, destructor.
+            **/
         feeder(string cfg);
 
         virtual ~feeder();
 
-        /* Method that puts a network in the network container. */
-        void addQuery(continuous_query *qry) { _query_container.join(qry); }
+        /**
+            Method that creates the test dataset.
+            This method passes one time through the entire dataset,
+            if the dataset is stored in a hdf5 file.
+            **/
+        virtual void makeTestDataset() {}
 
         /* Method that puts a network in the network container. */
         void addNet(distrNetType *net) { _net_container.join(net); }
+
+        /* Method that puts a network in the network container. */
+        void addQuery(continuous_query *qry) { _query_container.join(qry); }
 
         /* Method initializing all the networks. */
         void initializeSimulation();
@@ -102,23 +105,23 @@ namespace feeders {
         void gatherDifferentialInfo();
 
         // Getters.
-        inline arma::mat &getTestSet() { return testSet; }
+        arma::mat &getTestSet() { return testSet; }
 
-        inline arma::mat &getTestSetLabels() { return testResponses; }
+        arma::mat &getTestSetLabels() { return testResponses; }
 
-        inline arma::mat *getPTestSet() { return &testSet; }
+        arma::mat *getPTestSet() { return &testSet; }
 
-        inline arma::mat *getPTestSetLabels() { return &testResponses; }
+        arma::mat *getPTestSetLabels() { return &testResponses; }
 
-        inline size_t getRandomInt(size_t maxValue) { return std::rand() % maxValue; }
+        size_t getRandomInt(size_t maxValue) { return std::rand() % maxValue; }
 
-        virtual inline size_t getNumberOfFeatures() { return 0; }
+        virtual size_t getNumberOfFeatures() { return 0; }
 
-        virtual void getStatistics() {}
+        void getStatistics() {}
     };
 
     template<typename distrNetType>
-    feeder<distrNetType>::feeder(string cfg) : config_file(cfg) {
+    feeder<distrNetType>::feeder(string cfg) :config_file(cfg) {
         Json::Value root;
         std::ifstream cfgfile(config_file); // Parse from JSON file.
         cfgfile >> root;
@@ -193,15 +196,12 @@ namespace feeders {
             cout << "Initializing the network " << net_name << " with " << learning_algorithm << " learner."
                  << endl;
 
-            if (learning_algorithm == "PA" || learning_algorithm == "ELM" || learning_algorithm == "MLP") {
-                auto query = new Classification_query(&testSet, &testResponses, config_file, net_name);
-                addQuery(query);
-                cout << "Query added." << endl;
-            } else if (learning_algorithm == "PA_Reg" || learning_algorithm == "NN_Reg") {
-                auto query = new Regression_query(&testSet, &testResponses, config_file, net_name);
-                addQuery(query);
-                cout << "Query added." << endl;
-            }
+//            auto query = new Classification_query(&testSet, &testResponses, config_file, net_name);
+//            addQuery(query);
+            auto query = new Classification_query(&testSet, &testResponses, config_file, net_name);
+            addQuery(query);
+            cout << "Query added." << endl;
+
 
             source_id number_of_nodes = (source_id) root["gm_network_" + net_name].get("number_of_local_nodes",
                                                                                        1).asInt64();
@@ -235,8 +235,7 @@ namespace feeders {
             if (!uniform_distr) {
                 set<size_t> B;
                 set<size_t> B_compl;
-                vector<set<size_t>>
-                        net_distr;
+                vector<set<size_t>> net_distr;
                 for (size_t i = 0; i < net->sites.size(); i++) {
                     B_compl.insert(i);
                 }
@@ -266,7 +265,7 @@ namespace feeders {
             cout << endl;
             cout << "Network Name : " << net->name() << endl;
             cout << "Number of nodes : " << net->sites.size() << endl;
-            cout << "Coordinator " << net->hub->name() << " with address " << net->hub->addr() << endl;
+            cout << "Coordinator " << net->hub->name() << " with address ";//<< net->hub->addr() << endl;
             for (size_t j = 0; j < net->sites.size(); j++) {
                 cout << "Site " << net->sites.at(j)->name() << " with address " << net->sites.at(j)->site_id()
                      << endl;
@@ -286,9 +285,11 @@ namespace feeders {
                 batch_bytes += chnl->bytes_received();
             }
 
-            differential_communication.at(i).at(0).push_back(batch_messages - msgs);
+            differential_communication.at(i).at(0)
+                    .push_back(batch_messages - msgs);
 
-            differential_communication.at(i).at(1).push_back(batch_bytes - bts);
+            differential_communication.at(i).at(1)
+                    .push_back(batch_bytes - bts);
 
             msgs = batch_messages;
             bts = batch_bytes;
@@ -311,10 +312,18 @@ namespace feeders {
         size_t numOfMaxRounds = 100000; // Maximum number of monitored rounds.
 
     public:
-
+        /**
+            Constructor.
+            **/
         Random_Feeder(string cfg);
 
+        /**
+            A destructor for the class.
+            Probably needs some fixing later on.
+            **/
         ~Random_Feeder() {}
+
+        virtual void makeTestDataset() override;
 
         void GenNewTarget();
 
@@ -324,13 +333,13 @@ namespace feeders {
 
         void Train(arma::mat &batch, arma::mat &labels);
 
-        void getStatistics() override {}
+        void getStatistics() {}
 
         inline size_t getNumberOfFeatures() override { return number_of_features; }
     };
 
     template<typename distrNetType>
-    Random_Feeder<distrNetType>::Random_Feeder(string cfg) : feeder<distrNetType>(cfg) {
+    Random_Feeder<distrNetType>::Random_Feeder(string cfg) :feeder<distrNetType>(cfg) {
         try {
             Json::Value root;
             std::ifstream cfgfile(this->config_file); // Parse from JSON file.
@@ -364,6 +373,8 @@ namespace feeders {
 
             cout << "test_size : " << test_size << endl << endl;
 
+            // Create the test dataset.
+            makeTestDataset();
             targets = 1;
 
         } catch (...) {
@@ -385,6 +396,25 @@ namespace feeders {
     }
 
     template<typename distrNetType>
+    void Random_Feeder<distrNetType>::makeTestDataset() {
+        GenNewTarget();
+        this->testSet = arma::zeros<arma::mat>(number_of_features, this->test_size);
+        this->testResponses = arma::zeros<arma::mat>(1, this->test_size);
+
+        for (size_t i = 0; i < test_size; i++) {
+            arma::dvec point = GenPoint();
+            this->testSet.col(i) = point;
+            if (arma::dot(point, target.unsafe_col(0)) >= 1.) {
+                this->testResponses(0, i) = 1.;
+            } else {
+                if (this->negative_labels) {
+                    this->testResponses(0, i) = -1.;
+                }
+            }
+        }
+    }
+
+    template<typename distrNetType>
     arma::dvec Random_Feeder<distrNetType>::GenPoint() {
         arma::dvec point = arma::zeros<arma::dvec>(number_of_features);
         for (size_t j = 0; j < number_of_features; j++) {
@@ -403,6 +433,10 @@ namespace feeders {
         size_t degrees = 0; // Number of warmup datapoints read so far by the networks.
 
         while (count < numOfPoints) {
+
+            if ((double) std::rand() / RAND_MAX <= 0.0001) {
+                makeTestDataset();
+            }
 
             arma::mat point = arma::zeros<arma::mat>(number_of_features, 1);
             arma::mat label = arma::zeros<arma::mat>(1, 1);
@@ -473,7 +507,6 @@ namespace feeders {
         }
     }
 
+}
 
-} /* End of namespace feeders */
-
-#endif
+#endif //DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_FEEDERS_HH

@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 project(Distributed_Training_of_Recurrent_Neural_Networks_by_FGM_protocol)
+set(DCMAKE_CXX_COMPILER "g++-7")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 option(DEBUG "DEBUG" OFF)
 
@@ -9,11 +11,11 @@ include_directories("..")
 set(SOURCES ${MODEL_SOURCE_DIR}/ ../RNN_models/predictor/RNNPredictor.cc
         ../RNN_models/predictor/RNNPredictor.hh
         CentrEEG.cc)
+
 set(SOURCES ${MODEL_SOURCE_DIR}/ ../RNN_models/predictor/RNNPredictor.cc
         ../RNN_models/predictor/RNNPredictor.hh
-        ../Networks/feeders.hh
+        ../Networks
         GMNetEEG.cc)
-
 
 if (DEBUG)
     message("Compilation with debug info (with ggdb3 flag)")
@@ -24,7 +26,14 @@ endif ()
 
 
 add_executable(CentrEEG ${SOURCES})
+add_executable(GMNetEEG ${SOURCES})
 target_link_libraries(CentrEEG
+        ${MLPACK_LIBRARIES}
+        ${ARMADILLO_LIBRARIES}
+        ${Boost_LIBRARIES})
+target_link_libraries(GMNetEEG
+        jsoncpp
+        stdc++fs
         ${MLPACK_LIBRARIES}
         ${ARMADILLO_LIBRARIES}
         ${Boost_LIBRARIES})

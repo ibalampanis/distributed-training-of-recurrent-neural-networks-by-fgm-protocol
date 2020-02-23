@@ -10,7 +10,7 @@ RNNPredictor::RNNPredictor(int trainingEpochs, int lstmCells, int rho, double st
                                                      iterationsPerEpoch(iterationsPerEpoch) {}
 
 //template<typename InputDataType = arma::mat, typename DataType = arma::cube, typename LabelType = arma::cube>
-void RNNPredictor::CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y, const size_t rho) {
+void RNNPredictor::createTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y, const size_t rho) {
     for (size_t i = 0; i < dataset.n_cols - rho; i++) {
         X.subcube(arma::span(), arma::span(i), arma::span()) = dataset.submat(arma::span(), arma::span(i, i + rho - 1));
         y.subcube(arma::span(), arma::span(i), arma::span()) = dataset.submat(
@@ -18,7 +18,16 @@ void RNNPredictor::CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::
     }
 }
 
-double RNNPredictor::MSECalc(arma::cube &pred, arma::cube &Y) {
+double RNNPredictor::takeVectorAVG(const std::vector<double> &vec) {
+    double sum = 0;
+    for (double i : vec)
+        sum += i;
+
+    double avg = sum / vec.size();
+    return avg;
+}
+
+double RNNPredictor::calcMSE(arma::cube &pred, arma::cube &Y) {
     double err_sum = 0.0;
     arma::cube diff = pred - Y;
     for (size_t i = 0; i < diff.n_slices; i++) {
@@ -28,13 +37,8 @@ double RNNPredictor::MSECalc(arma::cube &pred, arma::cube &Y) {
     return (err_sum / (diff.n_elem + 1e-50));
 }
 
-double RNNPredictor::TakeVectorAVG(const std::vector<double> &vec) {
-    double sum = 0;
-    for (double i : vec)
-        sum += i;
-
-    double avg = sum / vec.size();
-    return avg;
+double RNNPredictor::getModelAccuracy() const {
+    return modelAccuracy;
 }
 
 void RNNPredictor::DataPreparation() {
@@ -58,7 +62,7 @@ void RNNPredictor::DataPreparation() {
     y.set_size(outputSize, dataset.n_cols - rho + 1, rho);
 
 
-    CreateTimeSeriesData(dataset, X, y, rho);
+    createTimeSeriesData(dataset, X, y, rho);
 
     // Split the data into training and testing sets.
     size_t trainingSize = (1 - trainTestRatio) * X.n_cols;
@@ -111,14 +115,16 @@ void RNNPredictor::TrainModel() {
         // Getting predictions on test data points.
         model.Predict(testX, predOut);
 
-        // Calculating MSE on test data points.
-        double testMSE = MSECalc(predOut, testY);
+        // Calculating MSE and accuracy on test data points.
+        double testMSE = calcMSE(predOut, testY);
+        modelAccuracy = 100 - testMSE;
+
         epoch_mses.push_back(testMSE);
 
         // Print stats during training
         if (epoch % 10 == 0 || epoch == 1)
-        cout << "|=== [Epoch: " << epoch << "\t|\tAccuracy: " << setprecision(2) << fixed << (100 - testMSE)
-             << " %] ===|" << endl;
+            cout << "|=== [Epoch: " << epoch << "\t|\tAccuracy: " << setprecision(2) << fixed << (100 - testMSE)
+                 << " %] ===|" << endl;
     }
 
     cout << "===========================================" << endl;
@@ -128,7 +134,7 @@ void RNNPredictor::TrainModel() {
     cout << "Training ... OK." << endl;
 
     cout << "Average accuracy during training: " << fixed << setprecision(2)
-         << (100 - TakeVectorAVG(epoch_mses)) << " %" << endl;
+         << (100 - takeVectorAVG(epoch_mses)) << " %" << endl;
 
     if (train_time.count() / 1e+9 < 60)
         cout << "Training time: " << setprecision(2) << fixed << train_time.count() / 1e+9 << " second(s)."
@@ -156,7 +162,7 @@ void RNNPredictor::MakePrediction() {
     modelP.Predict(testX, predOutP);
     cout << " OK." << endl;
     // Calculate MSE on prediction.
-    double testMSEPred = MSECalc(predOutP, testY);
+    double testMSEPred = calcMSE(predOutP, testY);
     cout << "Prediction Accuracy: " << setprecision(2) << fixed << (100 - testMSEPred) << " %" << endl;
 
 }

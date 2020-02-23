@@ -2,7 +2,9 @@
 #include <iostream>
 #include <vector>
 #include <boost/core/demangle.hpp>
+
 #include "dsarch.hh"
+#include "results.hh"
 #include "method.hh"
 
 namespace dds {
@@ -17,8 +19,7 @@ namespace dds {
 
 
 
-    host::host(basic_network *n, bool _b)
-            : _net(n), _addr(unknown_addr), _mcast(_b) {
+    host::host(basic_network *n, bool _b) : _net(n), _addr(unknown_addr), _mcast(_b) {
         if (!_mcast) {
             _net->_hosts.insert(this);
         } else
@@ -70,8 +71,7 @@ namespace dds {
 //-------------------
 
 
-    host_group::host_group(basic_network *n)
-            : host(n, true) {}
+    host_group::host_group(basic_network *n) : host(n, true) {}
 
 
 
@@ -96,9 +96,8 @@ namespace dds {
     }
 
 
-    multicast_channel::multicast_channel(host *s, host_group *d, rpcc_t rpcc)
-            : channel(s, d, rpcc), rxmsgs(0), rxbyts(0) {
-    }
+    multicast_channel::multicast_channel(host *s, host_group *d, rpcc_t rpcc) : channel(s, d, rpcc), rxmsgs(0),
+                                                                                rxbyts(0) {}
 
 
     size_t multicast_channel::messages_received() const { return rxmsgs; }
@@ -189,19 +188,15 @@ namespace dds {
         return rpctab.declare(name);
     }
 
-
     rpcc_t basic_network::decl_method(rpcc_t ifc, const string &name, bool onew) {
         return rpctab.declare(ifc, name, onew);
     }
 
-
-    basic_network::basic_network()
-            : all_hosts(this) {
+    basic_network::basic_network() : all_hosts(this) {
         new_group_addr = -1;
         new_host_addr = 0;
         all_hosts.set_addr(-1);
     }
-
 
     bool basic_network::assign_address(host *h, host_addr a) {
         if (h->_addr != unknown_addr)
@@ -238,7 +233,6 @@ namespace dds {
 
     }
 
-
     void basic_network::reserve_addresses(host_addr a) {
         if (a >= 0) {
             if (new_host_addr <= a) new_host_addr = a + 1;
@@ -252,8 +246,7 @@ namespace dds {
         return it == addr_map.end() ? nullptr : it->second;
     }
 
-    basic_network::~basic_network() {
-    }
+    basic_network::~basic_network() {}
 
 
 
@@ -394,14 +387,12 @@ namespace dds {
 //-------------------
 
 
-    rpc_proxy::rpc_proxy(size_t ifc, host *_own)
-            : _r_ifc(ifc), _r_owner(_own) {
+    rpc_proxy::rpc_proxy(size_t ifc, host *_own) : _r_ifc(ifc), _r_owner(_own) {
         assert(!_own->is_mcast());
     }
 
 
-    rpc_proxy::rpc_proxy(const string &name, host *_own)
-            : rpc_proxy(_own->net()->decl_interface(name), _own) {}
+    rpc_proxy::rpc_proxy(const string &name, host *_own) : rpc_proxy(_own->net()->decl_interface(name), _own) {}
 
     size_t rpc_proxy::_r_register(rpc_call *call) {
         _r_calls.push_back(call);
@@ -427,10 +418,12 @@ namespace dds {
 
 
 
-    rpc_call::rpc_call(rpc_proxy *_prx, bool _oneway, const string &_name)
-            : _proxy(_prx),
-              _endpoint(_prx->_r_owner->net()->decl_method(_prx->_r_ifc, _name, _oneway)),
-              one_way(_oneway) {
+    rpc_call::rpc_call(rpc_proxy *_prx, bool _oneway, const string &_name) : _proxy(_prx),
+                                                                             _endpoint(
+                                                                                     _prx->_r_owner->net()->decl_method(
+                                                                                             _prx->_r_ifc, _name,
+                                                                                             _oneway)),
+                                                                             one_way(_oneway) {
         _prx->_r_register(this);
     }
 

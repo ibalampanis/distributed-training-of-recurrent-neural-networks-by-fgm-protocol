@@ -9,8 +9,9 @@
 #include <cassert>
 #include <ctime>
 #include <mlpack/core.hpp>
-#include "dsarch.hh"
-#include "RNN_models/predictor/RNNPredictor.hh
+#include "dds/dsarch.hh"
+//#include "dds/dds.hh"
+#include "RNN_models/predictor/RNNPredictor.hh"
 
 namespace gm_protocol {
 
@@ -336,6 +337,9 @@ namespace gm_protocol {
         bool rebalancing = false;   // A boolean determining whether the monitoring protocol should run with rabalancing.
         float beta_mu = 0.5;        // Beta vector coefficient of rebalancing.
         int max_rebs = 2;           // Maximum number of rebalances
+        string distributed_learning_algorithm;
+        float precision;
+        float reb_mult;
     };
 
 
@@ -350,7 +354,7 @@ namespace gm_protocol {
         arma::mat *testSet;         // Test dataset without labels.
         arma::mat *testResponses;   // Labels of the test dataset.
 
-        continuous_query(arma::mat *tSet, arma::mat *tRes, string cfg, string nm);
+        continuous_query(string cfg, string nm);
 
         virtual ~continuous_query() {}
 
@@ -361,20 +365,6 @@ namespace gm_protocol {
         inline query_state *create_query_state(vector<arma::SizeMat> sz) { return new query_state(sz); }
 
         virtual inline double queryAccuracy(RNNPredictor *lnr);
-    };
-
-    struct Classification_query : continuous_query {
-        /** Constructor */
-        Classification_query(arma::mat *tSet, arma::mat *tRes, string cfg, string nm);
-
-        /** Destructor */
-        ~Classification_query() {
-            delete testSet;
-            delete testResponses;
-        }
-
-//        double queryAccuracy(MLPACK_Learner *lnr) override;
-
     };
 
     /** The star network topology using the Geometric Method for Distributed Machine Learning. **/

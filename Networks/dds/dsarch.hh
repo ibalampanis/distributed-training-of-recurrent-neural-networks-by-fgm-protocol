@@ -17,11 +17,11 @@
 #include <stdexcept>
 #include <algorithm>
 #include <map>
+
 #include "dds.hh"
-#include "gm_protocol.hh"
-#include "gm_nets.hh"
 
 namespace dds {
+
 
     class basic_network;
 
@@ -152,23 +152,23 @@ namespace dds {
         inline rpcc_t rpc_code() const { return rpcc; }
 
         /** Number of messages sent */
-        inline size_t messages() const { return msgs; }
+        inline auto messages() const { return msgs; }
 
         /** Number of bytes sent */
-        inline size_t bytes() const { return byts; }
+        inline auto bytes() const { return byts; }
 
         /**
             Number of messages received.
             For broadcast channels this is not the same as
             the number of messages sent.
-        **/
+          */
         virtual size_t messages_received() const { return msgs; }
 
         /**
             Number of bytes received.
             For broadcast channels, this is not the same as the
             bytes sent.
-        **/
+          */
         virtual size_t bytes_received() const { return byts; }
 
         /**
@@ -967,9 +967,7 @@ namespace dds {
     inline bool __transmit_response(const T &val) { return true; }
 
     template<typename T>
-    inline bool __transmit_response(const Acknowledge<T> &ackval) {
-        return ackval;
-    }
+    inline bool __transmit_response(const Acknowledge<T> &ackval) { return ackval; }
 
 
 /**
@@ -1115,7 +1113,7 @@ namespace dds {
 
         method_type method;
 
-        remote_method(gm_protocol::learning_node_proxy *_proxy, method_type _meth, const string &_name)
+        remote_method(remote_proxy<Dest> *_proxy, method_type _meth, const string &_name)
                 : proxy_method<Dest>(_proxy, true, _name), method(_meth) {}
 
         inline void operator()(Args...args) const {
@@ -1146,9 +1144,7 @@ namespace dds {
             remote_proxy<T> *owner,
             Response (T::*method)(Args...),
             const string &_name
-    ) {
-        return remote_method<T, Response, Args...>(owner, method, _name);
-    }
+    ) { return remote_method<T, Response, Args...>(owner, method, _name); }
 
 #define REMOTE_METHOD(RClass, RMethod)\
  decltype(dds::make_remote_method((remote_proxy<RClass>*)nullptr,\

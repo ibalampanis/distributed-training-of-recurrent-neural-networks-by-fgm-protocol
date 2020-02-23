@@ -12,13 +12,13 @@ option(USE_OPENMP "If available, use OpenMP for parallelization." OFF)
 # If we are not forcing C++11 support, check that the compiler supports C++11
 # and enable it.
 if (NOT FORCE_CXX11)
-    include(CMake/CXX11.cmake)
-    check_for_cxx11_compiler(HAS_CXX11)
+    include(CMake/CXX14.cmake)
+    check_cxx_compiler_flag(-std=c++14 has_std_14_flag)
 
-    if (NOT HAS_CXX11)
+    if (NOT has_std_14_flag)
         message(FATAL_ERROR "No C++11 compiler available!")
     endif ()
-    enable_cxx11()
+    enable_cxx14()
 endif ()
 
 # Include modules in the CMake directory.

@@ -1,6 +1,8 @@
 #include <jsoncpp/json/json.h>
 #include "gm_protocol.hh"
 #include "RNN_models/predictor/RNNPredictor.hh"
+#include "dds/dsarch.hh"
+//#include "dds/dds.hh"
 
 using namespace gm_protocol;
 
@@ -294,17 +296,14 @@ ml_safezone_function *query_state::safezone(string cfg, string algo) {
 	continuous_query
 *********************************************/
 
-continuous_query::continuous_query(arma::mat *tSet, arma::mat *tRes, string cfg, string nm) : testSet(tSet),
-                                                                                              testResponses(tRes) {
+continuous_query::continuous_query(string cfg, string nm) {
     cout << "Initializing the query..." << endl;
     Json::Value root;
     std::ifstream cfgfl(cfg);
     cfgfl >> root;
 
-    config.learning_algorithm = root["gm_network_" + nm]
-            .get("learning_algorithm", "Trash").asString();
-    config.distributed_learning_algorithm = root["gm_network_" + nm]
-            .get("distributed_learning_algorithm", "Trash").asString();
+    config.distributed_learning_algorithm = root["gm_network_" + nm].get("distributed_learning_algorithm",
+                                                                         "Trash").asString();
     config.network_name = nm;
     config.precision = root[config.distributed_learning_algorithm].get("precision", 0.01).asFloat();
     config.rebalancing = root[config.distributed_learning_algorithm].get("rebalancing", false).asBool();
@@ -314,7 +313,7 @@ continuous_query::continuous_query(arma::mat *tSet, arma::mat *tRes, string cfg,
 
     config.cfgfile = cfg;
 
-    cout << "Query initialized : " << config.learning_algorithm << ", ";
+    cout << "Query initialized : ";
     cout << config.distributed_learning_algorithm << ", ";
     cout << config.network_name << ", ";
     cout << config.cfgfile << endl;
@@ -325,20 +324,8 @@ void continuous_query::setTestSet(arma::mat *tSet, arma::mat *tRes) {
     testResponses = tRes;
 }
 
-double continuous_query::queryAccuracy(RNNPredictor *lnr) { return 0.; }
+double continuous_query::queryAccuracy(RNNPredictor *rnn) { return rnn->getModelAccuracy(); }
 
-/*********************************************
-	Classification_query
-*********************************************/
-
-Classification_query::Classification_query(arma::mat *tSet, arma::mat *tRes, string cfg, string nm) : continuous_query(
-        tSet, tRes, cfg, nm) {}
-
-double Classification_query::queryAccuracy(RNNPredictor *lnr) {
-
-    return lnr->accuracy(*testSet, *testResponses);
-
-}
 
 
 /*********************************************
@@ -462,9 +449,7 @@ double Classification_query::queryAccuracy(RNNPredictor *lnr) {
 //        auto safe_zone = new Batch_safezone_function(GlobalModel, root[algo].get("batch_size", 32).asInt64());
 //        return safe_zone;
 //    } else if (algorithm == "Variance_Monitoring") {
-//        auto safe_zone = new Param_Variance_safezone_func(GlobalModel,
-//                                                          root[algo].get("threshold", 1.).asDouble(),
-//                                                          root[algo].get("batch_size", 32).asInt64());
+//        auto safe_zone = new Param_Variance_safezone_func(GlobalModel, root[algo].get("threshold", 1.).asDouble(),  root[algo].get("batch_size", 32).asInt64());
 //        return safe_zone;
 //    } else {
 //        return nullptr;

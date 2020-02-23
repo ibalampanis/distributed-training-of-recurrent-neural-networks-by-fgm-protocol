@@ -7,7 +7,8 @@
 #include <iostream>
 #include <jsoncpp/json/json.h>
 #include "gm_nets.hh"
-#include "dds.hh"
+#include "dds/dds.hh"
+#include "gm_protocol.hh"
 
 namespace feeders {
 
@@ -196,9 +197,7 @@ namespace feeders {
             cout << "Initializing the network " << net_name << " with " << learning_algorithm << " learner."
                  << endl;
 
-//            auto query = new Classification_query(&testSet, &testResponses, config_file, net_name);
-//            addQuery(query);
-            auto query = new Classification_query(&testSet, &testResponses, config_file, net_name);
+            auto query = new gm_protocol::continuous_query(config_file, net_name);
             addQuery(query);
             cout << "Query added." << endl;
 
@@ -211,7 +210,8 @@ namespace feeders {
             }
             count += number_of_nodes + 1; // We add one because of the coordinator.
 
-            auto net = new distrNetType(node_ids, net_name, _query_container.at(i - 1));
+//            auto net = new distrNetType(node_ids, net_name, _query_container.at(i - 1));
+            auto net = new GM_Net(node_ids, net_name, _query_container.at(i - 1));
             addNet(net);
             cout << "Net " << net_name << " initialized." << endl << endl;
         }

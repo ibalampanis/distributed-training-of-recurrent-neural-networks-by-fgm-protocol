@@ -12,9 +12,21 @@ set(SOURCES ${MODEL_SOURCE_DIR}/ ../RNN_models/predictor/RNNPredictor.cc
         ../RNN_models/predictor/RNNPredictor.hh
         CentrEEG.cc)
 
-set(SOURCES ${MODEL_SOURCE_DIR}/ ../RNN_models/predictor/RNNPredictor.cc
+set(SOURCES ${MODEL_SOURCE_DIR}/
+        ../RNN_models/predictor/RNNPredictor.cc
         ../RNN_models/predictor/RNNPredictor.hh
-        ../Networks
+        ../Networks/dds/binc.hh
+        ../Networks/dds/dds.hh
+        ../Networks/dds/dds.cc
+        ../Networks/dds/dsarch.hh
+        ../Networks/dds/dsarch.cc
+        ../Networks/dds/dsarch_tests.hh
+        ../Networks/gm_nets.hh
+        ../Networks/gm_nets.cc
+        ../Networks/gm_protocol.cc
+        ../Networks/gm_protocol.hh
+        #        ../Networks/gm_nets_ext.hh
+        ../Networks/feeders.hh
         GMNetEEG.cc)
 
 if (DEBUG)
@@ -33,7 +45,6 @@ target_link_libraries(CentrEEG
         ${Boost_LIBRARIES})
 target_link_libraries(GMNetEEG
         jsoncpp
-        stdc++fs
         ${MLPACK_LIBRARIES}
         ${ARMADILLO_LIBRARIES}
         ${Boost_LIBRARIES})

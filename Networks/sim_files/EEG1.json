@@ -1,22 +1,21 @@
 {
   "simulations": {
     "encoding": "UTF-8",
-    "net_name_1": "net1",
+    "net_name_1": "gm_net",
     "number_of_networks": 4,
     "learning_problem": "classification",
-    "data": "tests_hdf5_Data",
+    "data": "data_section",
     "stream_distribution": "Stream_Distribution1",
     "log_diff_acc": false,
-    "Communication_File": "/home/aris/Desktop/Diplwmatikh/StartingCppDeveloping/Graphs/Exp001/Com.csv",
-    "Differential_Communication_File": "/home/aris/Desktop/Diplwmatikh/StartingCppDeveloping/Graphs/Exp001/_Diff_Com.csv",
+    "Communication_File": "/home/ibalampanis/CLionProjects/Distributed_Training_of_Recurrent_Neural_Networks_by_FGM_protocol/Networks/sim_files/eeg_comm.csv",
+    "Differential_Communication_File": "/home/ibalampanis/CLionProjects/Distributed_Training_of_Recurrent_Neural_Networks_by_FGM_protocol/Networks/sim_files/eeg_comm_diff.csv",
     "seed": -1
   },
-  "tests_hdf5_Data": {
+  "data_section": {
     "encoding": "UTF-8",
-    "batch_size": 64,
+    "batch_size": 16,
     "warmup_size": 1000,
-    "test_size": 10000,
-    "epochs": 1
+    "epochs": 100
   },
   "Stream_Distribution1": {
     "encoding": "UTF-8",
@@ -28,21 +27,19 @@
     "encoding": "UTF-8",
     "number_of_local_nodes": 4,
     "learning_algorithm": "LSTM",
-    "image_width": 28,
-    "image_height": 28,
     "number_of_channels": 1,
-    "distributed_learning_algorithm": "dist_algo_net1"
+    "distributed_learning_algorithm": "gm_lstm"
   },
-  "dist_algo_net1": {
-    "algorithm": "Batch_Learning",
+  "gm_lstm": {
+    "algorithm": "Variance_Learning",
     "precision": 0.01,
     "threshold": 0.0008,
-    "batch_size": 64
+    "batch_size": 16
   },
   "data": {
     "encoding": "UTF-8",
     "file_name": "/home/ibalampanis/CLionProjects/Distributed_Training_of_Recurrent_Neural_Networks_by_FGM_protocol/RNN_models/data/EEG_Eye_State.csv",
-    "train_dset_name": "EEG_train",
-    "test_dset_name": "EEG_Test"
+    "train_dset_name": "eegTrainSet",
+    "test_dset_name": "eegTestSet"
   }
 }

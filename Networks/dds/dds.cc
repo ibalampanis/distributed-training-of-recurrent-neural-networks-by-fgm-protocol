@@ -1,6 +1,9 @@
 
 #include <sstream>
+#include <iterator>
+
 #include <boost/core/demangle.hpp>
+
 #include "binc.hh"
 #include "dds.hh"
 

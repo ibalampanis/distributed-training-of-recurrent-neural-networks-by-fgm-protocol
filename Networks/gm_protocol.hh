@@ -356,13 +356,13 @@ namespace gm_protocol {
 
         continuous_query(string cfg, string nm);
 
-        virtual ~continuous_query() {}
+        virtual ~continuous_query() = default;
 
         void setTestSet(arma::mat *tSet, arma::mat *tRes);
 
-        inline query_state *create_query_state() { return new query_state(); }
+        static inline query_state *create_query_state() { return new query_state(); }
 
-        inline query_state *create_query_state(vector<arma::SizeMat> sz) { return new query_state(sz); }
+        static inline query_state *create_query_state(vector<arma::SizeMat> sz) { return new query_state(sz); }
 
         virtual inline double queryAccuracy(RNNPredictor *lnr);
     };

@@ -48,8 +48,7 @@ namespace rnn_predictor {
         size_t inputSize = 15, outputSize = 1;
         arma::cube trainX, trainY, testX, testY;
 
-
-        static void createTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y, const size_t rho);
+        static void createTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y, size_t rho);
 
         static double takeVectorAVG(const std::vector<double> &vec);
 

@@ -3,16 +3,16 @@
 
 
 using namespace feeders;
+using namespace gm_protocol;
 
 int main(int argc, char **argv) {
 
     std::string cfg = std::string(argv[1]);
 
-    Random_Feeder<gm_protocol::GM_Net> simulation(cfg);
-
-    simulation.initializeSimulation();
-    simulation.printStarNets();
-//    simulation.TrainNetworks();
+    feeders::Random_Feeder <GM_Net> sim(cfg);
+    sim.initializeSimulation();
+    sim.printStarNets();
+//    sim.TrainNetworks();
 
     return 0;
 }

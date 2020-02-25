@@ -1,5 +1,5 @@
 #include "RNNPredictor.hh"
-#include <armadillo>
+#include <mlpack/core.hpp>
 
 using namespace rnn_predictor;
 using namespace arma;
@@ -9,7 +9,6 @@ RNNPredictor::RNNPredictor(int trainingEpochs, int lstmCells, int rho, double st
                                                      stepSize(stepSize), batchSize(batchSize),
                                                      iterationsPerEpoch(iterationsPerEpoch) {}
 
-//template<typename InputDataType = arma::mat, typename DataType = arma::cube, typename LabelType = arma::cube>
 void RNNPredictor::createTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y, const size_t rho) {
     for (size_t i = 0; i < dataset.n_cols - rho; i++) {
         X.subcube(arma::span(), arma::span(i), arma::span()) = dataset.submat(arma::span(), arma::span(i, i + rho - 1));

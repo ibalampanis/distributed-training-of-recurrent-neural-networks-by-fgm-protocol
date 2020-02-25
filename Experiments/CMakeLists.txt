@@ -1,14 +1,15 @@
 cmake_minimum_required(VERSION 2.6)
 project(Distributed_Training_of_Recurrent_Neural_Networks_by_FGM_protocol)
 set(DCMAKE_CXX_COMPILER "g++-7")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
 option(DEBUG "DEBUG" OFF)
 
 set(MODEL_SOURCE_DIR .)
 include_directories("..")
 
-set(SOURCES ${MODEL_SOURCE_DIR}/ ../RNN_models/predictor/RNNPredictor.cc
+set(SOURCES ${MODEL_SOURCE_DIR}/
+        ../RNN_models/predictor/RNNPredictor.cc
         ../RNN_models/predictor/RNNPredictor.hh
         CentrEEG.cc)
 
@@ -25,7 +26,7 @@ set(SOURCES ${MODEL_SOURCE_DIR}/
         ../Networks/gm_nets.cc
         ../Networks/gm_protocol.cc
         ../Networks/gm_protocol.hh
-        #        ../Networks/gm_nets_ext.hh
+        ../Networks/feeders.cc
         ../Networks/feeders.hh
         GMNetEEG.cc)
 

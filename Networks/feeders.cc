@@ -8,7 +8,7 @@ using std::vector;
 using std::string;
 
 /**
-    FEEDER
+    Feeder
 **/
 
 template<typename distrNetType>
@@ -187,7 +187,7 @@ void feeder<distrNetType>::gatherDifferentialInfo() {
 }
 
 /**
-    RANDOM FEEDER
+    Random Feeder
 **/
 
 template<typename distrNetType>

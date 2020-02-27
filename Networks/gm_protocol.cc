@@ -84,27 +84,22 @@ Batch_Learning::~Batch_Learning() {}
 	Variance_safezone_func
 *********************************************/
 
-Variance_safezone_func::Variance_safezone_func(vector<arma::mat> &GlMd) : ml_safezone_function(GlMd), threshold(1.),
-                                                                          batch_size(32) {
+Variance_safezone_func::Variance_safezone_func(vector<arma::mat> &GlMd) : ml_safezone_function(GlMd), threshold(1.), batch_size(32) {
     hyperparameters.push_back(1.);
     hyperparameters.push_back(32.);
 }
 
-Variance_safezone_func::Variance_safezone_func(vector<arma::mat> &GlMd, size_t batch_sz) : ml_safezone_function(GlMd),
-                                                                                           threshold(1.),
-                                                                                           batch_size(batch_sz) {
+Variance_safezone_func::Variance_safezone_func(vector<arma::mat> &GlMd, size_t batch_sz) : ml_safezone_function(GlMd), threshold(1.), batch_size(batch_sz) {
     hyperparameters.push_back(1.);
     hyperparameters.push_back(batch_sz);
 }
 
-Variance_safezone_func::Variance_safezone_func(vector<arma::mat> &GlMd, float thr) : ml_safezone_function(GlMd),
-                                                                                     threshold(thr), batch_size(32) {
+Variance_safezone_func::Variance_safezone_func(vector<arma::mat> &GlMd, float thr) : ml_safezone_function(GlMd), threshold(thr), batch_size(32) {
     hyperparameters.push_back(thr);
     hyperparameters.push_back(32.);
 }
 
-Variance_safezone_func::Variance_safezone_func(vector<arma::mat> &GlMd, float thr, size_t batch_sz)
-        : ml_safezone_function(GlMd), threshold(thr), batch_size(batch_sz) {
+Variance_safezone_func::Variance_safezone_func(vector<arma::mat> &GlMd, float thr, size_t batch_sz): ml_safezone_function(GlMd), threshold(thr), batch_size(batch_sz) {
     hyperparameters.push_back(thr);
     hyperparameters.push_back(batch_sz);
 }
@@ -127,9 +122,7 @@ float Variance_safezone_func::Zeta(const vector<arma::mat *> &mdl) const {
     return std::sqrt(threshold) - std::sqrt(res);
 }
 
-size_t Variance_safezone_func::checkIfAdmissible(const size_t counter) const {
-    return batch_size - counter;
-}
+size_t Variance_safezone_func::checkIfAdmissible(const size_t counter) const { return batch_size - counter; }
 
 float Variance_safezone_func::checkIfAdmissible(const vector <arma::mat> &mdl) const {
     float var = 0.;
@@ -158,8 +151,7 @@ float Variance_safezone_func::checkIfAdmissible(const vector<arma::mat *> &par1,
     return std::sqrt(threshold) - std::sqrt(res);
 }
 
-float Variance_safezone_func::checkIfAdmissible_reb(const vector<arma::mat *> &par1, const vector<arma::mat> &par2,
-                                                    float coef) const {
+float Variance_safezone_func::checkIfAdmissible_reb(const vector<arma::mat *> &par1, const vector<arma::mat> &par2, float coef) const {
     float res = 0.;
     for (size_t i = 0; i < par1.size(); i++) {
         arma::mat subtr = *par1.at(i) - par2.at(i);
@@ -210,9 +202,7 @@ safezone::~safezone() {}
 safezone::safezone(ml_safezone_function *sz) : szone(sz) {}
 
 // Movable
-safezone::safezone(safezone &&other) {
-    swap(other);
-}
+safezone::safezone(safezone &&other) { swap(other); }
 
 safezone &safezone::operator=(safezone &&other) {
     swap(other);
@@ -220,9 +210,7 @@ safezone &safezone::operator=(safezone &&other) {
 }
 
 // Copyable
-safezone::safezone(const safezone &other) {
-    szone = other.szone;
-}
+safezone::safezone(const safezone &other) { szone = other.szone; }
 
 safezone &safezone::operator=(const safezone &other) {
     if (szone != other.szone) {
@@ -302,8 +290,7 @@ continuous_query::continuous_query(string cfg, string nm) {
     std::ifstream cfgfl(cfg);
     cfgfl >> root;
 
-    config.distributed_learning_algorithm = root["gm_network_" + nm].get("distributed_learning_algorithm",
-                                                                         "Trash").asString();
+    config.distributed_learning_algorithm = root["gm_network_" + nm].get("distributed_learning_algorithm", "Trash").asString();
     config.network_name = nm;
     config.precision = root[config.distributed_learning_algorithm].get("precision", 0.01).asFloat();
     config.rebalancing = root[config.distributed_learning_algorithm].get("rebalancing", false).asBool();
@@ -325,137 +312,6 @@ void continuous_query::setTestSet(arma::mat *tSet, arma::mat *tRes) {
 }
 
 double continuous_query::queryAccuracy(RNNPredictor *rnn) { return rnn->getModelAccuracy(); }
-
-
-
-/*********************************************
-	dl_safezone_function
-*********************************************/
-
-//dl_safezone_function::dl_safezone_function(vector<resizable_tensor *> &mdl) : GlobalModel(mdl) {
-//    num_of_params = 0;
-//    for (auto layer:mdl) {
-//        num_of_params += layer->size();
-//    }
-//}
-//
-//dl_safezone_function::~dl_safezone_function() {}
-//
-//const vector<resizable_tensor *> &dl_safezone_function::getGlobalModel() const {
-//    return GlobalModel;
-//}
-
-
-/*********************************************
-	Batch_safezone_function
-*********************************************/
-
-//Batch_safezone_function::Batch_safezone_function(vector<resizable_tensor *> &GlMd) : dl_safezone_function(GlMd), threshold(32.) {
-//    hyperparameters.push_back(32.);
-//}
-//
-//Batch_safezone_function::Batch_safezone_function(vector<resizable_tensor *> &GlMd, size_t thr) : dl_safezone_function(GlMd), threshold(thr) {
-//    hyperparameters.push_back(thr);
-//}
-//
-//size_t Batch_safezone_function::checkIfAdmissible(const size_t counter) const {
-//    return threshold - counter;
-//}
-//
-//Batch_safezone_function::~Batch_safezone_function() {}
-
-
-/*********************************************
-	dl_safezone
-*********************************************/
-
-//dl_safezone::dl_safezone() : szone(nullptr) {}
-//
-//dl_safezone::~dl_safezone() {}
-//
-//// valid dl_safezone
-//dl_safezone::dl_safezone(dl_safezone_function *sz) : szone(sz) {}
-//
-//// Movable
-//dl_safezone::dl_safezone(dl_safezone &&other) {
-//    swap(other);
-//}
-//
-//dl_safezone &dl_safezone::operator=(dl_safezone &&other) {
-//    swap(other);
-//    return *this;
-//}
-//
-//// Copyable
-//dl_safezone::dl_safezone(const dl_safezone &other) {
-//    szone = other.szone;
-//}
-//
-//dl_safezone &dl_safezone::operator=(const dl_safezone &other) {
-//    if (szone != other.szone) {
-//        szone = other.szone;
-//    }
-//    return *this;
-//}
-//
-//
-/*********************************************
-	dl_query_state
-*********************************************/
-//
-//dl_query_state::dl_query_state() {}
-//
-//dl_query_state::dl_query_state(vector<resizable_tensor *> &mdl) {
-//    num_of_params = 0;
-//    for (auto layer:mdl) {
-//        resizable_tensor *l;
-//        l = new resizable_tensor();
-//        l->set_size(layer->num_samples(), layer->k(), layer->nr(), layer->nc());
-//        *l = 0.;
-//        GlobalModel.push_back(l);
-//        num_of_params += layer->size();
-//    }
-//}
-//
-//void dl_query_state::initializeGlobalModel(const vector<tensor *> &mdl) {
-//    num_of_params = 0;
-//    for (auto layer:mdl) {
-//        resizable_tensor *l;
-//        l = new resizable_tensor();
-//        l->set_size(layer->num_samples(), layer->k(), layer->nr(), layer->nc());
-//        *l = 0.;
-//        GlobalModel.push_back(l);
-//        num_of_params += layer->size();
-//    }
-//}
-//
-//void dl_query_state::update_estimate(vector<resizable_tensor *> &mdl) {
-//    for (size_t i = 0; i < GlobalModel.size(); i++) {
-//        //dlib::cpu::affine_transform(*GlobalModel.at(i), *mdl.at(i), 1., 0.);
-//        dlib::cpu::affine_transform(*GlobalModel.at(i), *mdl.at(i), 1.);
-//    }
-//}
-//
-//dl_query_state::~dl_query_state() {}
-//
-//dl_safezone_function *dl_query_state::dl_safezone(string cfg, string algo) {
-//
-//    Json::Value root;
-//    std::ifstream cfgfl(cfg);
-//    cfgfl >> root;
-//
-//    string algorithm = root[algo].get("algorithm", "Variance_Monitoring").asString();
-//    if (algorithm == "Batch_Learning") {
-//        auto safe_zone = new Batch_safezone_function(GlobalModel, root[algo].get("batch_size", 32).asInt64());
-//        return safe_zone;
-//    } else if (algorithm == "Variance_Monitoring") {
-//        auto safe_zone = new Param_Variance_safezone_func(GlobalModel, root[algo].get("threshold", 1.).asDouble(),  root[algo].get("batch_size", 32).asInt64());
-//        return safe_zone;
-//    } else {
-//        return nullptr;
-//    }
-//}
-
 
 /*********************************************
 	tcp_channel

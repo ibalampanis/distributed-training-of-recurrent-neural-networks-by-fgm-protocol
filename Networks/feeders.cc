@@ -97,7 +97,6 @@ void feeder<distrNetType>::initializeSimulation() {
         }
         count += number_of_nodes + 1; // We add one because of the coordinator.
 
-//            auto net = new distrNetType(node_ids, net_name, _query_container.at(i - 1));
         auto net = new GM_Net(node_ids, net_name, _query_container.at(i - 1));
         addNet(net);
         cout << "Net " << net_name << " initialized." << endl << endl;

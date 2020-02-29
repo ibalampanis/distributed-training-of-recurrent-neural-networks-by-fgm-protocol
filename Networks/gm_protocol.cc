@@ -220,64 +220,64 @@ safezone &safezone::operator=(const safezone &other) {
 }
 
 
-/*********************************************
-	dl_query_state
-*********************************************/
-
-query_state::query_state() {}
-
-query_state::query_state(vector <arma::SizeMat> vsz) {
-    for (auto sz:vsz)
-        GlobalModel.push_back(arma::mat(sz, arma::fill::zeros));
-}
-
-void query_state::initializeGlobalModel(vector <arma::SizeMat> vsz) {
-    for (auto sz:vsz)
-        GlobalModel.push_back(arma::mat(sz, arma::fill::zeros));
-}
-
-void query_state::update_estimate(vector <arma::mat> &mdl) {
-    for (size_t i = 0; i < mdl.size(); i++)
-        GlobalModel.at(i) -= GlobalModel.at(i) - mdl.at(i);
-}
-
-void query_state::update_estimate(vector<arma::mat *> &mdl) {
-    for (size_t i = 0; i < mdl.size(); i++)
-        GlobalModel.at(i) -= GlobalModel.at(i) - *mdl.at(i);
-}
-
-void query_state::update_estimate_v2(vector <arma::mat> &mdl) {
-    for (size_t i = 0; i < mdl.size(); i++)
-        GlobalModel.at(i) += mdl.at(i);
-}
-
-void query_state::update_estimate_v2(vector<arma::mat *> &mdl) {
-    for (size_t i = 0; i < mdl.size(); i++)
-        GlobalModel.at(i) += *mdl.at(i);
-}
-
-query_state::~query_state() {}
-
-ml_safezone_function *query_state::safezone(string cfg, string algo) {
-
-    Json::Value root;
-    std::ifstream cfgfl(cfg);
-    cfgfl >> root;
-
-    string algorithm = root[algo].get("algorithm", "Variance_Monitoring").asString();
-    cout << algorithm << endl;
-    if (algorithm == "Batch_Learning") {
-        auto safe_zone = new Batch_Learning(GlobalModel, root[algo].get("batch_size", 32).asInt64());
-        return safe_zone;
-    } else if (algorithm == "Variance_Monitoring") {
-        auto safe_zone = new Variance_safezone_func(GlobalModel,
-                                                    root[algo].get("threshold", 1.).asDouble(),
-                                                    root[algo].get("batch_size", 32).asInt64());
-        return safe_zone;
-    } else {
-        return nullptr;
-    }
-}
+///*********************************************
+//	dl_query_state
+//*********************************************/
+//
+//query_state::query_state() {}
+//
+//query_state::query_state(vector <arma::SizeMat> vsz) {
+//    for (auto sz:vsz)
+//        GlobalModel.push_back(arma::mat(sz, arma::fill::zeros));
+//}
+//
+//void query_state::initializeGlobalModel(vector <arma::SizeMat> vsz) {
+//    for (auto sz:vsz)
+//        GlobalModel.push_back(arma::mat(sz, arma::fill::zeros));
+//}
+//
+//void query_state::update_estimate(vector <arma::mat> &mdl) {
+//    for (size_t i = 0; i < mdl.size(); i++)
+//        GlobalModel.at(i) -= GlobalModel.at(i) - mdl.at(i);
+//}
+//
+//void query_state::update_estimate(vector<arma::mat *> &mdl) {
+//    for (size_t i = 0; i < mdl.size(); i++)
+//        GlobalModel.at(i) -= GlobalModel.at(i) - *mdl.at(i);
+//}
+//
+//void query_state::update_estimate_v2(vector <arma::mat> &mdl) {
+//    for (size_t i = 0; i < mdl.size(); i++)
+//        GlobalModel.at(i) += mdl.at(i);
+//}
+//
+//void query_state::update_estimate_v2(vector<arma::mat *> &mdl) {
+//    for (size_t i = 0; i < mdl.size(); i++)
+//        GlobalModel.at(i) += *mdl.at(i);
+//}
+//
+//query_state::~query_state() {}
+//
+//ml_safezone_function *query_state::safezone(string cfg, string algo) {
+//
+//    Json::Value root;
+//    std::ifstream cfgfl(cfg);
+//    cfgfl >> root;
+//
+//    string algorithm = root[algo].get("algorithm", "Variance_Monitoring").asString();
+//    cout << algorithm << endl;
+//    if (algorithm == "Batch_Learning") {
+//        auto safe_zone = new Batch_Learning(GlobalModel, root[algo].get("batch_size", 32).asInt64());
+//        return safe_zone;
+//    } else if (algorithm == "Variance_Monitoring") {
+//        auto safe_zone = new Variance_safezone_func(GlobalModel,
+//                                                    root[algo].get("threshold", 1.).asDouble(),
+//                                                    root[algo].get("batch_size", 32).asInt64());
+//        return safe_zone;
+//    } else {
+//        return nullptr;
+//    }
+//}
 
 
 /*********************************************

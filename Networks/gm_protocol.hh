@@ -10,7 +10,7 @@
 #include <ctime>
 #include <mlpack/core.hpp>
 #include "dds/dsarch.hh"
-//#include "dds/dds.hh"
+#include "dds/dds.hh"
 #include "RNN_models/predictor/RNNPredictor.hh"
 
 namespace gm_protocol {
@@ -286,7 +286,7 @@ namespace gm_protocol {
 	    accuracy of the current global model.
     **/
     struct query_state {
-        vector<arma::mat> GlobalModel;  // The global model.
+        initializer_list<Mat<double>> GlobalModel;  // The global model.
 
         float accuracy; // The accuracy of the current global model.
 

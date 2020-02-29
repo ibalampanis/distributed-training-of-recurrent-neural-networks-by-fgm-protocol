@@ -1,11 +1,10 @@
 {
   "simulations": {
     "encoding": "UTF-8",
-    "net_name_1": "gm_net",
+    "net_name": "gm_net",
     "number_of_networks": 4,
-    "learning_problem": "classification",
     "data": "data_section",
-    "stream_distribution": "Stream_Distribution1",
+    "stream_distribution": "Stream_Distribution",
     "log_diff_acc": false,
     "Communication_File": "/home/ibalampanis/CLionProjects/Distributed_Training_of_Recurrent_Neural_Networks_by_FGM_protocol/Networks/sim_files/eeg_comm.csv",
     "Differential_Communication_File": "/home/ibalampanis/CLionProjects/Distributed_Training_of_Recurrent_Neural_Networks_by_FGM_protocol/Networks/sim_files/eeg_comm_diff.csv",
@@ -13,17 +12,15 @@
   },
   "data_section": {
     "encoding": "UTF-8",
-    "batch_size": 16,
-    "warmup_size": 1000,
-    "epochs": 100
+    "warmup_size": 1000
   },
-  "Stream_Distribution1": {
+  "Stream_Distribution": {
     "encoding": "UTF-8",
     "uniform": true,
     "B_prob": 0.75,
     "site_ratio": 0.5
   },
-  "gm_network_net1": {
+  "gm_net": {
     "encoding": "UTF-8",
     "number_of_local_nodes": 4,
     "learning_algorithm": "LSTM",
@@ -35,6 +32,20 @@
     "precision": 0.01,
     "threshold": 0.0008,
     "batch_size": 16
+  },
+  "hyperparameters": {
+    "trainingEpochs": "100",
+    "lstmCells": 10,
+    "rho": 15,
+    "stepSize": 5e-5,
+    "batchSize": 16,
+    "iterationsPerEpoch": 3000,
+    "tolerance": 1e-8,
+    "bShuffle": true,
+    "epsilon": 2e-8,
+    "beta1": 0.9,
+    "beta2": 0.99,
+    "trainTestRatio": 0.3
   },
   "data": {
     "encoding": "UTF-8",

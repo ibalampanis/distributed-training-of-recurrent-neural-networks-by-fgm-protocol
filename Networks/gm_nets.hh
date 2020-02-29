@@ -142,11 +142,11 @@ namespace gm_protocol {
         typedef coord_proxy coord_proxy_t;
         typedef continuous_query continuous_query_t;
 
-        continuous_query *Q;                  // The query management object.
-        safezone szone;                       // The safezone object.
+        continuous_query *Q;                // The query management object.
+        safezone szone;                     // The safezone object.
         RNNPredictor *_learner;             // The learning algorithm.
 
-        vector<arma::mat> drift;             // The drift of the node.
+        vector<arma::mat> drift;            // The drift of the node.
 
         int num_sites;                         // Number of sites.
 

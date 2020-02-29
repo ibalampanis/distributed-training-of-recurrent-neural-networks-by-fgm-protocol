@@ -1,13 +1,35 @@
-#include "RNNPredictor.hh"
 #include <mlpack/core.hpp>
+#include <jsoncpp/json/json.h>
+#include <iostream>
+#include "RNNPredictor.hh"
+
 
 using namespace rnn_predictor;
 using namespace arma;
 
-RNNPredictor::RNNPredictor(int trainingEpochs, int lstmCells, int rho, double stepSize, int batchSize,
-                           int iterationsPerEpoch) : trainingEpochs(trainingEpochs), lstmCells(lstmCells), rho(rho),
-                                                     stepSize(stepSize), batchSize(batchSize),
-                                                     iterationsPerEpoch(iterationsPerEpoch) {}
+RNNPredictor::RNNPredictor(string cfg, string net_name) {
+    try {
+        std::ifstream cfgfile(cfg);
+        cfgfile >> root;
+        string temp = root["hyperparameters"].get("trainingEpochs", 0).asString();
+        trainingEpochs = std::stoi(temp);
+        lstmCells = root["hyperparameters"].get("lstmCells", 0).asInt();
+        rho = root["hyperparameters"].get("rho", 0).asInt();
+        stepSize = root["hyperparameters"].get("stepSize", 0).asDouble();
+        batchSize = root["hyperparameters"].get("batchSize", 0).asInt();
+        iterationsPerEpoch = root["hyperparameters"].get("iterationsPerEpoch", 0).asInt();
+        tolerance = root["hyperparameters"].get("tolerance", 0).asDouble();
+        bShuffle = root["hyperparameters"].get("bShuffle", 0).asBool();
+        epsilon = root["hyperparameters"].get("epsilon", 0).asDouble();
+        beta1 = root["hyperparameters"].get("beta1", 0).asDouble();
+        beta2 = root["hyperparameters"].get("beta2", 0).asDouble();
+        trainTestRatio = root["hyperparameters"].get("trainTestRatio", 0).asDouble();
+        maxRho = rho;
+        numberOfUpdates = 0;
+    } catch (...) {
+        throw;
+    }
+}
 
 void RNNPredictor::createTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y, const size_t rho) {
     for (size_t i = 0; i < dataset.n_cols - rho; i++) {
@@ -36,8 +58,18 @@ double RNNPredictor::calcMSE(arma::cube &pred, arma::cube &Y) {
     return (err_sum / (diff.n_elem + 1e-50));
 }
 
-double RNNPredictor::getModelAccuracy() const {
-    return modelAccuracy;
+double RNNPredictor::getModelAccuracy() const { return modelAccuracy; }
+
+int RNNPredictor::getNumberOfUpdates() const {
+    return numberOfUpdates;
+}
+
+const Mat<double> &RNNPredictor::getModelParameters() const {
+    return modelParameters;
+}
+
+void RNNPredictor::setModelParameters(const Mat<double> &modelParameters) {
+    RNNPredictor::modelParameters = modelParameters;
 }
 
 void RNNPredictor::DataPreparation() {
@@ -105,7 +137,6 @@ void RNNPredictor::TrainModel() {
         // Train neural network. If this is the first iteration, weights are random,
         // using current values as starting point otherwise.
         model.Train(trainX, trainY, optimizer);
-        //model.Parameters().print(std::cout);
 
         optimizer.ResetPolicy() = false;
 
@@ -117,6 +148,7 @@ void RNNPredictor::TrainModel() {
         // Calculating MSE and accuracy on test data points.
         double testMSE = calcMSE(predOut, testY);
         modelAccuracy = 100 - testMSE;
+//        modelParameters = static_cast<mat>(model.Parameters());
 
         epoch_mses.push_back(testMSE);
 
@@ -165,3 +197,12 @@ void RNNPredictor::MakePrediction() {
     cout << "Prediction Accuracy: " << setprecision(2) << fixed << (100 - testMSEPred) << " %" << endl;
 
 }
+
+
+
+
+
+
+
+
+

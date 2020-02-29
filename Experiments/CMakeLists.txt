@@ -8,54 +8,21 @@ option(DEBUG "DEBUG" OFF)
 set(MODEL_SOURCE_DIR .)
 include_directories("..")
 
-set(SOURCES ${MODEL_SOURCE_DIR}/
+######################################
+############# CentrEEG ###############
+######################################
+
+set(SOURCES1 ${MODEL_SOURCE_DIR}/
         ../RNN_models/predictor/RNNPredictor.cc
         ../RNN_models/predictor/RNNPredictor.hh
         CentrEEG.cc)
 
-set(SOURCES ${MODEL_SOURCE_DIR}/
-        ../RNN_models/predictor/RNNPredictor.cc
-        ../RNN_models/predictor/RNNPredictor.hh
-        ../Networks/dds/binc.hh
-        ../Networks/dds/dds.hh
-        ../Networks/dds/dds.cc
-        ../Networks/dds/dsarch.hh
-        ../Networks/dds/dsarch.cc
-        ../Networks/dds/dsarch_tests.hh
-        ../Networks/gm_nets.hh
-        ../Networks/gm_nets.cc
-        ../Networks/gm_protocol.cc
-        ../Networks/gm_protocol.hh
-        ../Networks/feeders.cc
-        ../Networks/feeders.hh
-        GMNetEEG.cc)
-
-if (DEBUG)
-    message("Compilation with debug info (with ggdb3 flag)")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb3")
-else ()
-    message("Compilation without debug info (without ggdb3 flag)")
-endif ()
-
-
-add_executable(CentrEEG ${SOURCES})
-add_executable(GMNetEEG ${SOURCES})
+add_executable(CentrEEG ${SOURCES1})
 target_link_libraries(CentrEEG
-        ${MLPACK_LIBRARIES}
-        ${ARMADILLO_LIBRARIES}
-        ${Boost_LIBRARIES})
-target_link_libraries(GMNetEEG
         jsoncpp
         ${MLPACK_LIBRARIES}
         ${ARMADILLO_LIBRARIES}
         ${Boost_LIBRARIES})
-#Enable OpenMP package
-find_package(OpenMP)
-if (OPENMP_FOUND)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-endif ()
 
 if (NOT EXISTS ${PROJECT_BINARY_DIR}/../data)
     add_custom_command(TARGET CentrEEG POST_BUILD
@@ -76,5 +43,53 @@ if (NOT EXISTS ${PROJECT_BINARY_DIR}/../data/EEG_Eye_State.csv)
             COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_CURRENT_SOURCE_DIR}/../../data/EEG_Eye_State.csv
             ${PROJECT_BINARY_DIR}/../data/EEG_Eye_State.csv)
+endif ()
+
+######################################
+############# GMNetEEG ###############
+######################################
+
+set(SOURCES2 ${MODEL_SOURCE_DIR}/
+        ../RNN_models/predictor/RNNPredictor.cc
+        ../RNN_models/predictor/RNNPredictor.hh
+        ../Networks/dds/binc.hh
+        ../Networks/dds/dds.hh
+        ../Networks/dds/dds.cc
+        ../Networks/dds/dsarch.hh
+        ../Networks/dds/dsarch.cc
+        ../Networks/dds/dsarch_tests.hh
+        ../Networks/gm_nets.hh
+        ../Networks/gm_nets.cc
+        ../Networks/gm_protocol.cc
+        ../Networks/gm_protocol.hh
+        ../Networks/feeders.cc
+        ../Networks/feeders.hh
+        GMNetEEG.cc)
+
+add_executable(GMNetEEG ${SOURCES2})
+target_link_libraries(GMNetEEG
+        jsoncpp
+        ${MLPACK_LIBRARIES}
+        ${ARMADILLO_LIBRARIES}
+        ${Boost_LIBRARIES})
+
+
+######################################
+########## Other Settings ############
+######################################
+
+if (DEBUG)
+    message("Compilation with debug info (with ggdb3 flag)")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb3")
+else ()
+    message("Compilation without debug info (without ggdb3 flag)")
+endif ()
+
+#Enable OpenMP package
+find_package(OpenMP)
+if (OPENMP_FOUND)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif ()
 

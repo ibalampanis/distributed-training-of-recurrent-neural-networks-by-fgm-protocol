@@ -68,7 +68,7 @@ namespace rnn_predictor {
 
         void setModelParameters(const arma::Mat<double> &modelParameters);
 
-        void DataPreparation();
+        void CentralizedDataPreparation();
 
         void TrainModel();
 

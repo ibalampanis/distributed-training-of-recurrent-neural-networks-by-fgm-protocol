@@ -1,5 +1,5 @@
-#ifndef DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_GM_NETS_HH
-#define DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_GM_NETS_HH
+#ifndef DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_GM_NETWORK_HH
+#define DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_GM_NETWORK_HH
 
 #include <boost/range/adaptors.hpp>
 #include <boost/shared_ptr.hpp>
@@ -10,7 +10,6 @@
 namespace gm_protocol {
 
     using namespace dds;
-//    using namespace data_src;
     using namespace rnn_predictor;
     using std::map;
     using std::cout;
@@ -36,15 +35,14 @@ namespace gm_protocol {
 
         proxy_map<node_proxy_t, node_t> proxy;
 
-        //
-        // protocol stuff
-        //
+        /**
+	        Protocol Stuff
+        **/
         RNNPredictor *global_learner;
-        continuous_query *Q;                      // continuous query
-        query_state *query;                      // current query state
-        ml_safezone_function *safe_zone;          // the safe zone wrapper
-
-        size_t k;                                  // number of sites
+        continuous_query *Q;            // continuous query
+        query_state *query;             // current query state
+        SafezoneFunction *safe_zone;    // the safe zone wrapper
+        size_t k;                       // number of sites
 
         // index the nodes
         map<node_t *, size_t> node_index;

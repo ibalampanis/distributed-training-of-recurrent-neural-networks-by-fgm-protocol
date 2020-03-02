@@ -72,7 +72,7 @@ void RNNPredictor::setModelParameters(const Mat<double> &modelParameters) {
     RNNPredictor::modelParameters = modelParameters;
 }
 
-void RNNPredictor::DataPreparation() {
+void RNNPredictor::CentralizedDataPreparation() {
 
     arma::mat dataset;
     // In Armadillo rows represent features, columns represent data points.

@@ -111,14 +111,14 @@ namespace gm_protocol {
     };
 
     /** The base class of a safezone function for machine learning purposes. **/
-    struct ml_safezone_function {
+    struct SafezoneFunction {
 
         vector<arma::mat> &GlobalModel; // The global model.
         vector<float> hyperparameters; // A vector of hyperparameters.
 
-        ml_safezone_function(vector<arma::mat> &mdl);
+        SafezoneFunction(vector<arma::mat> &mdl);
 
-        ~ml_safezone_function();
+        ~SafezoneFunction();
 
         const vector<arma::mat> &getGlobalModel() const { return GlobalModel; }
 
@@ -157,15 +157,15 @@ namespace gm_protocol {
 	    variable basically indicates the batch size. If the proccesed points reach
 	    the batch size, then the function returns an inadmissible region.
     **/
-    struct Batch_Learning : ml_safezone_function {
+    struct BatchLearningSZFunction : SafezoneFunction {
 
         size_t threshold; // The maximum number of points fitted by each node before requesting synch from the Hub.
 
-        Batch_Learning(vector<arma::mat> &GlMd);
+        BatchLearningSZFunction(vector<arma::mat> &GlMd);
 
-        Batch_Learning(vector<arma::mat> &GlMd, size_t thr);
+        BatchLearningSZFunction(vector<arma::mat> &GlMd, size_t thr);
 
-        ~Batch_Learning();
+        ~BatchLearningSZFunction();
 
         size_t checkIfAdmissible(const size_t counter) const;
 
@@ -178,20 +178,20 @@ namespace gm_protocol {
 	    by Dynamic Model Synchronization"
 	    by Michael Kamp, Mario Boley, Assaf Schuster and Izchak Sharfman.
     **/
-    struct Variance_safezone_func : ml_safezone_function {
+    struct VarianceSZFunction : SafezoneFunction {
 
         float threshold; // The threshold of the variance between the models of the network.
         size_t batch_size; // The number of points seen by the node since the last synchronization.
 
-        Variance_safezone_func(vector<arma::mat> &GlMd);
+        VarianceSZFunction(vector<arma::mat> &GlMd);
 
-        Variance_safezone_func(vector<arma::mat> &GlMd, size_t batch_sz);
+        VarianceSZFunction(vector<arma::mat> &GlMd, size_t batch_sz);
 
-        Variance_safezone_func(vector<arma::mat> &GlMd, float thr);
+        VarianceSZFunction(vector<arma::mat> &GlMd, float thr);
 
-        Variance_safezone_func(vector<arma::mat> &GlMd, float thr, size_t batch_sz);
+        VarianceSZFunction(vector<arma::mat> &GlMd, float thr, size_t batch_sz);
 
-        ~Variance_safezone_func();
+        ~VarianceSZFunction();
 
         float Zeta(const vector<arma::mat> &pars) const;
 
@@ -224,7 +224,7 @@ namespace gm_protocol {
 	    provides a byte_size() method, making it suitable for integration with the middleware.
 	**/
     class safezone {
-        ml_safezone_function *szone;        // the safezone function, if any
+        SafezoneFunction *szone;        // the safezone function, if any
 
     public:
         /// null state
@@ -233,7 +233,7 @@ namespace gm_protocol {
         ~safezone();
 
         /// valid safezone
-        safezone(ml_safezone_function *sz);
+        safezone(SafezoneFunction *sz);
         //~safezone();
 
         /// Movable
@@ -250,7 +250,7 @@ namespace gm_protocol {
             std::swap(szone, other.szone);
         }
 
-        ml_safezone_function *getSZone() { return (szone != nullptr) ? szone : nullptr; }
+        SafezoneFunction *getSZone() { return (szone != nullptr) ? szone : nullptr; }
 
         inline void operator()(vector<arma::mat> &drift, vector<arma::mat *> &vars, float mul) {
             szone->updateDrift(drift, vars, mul);
@@ -318,7 +318,7 @@ namespace gm_protocol {
             It is the caller's responsibility to delete the returned object,
             and do so before this object is destroyed.
         **/
-        ml_safezone_function *safezone(string cfg, string algo);
+        SafezoneFunction *safezone(string cfg, string algo);
 
         virtual size_t byte_size() const {
             size_t num_of_params = 0;

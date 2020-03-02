@@ -8,9 +8,9 @@ option(DEBUG "DEBUG" OFF)
 set(MODEL_SOURCE_DIR .)
 include_directories("..")
 
-######################################
-############# CentrEEG ###############
-######################################
+############################################################################
+########################### CentrEEG #######################################
+############################################################################
 
 set(SOURCES1 ${MODEL_SOURCE_DIR}/
         ../RNN_models/predictor/RNNPredictor.cc
@@ -45,9 +45,9 @@ if (NOT EXISTS ${PROJECT_BINARY_DIR}/../data/EEG_Eye_State.csv)
             ${PROJECT_BINARY_DIR}/../data/EEG_Eye_State.csv)
 endif ()
 
-######################################
-############# GMNetEEG ###############
-######################################
+############################################################################
+############################## GMNetEEG ####################################
+############################################################################
 
 set(SOURCES2 ${MODEL_SOURCE_DIR}/
         ../RNN_models/predictor/RNNPredictor.cc
@@ -58,8 +58,8 @@ set(SOURCES2 ${MODEL_SOURCE_DIR}/
         ../Networks/dds/dsarch.hh
         ../Networks/dds/dsarch.cc
         ../Networks/dds/dsarch_tests.hh
-        ../Networks/gm_nets.hh
-        ../Networks/gm_nets.cc
+        ../Networks/gm_network.hh
+        ../Networks/gm_network.cc
         ../Networks/gm_protocol.cc
         ../Networks/gm_protocol.hh
         ../Networks/feeders.cc
@@ -74,9 +74,9 @@ target_link_libraries(GMNetEEG
         ${Boost_LIBRARIES})
 
 
-######################################
-########## Other Settings ############
-######################################
+############################################################################
+########################## Other Settings ##################################
+############################################################################
 
 if (DEBUG)
     message("Compilation with debug info (with ggdb3 flag)")

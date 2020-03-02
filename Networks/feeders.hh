@@ -2,13 +2,14 @@
 #define DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_FEEDERS_HH
 
 
-#include <mlpack/core.hpp>
 #include <fstream>
 #include <iostream>
 #include <jsoncpp/json/json.h>
-#include "gm_nets.hh"
-#include "dds/dds.hh"
+#include <mlpack/core.hpp>
 #include "gm_protocol.hh"
+#include "gm_network.hh"
+#include "dds/dds.hh"
+
 
 namespace feeders {
 

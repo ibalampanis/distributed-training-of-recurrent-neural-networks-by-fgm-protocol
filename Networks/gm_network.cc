@@ -1,12 +1,28 @@
 #include <random>
-#include "gm_nets.hh"
+#include "gm_network.hh"
 
 using namespace gm_protocol;
 
 
 /*********************************************
-	coordinator
+	Coordinator Side
 *********************************************/
+
+coordinator::coordinator(network_t *nw, continuous_query *_Q)
+        : process(nw), proxy(this),
+          Q(_Q),
+          k(0),
+          num_violations(0), num_rounds(0), num_subrounds(0),
+          sz_sent(0), total_updates(0) {
+    initializeLearner();
+    query = Q->create_query_state();
+    safe_zone = query->safezone(cfg().cfgfile, cfg().distributed_learning_algorithm);
+}
+
+coordinator::~coordinator() {
+    delete safe_zone;
+    delete query;
+}
 
 void coordinator::start_round() {
     // Send new safezone.
@@ -32,7 +48,7 @@ oneway coordinator::local_violation(sender<node_t> ctx) {
     }
     cnt = 0;
 
-    if (ml_safezone_function *entity = dynamic_cast<Batch_Learning *>(safe_zone)) {
+    if (ml_safezone_function * entity = dynamic_cast<Batch_Learning *>(safe_zone)) {
         num_violations = 0;
         finish_round();
     } else {
@@ -273,25 +289,9 @@ void coordinator::initializeLearner() {
     global_learner = new RNNPredictor(200, 10, 15, 5e-5, 16, 3000);
 }
 
-coordinator::coordinator(network_t *nw, continuous_query *_Q)
-        : process(nw), proxy(this),
-          Q(_Q),
-          k(0),
-          num_violations(0), num_rounds(0), num_subrounds(0),
-          sz_sent(0), total_updates(0) {
-    initializeLearner();
-    query = Q->create_query_state();
-    safe_zone = query->safezone(cfg().cfgfile, cfg().distributed_learning_algorithm);
-}
-
-coordinator::~coordinator() {
-    delete safe_zone;
-    delete query;
-}
-
 
 /*********************************************
-	node
+	Node Side
 *********************************************/
 
 oneway learning_node::reset(const safezone &newsz) {

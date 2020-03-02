@@ -10,7 +10,7 @@ int main(int argc, char **argv) {
 
     auto *predictor = new RNNPredictor(cfg, "gm_net");
 
-    predictor->DataPreparation();
+    predictor->CentralizedDataPreparation();
     predictor->TrainModel();
     predictor->MakePrediction();
 

@@ -49,7 +49,7 @@
   },
   "data": {
     "encoding": "UTF-8",
-    "file_name": "/home/ibalampanis/CLionProjects/Distributed_Training_of_Recurrent_Neural_Networks_by_FGM_protocol/RNN_models/data/EEG_Eye_State.csv",
+    "path": "/home/ibalampanis/CLionProjects/Distributed_Training_of_Recurrent_Neural_Networks_by_FGM_protocol/Datasets/EEG_Eye_State.csv",
     "train_dset_name": "eegTrainSet",
     "test_dset_name": "eegTestSet"
   }

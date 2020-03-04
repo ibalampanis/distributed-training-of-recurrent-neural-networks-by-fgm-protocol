@@ -31,7 +31,7 @@ void coordinator::start_round() {
             proxy[n].set_HStatic_variables(p_model_state(global_learner->getHModel(), 0));
         }
         sz_sent++;
-        proxy[n].reset(safezone(safe_zone));
+        proxy[n].reset(Safezone(safe_zone));
     }
     num_rounds++;
 }
@@ -48,7 +48,7 @@ oneway coordinator::local_violation(sender<node_t> ctx) {
     }
     cnt = 0;
 
-    if (ml_safezone_function * entity = dynamic_cast<Batch_Learning *>(safe_zone)) {
+    if (SafezoneFunction *entity = dynamic_cast<Batch_Learning *>(safe_zone)) {
         num_violations = 0;
         finish_round();
     } else {
@@ -104,7 +104,7 @@ void coordinator::Kamp_Rebalance(node_t *lvnode) {
         B.insert(n);
         for (size_t i = 0; i < Mean.size(); i++)
             Mean.at(i) /= cnt;
-        if (safe_zone->checkIfAdmissible_v2(Mean) > 0. || B.size() == k)
+        if (safe_zone->CheckIfAdmissible_v2(Mean) > 0. || B.size() == k)
             break;
         for (size_t i = 0; i < Mean.size(); i++)
             Mean.at(i) *= cnt;
@@ -113,7 +113,7 @@ void coordinator::Kamp_Rebalance(node_t *lvnode) {
     if (B.size() < k) {
         // Rebalancing
         for (size_t i = 0; i < Mean.size(); i++)
-            Mean.at(i) += query->GlobalModel.at(i);
+            Mean.at(i) += query->globalModel.at(i);
         for (auto n : B) {
             proxy[n].set_drift(model_state(Mean, 0));
         }
@@ -122,7 +122,7 @@ void coordinator::Kamp_Rebalance(node_t *lvnode) {
         // New round
         num_violations = 0;
         query->update_estimate_v2(Mean);
-        global_learner->update_model(query->GlobalModel);
+        global_learner->UpdateModel(query->globalModel);
         start_round();
     }
 
@@ -140,7 +140,7 @@ void coordinator::finish_round() {
 
     // New round
     query->update_estimate_v2(Mean);
-    global_learner->update_model(query->GlobalModel);
+    global_learner->UpdateModel(query->globalModel);
 
     start_round();
 
@@ -168,8 +168,8 @@ matrix_message coordinator::hybrid_drift(sender<node_t> ctx, int_num rows, int_n
         }
     }
     Mean.at(1).resize(Mean.at(1).n_rows, Mean.at(1).n_cols + cols.number);
-    query->GlobalModel.at(1) = arma::mat(arma::size(*global_learner->getModel().at(1)), arma::fill::zeros);
-    query->GlobalModel.at(1) += *global_learner->getModel().at(1);
+    query->globalModel.at(1) = arma::mat(arma::size(*global_learner->getModel().at(1)), arma::fill::zeros);
+    query->globalModel.at(1) += *global_learner->getModel().at(1);
 
     return matrix_message(new_hidden);
 }
@@ -199,8 +199,8 @@ oneway coordinator::real_drift(sender<node_t> ctx, int_num cols) {
         }
     }
     Mean.at(1).resize(Mean.at(1).n_rows, Mean.at(1).n_cols + cols.number);
-    query->GlobalModel.at(1) = arma::mat(arma::size(*global_learner->getModel().at(1)), arma::fill::zeros);
-    query->GlobalModel.at(1) += *global_learner->getModel().at(1);
+    query->globalModel.at(1) = arma::mat(arma::size(*global_learner->getModel().at(1)), arma::fill::zeros);
+    query->globalModel.at(1) += *global_learner->getModel().at(1);
 }
 
 void coordinator::Progress() {
@@ -241,17 +241,13 @@ void coordinator::finish_rounds() {
 
     // See the total number of points received by all the nodes. For debugging.
     for (auto nd:node_ptr) {
-        total_updates += nd->_learner->getNumOfUpdates();
+        total_updates += nd->_learner->GetNumberOfUpdates();
     }
 
     // Print the results.
-    if (Q->config.learning_algorithm == "PA"
-        || Q->config.learning_algorithm == "MLP"
-        || Q->config.learning_algorithm == "ELM") {
-        cout << "accuracy : " << std::setprecision(6) << query->accuracy << "%" << endl;
-    } else {
-        cout << "accuracy : " << std::setprecision(6) << query->accuracy << endl;
-    }
+
+    cout << "accuracy : " << std::setprecision(6) << query->accuracy << "%" << endl;
+
     cout << "Number of rounds : " << num_rounds << endl;
     cout << "Number of subrounds : " << num_subrounds << endl;
     cout << "Total updates : " << total_updates << endl;
@@ -261,7 +257,7 @@ void coordinator::finish_rounds() {
 void coordinator::warmup(arma::mat &batch, arma::mat &labels) {
     global_learner->fit(batch, labels);
     total_updates += batch.n_cols;
-    if (query->GlobalModel.size() == 0) {
+    if (query->globalModel.size() == 0) {
         vector<arma::SizeMat> model_sizes = global_learner->modelDimensions();
         query->initializeGlobalModel(model_sizes);
         for (arma::SizeMat sz:model_sizes)
@@ -286,7 +282,7 @@ void coordinator::setup_connections() {
 
 void coordinator::initializeLearner() {
 
-    global_learner = new rnn_learner(200, 10, 15, 5e-5, 16, 3000);
+    global_learner = new RNNLearner(200, 10, 15, 5e-5, 16, 3000);
 }
 
 
@@ -294,52 +290,51 @@ void coordinator::initializeLearner() {
 	Node Side
 *********************************************/
 
-oneway learning_node::reset(const safezone &newsz) {
+oneway learning_node::reset(const Safezone &newsz) {
     szone = newsz;       // Reset the safezone object
     datapoints_seen = 0; // Reset the drift vector
-    _learner->update_model(szone.getSZone()->getGlobalModel()); // Updates the parameters of the local learner
+    _learner->UpdateModel(szone.GetSZone()->getGlobalModel()); // Updates the parameters of the local learner
 }
 
 model_state learning_node::get_drift() {
     // Getting the drift vector is done as getting the local statistic
     szone(drift, _learner->getModel(), 1.);
-    return model_state(drift, _learner->getNumOfUpdates());
+    return model_state(drift, _learner->GetNumberOfUpdates());
 }
 
 void learning_node::set_drift(model_state mdl) {
     // Update the local learner with the model sent by the coordinator
-    _learner->update_model(mdl._model);
+    _learner->UpdateModel(mdl._model);
 }
 
 void learning_node::update_stream(arma::mat &batch, arma::mat &labels) {
 
-    if (cfg().learning_algorithm == "ELM") {
 
-        size_t alpha_rows = batch.n_rows - _learner->getHModel().at(0)->n_rows;
-        size_t beta_cols = labels.n_rows - _learner->getModel().at(1)->n_cols;
+    size_t alpha_rows = batch.n_rows - _learner->getHModel().at(0)->n_rows;
+    size_t beta_cols = labels.n_rows - _learner->getModel().at(1)->n_cols;
 
-        if (alpha_rows > 0 && beta_cols > 0) {
-            arma::mat newA = arma::zeros<arma::mat>(_learner->getHModel().at(0)->n_rows + alpha_rows,
-                                                    _learner->getHModel().at(0)->n_cols);
+    if (alpha_rows > 0 && beta_cols > 0) {
+        arma::mat newA = arma::zeros<arma::mat>(_learner->getHModel().at(0)->n_rows + alpha_rows,
+                                                _learner->getHModel().at(0)->n_cols);
 
-            newA.rows(0, _learner->getHModel().at(0)->n_rows - 1) += *_learner->getHModel().at(0);
-            newA.rows(_learner->getHModel().at(0)->n_rows, newA.n_rows - 1) +=
-                    coord.hybrid_drift(this, int_num(alpha_rows), int_num(beta_cols)).sub_params;
+        newA.rows(0, _learner->getHModel().at(0)->n_rows - 1) += *_learner->getHModel().at(0);
+        newA.rows(_learner->getHModel().at(0)->n_rows, newA.n_rows - 1) +=
+                coord.hybrid_drift(this, int_num(alpha_rows), int_num(beta_cols)).sub_params;
 
-            *_learner->getHModel().at(0) = newA;
-        } else if (alpha_rows > 0) {
-            arma::mat newA = arma::zeros<arma::mat>(_learner->getHModel().at(0)->n_rows + alpha_rows,
-                                                    _learner->getHModel().at(0)->n_cols);
+        *_learner->getHModel().at(0) = newA;
+    } else if (alpha_rows > 0) {
+        arma::mat newA = arma::zeros<arma::mat>(_learner->getHModel().at(0)->n_rows + alpha_rows,
+                                                _learner->getHModel().at(0)->n_cols);
 
-            newA.rows(0, _learner->getHModel().at(0)->n_rows - 1) += *_learner->getHModel().at(0);
-            newA.rows(_learner->getHModel().at(0)->n_rows, newA.n_rows - 1) +=
-                    coord.virtual_drift(this, int_num(alpha_rows)).sub_params;
+        newA.rows(0, _learner->getHModel().at(0)->n_rows - 1) += *_learner->getHModel().at(0);
+        newA.rows(_learner->getHModel().at(0)->n_rows, newA.n_rows - 1) +=
+                coord.virtual_drift(this, int_num(alpha_rows)).sub_params;
 
-            *_learner->getHModel().at(0) = newA;
-        } else if (beta_cols > 0) {
-            coord.real_drift(this, int_num(beta_cols));
-        }
+        *_learner->getHModel().at(0) = newA;
+    } else if (beta_cols > 0) {
+        coord.real_drift(this, int_num(beta_cols));
     }
+
 
     _learner->fit(batch, labels);
     datapoints_seen += batch.n_cols;
@@ -375,7 +370,7 @@ oneway learning_node::augmentBetaMatrix(int_num cols) {
 
 void learning_node::initializeLearner() {
 
-    _learner = new ELM_Classifier(cfg().cfgfile, cfg().network_name);
+    _learner = new RNNLearner(cfg().cfgfile);
 
     _learner->initializeModel(Q->testSet->n_rows);
 

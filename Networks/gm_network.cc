@@ -286,7 +286,7 @@ void coordinator::setup_connections() {
 
 void coordinator::initializeLearner() {
 
-    global_learner = new RNNPredictor(200, 10, 15, 5e-5, 16, 3000);
+    global_learner = new rnn_learner(200, 10, 15, 5e-5, 16, 3000);
 }
 
 

@@ -13,8 +13,8 @@ include_directories("..")
 ############################################################################
 
 set(SOURCES1 ${MODEL_SOURCE_DIR}/
-        ../RNN_models/predictor/RNNPredictor.cc
-        ../RNN_models/predictor/RNNPredictor.hh
+        ../rnn_models/predictor/rnn_learner.cc
+        ../rnn_models/predictor/rnn_learner.hh
         CentrEEG.cc)
 
 add_executable(CentrEEG ${SOURCES1})
@@ -50,8 +50,8 @@ endif ()
 ############################################################################
 
 set(SOURCES2 ${MODEL_SOURCE_DIR}/
-        ../RNN_models/predictor/RNNPredictor.cc
-        ../RNN_models/predictor/RNNPredictor.hh
+        ../rnn_models/predictor/rnn_learner.cc
+        ../rnn_models/predictor/rnn_learner.hh
         ../Networks/dds/binc.hh
         ../Networks/dds/dds.hh
         ../Networks/dds/dds.cc

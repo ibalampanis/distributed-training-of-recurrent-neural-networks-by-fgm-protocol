@@ -1,6 +1,6 @@
 #include <jsoncpp/json/json.h>
 #include "gm_protocol.hh"
-#include "RNN_models/predictor/RNNPredictor.hh"
+#include "rnn_models/predictor/rnn_learner.hh"
 #include "dds/dsarch.hh"
 
 
@@ -40,7 +40,7 @@ size_t matrix_message::byte_size() const {
 
 SafezoneFunction::SafezoneFunction(vector<arma::mat> &mdl) : GlobalModel(mdl) {}
 
-void SafezoneFunction::updateDrift(vector<arma::mat> &drift, vector<arma::mat *> &vars, float mul) const {
+void SafezoneFunction::UpdateDrift(vector<arma::mat> &drift, vector<arma::mat *> &vars, float mul) const {
     drift.clear();
     for (size_t i = 0; i < GlobalModel.size(); i++) {
         arma::mat dr = arma::mat(arma::size(*vars.at(i)), arma::fill::zeros);
@@ -65,7 +65,7 @@ BatchLearningSZFunction::BatchLearningSZFunction(vector<arma::mat> &GlMd, size_t
     hyperparameters.push_back(thr);
 }
 
-size_t BatchLearningSZFunction::checkIfAdmissible(const size_t counter) const {
+size_t BatchLearningSZFunction::CheckIfAdmissible(const size_t counter) const {
     size_t sz = threshold - counter;
     return sz;
 }
@@ -128,9 +128,9 @@ float VarianceSZFunction::Zeta(const vector<arma::mat *> &mdl) const {
     return std::sqrt(threshold) - std::sqrt(res);
 }
 
-size_t VarianceSZFunction::checkIfAdmissible(const size_t counter) const { return batch_size - counter; }
+size_t VarianceSZFunction::CheckIfAdmissible(const size_t counter) const { return batch_size - counter; }
 
-float VarianceSZFunction::checkIfAdmissible(const vector<arma::mat> &mdl) const {
+float VarianceSZFunction::CheckIfAdmissible(const vector<arma::mat> &mdl) const {
     float var = 0.;
     for (size_t i = 0; i < mdl.size(); i++) {
         arma::mat sub = mdl.at(i) - GlobalModel.at(i);
@@ -139,7 +139,7 @@ float VarianceSZFunction::checkIfAdmissible(const vector<arma::mat> &mdl) const 
     return threshold - var;
 }
 
-float VarianceSZFunction::checkIfAdmissible(const vector<arma::mat *> &mdl) const {
+float VarianceSZFunction::CheckIfAdmissible(const vector<arma::mat *> &mdl) const {
     float var = 0.;
     for (size_t i = 0; i < mdl.size(); i++) {
         arma::mat sub = *mdl.at(i) - GlobalModel.at(i);
@@ -148,7 +148,7 @@ float VarianceSZFunction::checkIfAdmissible(const vector<arma::mat *> &mdl) cons
     return threshold - var;
 }
 
-float VarianceSZFunction::checkIfAdmissible(const vector<arma::mat *> &par1, const vector<arma::mat> &par2) const {
+float VarianceSZFunction::CheckIfAdmissible(const vector<arma::mat *> &par1, const vector<arma::mat> &par2) const {
     float res = 0.;
     for (size_t i = 0; i < par1.size(); i++) {
         arma::mat subtr = *par1.at(i) - par2.at(i);
@@ -157,7 +157,7 @@ float VarianceSZFunction::checkIfAdmissible(const vector<arma::mat *> &par1, con
     return std::sqrt(threshold) - std::sqrt(res);
 }
 
-float VarianceSZFunction::checkIfAdmissible_reb(const vector<arma::mat *> &par1, const vector<arma::mat> &par2,
+float VarianceSZFunction::CheckIfAdmissible_reb(const vector<arma::mat *> &par1, const vector<arma::mat> &par2,
                                                 float coef) const {
     float res = 0.;
     for (size_t i = 0; i < par1.size(); i++) {
@@ -170,7 +170,7 @@ float VarianceSZFunction::checkIfAdmissible_reb(const vector<arma::mat *> &par1,
     return coef * (std::sqrt(threshold) - std::sqrt(res));
 }
 
-float VarianceSZFunction::checkIfAdmissible_v2(const vector<arma::mat> &drift) const {
+float VarianceSZFunction::CheckIfAdmissible_v2(const vector<arma::mat> &drift) const {
     float var = 0.;
     for (size_t i = 0; i < drift.size(); i++) {
         var += arma::dot(drift.at(i), drift.at(i));
@@ -178,7 +178,7 @@ float VarianceSZFunction::checkIfAdmissible_v2(const vector<arma::mat> &drift) c
     return threshold - var;
 }
 
-float VarianceSZFunction::checkIfAdmissible_v2(const vector<arma::mat *> &drift) const {
+float VarianceSZFunction::CheckIfAdmissible_v2(const vector<arma::mat *> &drift) const {
     float var = 0.;
     for (size_t i = 0; i < drift.size(); i++) {
         var += arma::dot(*drift.at(i), *drift.at(i));
@@ -201,25 +201,25 @@ VarianceSZFunction::~VarianceSZFunction() {}
 	safezone
 *********************************************/
 
-safezone::safezone() : szone(nullptr) {}
+Safezone::Safezone() : szone(nullptr) {}
 
-safezone::~safezone() {}
+Safezone::~Safezone() {}
 
 // valid safezone
-safezone::safezone(SafezoneFunction *sz) : szone(sz) {}
+Safezone::Safezone(SafezoneFunction *sz) : szone(sz) {}
 
 // Movable
-safezone::safezone(safezone &&other) { swap(other); }
+Safezone::Safezone(Safezone &&other) { Swap(other); }
 
-safezone &safezone::operator=(safezone &&other) {
-    swap(other);
+Safezone &Safezone::operator=(Safezone &&other) {
+    Swap(other);
     return *this;
 }
 
 // Copyable
-safezone::safezone(const safezone &other) { szone = other.szone; }
+Safezone::Safezone(const Safezone &other) { szone = other.szone; }
 
-safezone &safezone::operator=(const safezone &other) {
+Safezone &Safezone::operator=(const Safezone &other) {
     if (szone != other.szone) {
         szone = other.szone;
     }
@@ -258,7 +258,7 @@ void continuous_query::setTestSet(arma::mat *tSet, arma::mat *tRes) {
     testResponses = tRes;
 }
 
-double continuous_query::queryAccuracy(RNNPredictor *rnn) { return rnn->getModelAccuracy(); }
+double continuous_query::queryAccuracy(RNNLearner *rnn) { return rnn->GetModelAccuracy(); }
 
 /*********************************************
 	tcp_channel

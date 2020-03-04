@@ -11,13 +11,13 @@
 #include <mlpack/core.hpp>
 #include "dds/dsarch.hh"
 #include "dds/dds.hh"
-#include "RNN_models/predictor/RNNPredictor.hh"
+#include "rnn_models/predictor/rnn_learner.hh"
 
 namespace gm_protocol {
 
     using namespace dds;
     using namespace arma;
-    using namespace rnn_predictor;
+    using namespace rnn_learner;
     using std::map;
     using std::string;
     using std::vector;
@@ -122,32 +122,32 @@ namespace gm_protocol {
 
         const vector<arma::mat> &getGlobalModel() const { return GlobalModel; }
 
-        void updateDrift(vector<arma::mat> &drift, vector<arma::mat *> &vars, float mul) const;
+        void UpdateDrift(vector<arma::mat> &drift, vector<arma::mat *> &vars, float mul) const;
 
         float Zeta(const vector<arma::mat> &pars) const { return 0.; }
 
         float Zeta(const vector<arma::mat *> &pars) const { return 0.; }
 
-        size_t checkIfAdmissible(const size_t counter) const { return 0.; }
+        size_t CheckIfAdmissible(const size_t counter) const { return 0.; }
 
-        float checkIfAdmissible(const vector<arma::mat> &mdl) const { return 0.; }
+        float CheckIfAdmissible(const vector<arma::mat> &mdl) const { return 0.; }
 
-        float checkIfAdmissible(const vector<arma::mat *> &mdl) const { return 0.; }
+        float CheckIfAdmissible(const vector<arma::mat *> &mdl) const { return 0.; }
 
-        float checkIfAdmissible(const vector<arma::mat *> &par1, const vector<arma::mat> &par2) const { return 0.; }
+        float CheckIfAdmissible(const vector<arma::mat *> &par1, const vector<arma::mat> &par2) const { return 0.; }
 
-        float checkIfAdmissible_reb(const vector<arma::mat *> &par1, const vector<arma::mat> &par2,
+        float CheckIfAdmissible_reb(const vector<arma::mat *> &par1, const vector<arma::mat> &par2,
                                     float coef) const { return 0.; }
 
-        float checkIfAdmissible_v2(const vector<arma::mat> &drift) const { return 0.; }
+        float CheckIfAdmissible_v2(const vector<arma::mat> &drift) const { return 0.; }
 
-        float checkIfAdmissible_v2(const vector<arma::mat *> &drift) const { return 0.; }
+        float CheckIfAdmissible_v2(const vector<arma::mat *> &drift) const { return 0.; }
 
         size_t byte_size() const { return 0; }
 
         vector<float> hyper() const { return hyperparameters; }
 
-        void pr() { cout << endl << "Simple safezone function." << endl; }
+        void Print() { cout << endl << "Simple safezone function." << endl; }
     };
 
 
@@ -167,7 +167,7 @@ namespace gm_protocol {
 
         ~BatchLearningSZFunction();
 
-        size_t checkIfAdmissible(const size_t counter) const;
+        size_t CheckIfAdmissible(const size_t counter) const;
 
         size_t byte_size() const;
     };
@@ -197,20 +197,20 @@ namespace gm_protocol {
 
         float Zeta(const vector<arma::mat *> &pars) const;
 
-        size_t checkIfAdmissible(const size_t counter) const;
+        size_t CheckIfAdmissible(const size_t counter) const;
 
-        float checkIfAdmissible(const vector<arma::mat> &mdl) const;
+        float CheckIfAdmissible(const vector<arma::mat> &mdl) const;
 
-        float checkIfAdmissible(const vector<arma::mat *> &mdl) const;
+        float CheckIfAdmissible(const vector<arma::mat *> &mdl) const;
 
-        float checkIfAdmissible(const vector<arma::mat *> &par1, const vector<arma::mat> &par2) const;
+        float CheckIfAdmissible(const vector<arma::mat *> &par1, const vector<arma::mat> &par2) const;
 
-        float checkIfAdmissible_reb(const vector<arma::mat *> &par1, const vector<arma::mat> &par2,
+        float CheckIfAdmissible_reb(const vector<arma::mat *> &par1, const vector<arma::mat> &par2,
                                     float coef) const;
 
-        float checkIfAdmissible_v2(const vector<arma::mat> &drift) const;
+        float CheckIfAdmissible_v2(const vector<arma::mat> &drift) const;
 
-        float checkIfAdmissible_v2(const vector<arma::mat *> &drift) const;
+        float CheckIfAdmissible_v2(const vector<arma::mat *> &drift) const;
 
         size_t byte_size() const;
     };
@@ -223,53 +223,53 @@ namespace gm_protocol {
 	    but it conforms to the standard functional API. It is copyable and in addition, it
 	    provides a byte_size() method, making it suitable for integration with the middleware.
 	**/
-    class safezone {
+    class Safezone {
         SafezoneFunction *szone;        // the safezone function, if any
 
     public:
         /// null state
-        safezone();
+        Safezone();
 
-        ~safezone();
+        ~Safezone();
 
         /// valid safezone
-        safezone(SafezoneFunction *sz);
+        Safezone(SafezoneFunction *sz);
         //~safezone();
 
         /// Movable
-        safezone(safezone &&);
+        Safezone(Safezone &&);
 
-        safezone &operator=(safezone &&);
+        Safezone &operator=(Safezone &&);
 
         /// Copyable
-        safezone(const safezone &);
+        Safezone(const Safezone &);
 
-        safezone &operator=(const safezone &);
+        Safezone &operator=(const Safezone &);
 
-        void swap(safezone &other) {
+        void Swap(Safezone &other) {
             std::swap(szone, other.szone);
         }
 
-        SafezoneFunction *getSZone() { return (szone != nullptr) ? szone : nullptr; }
+        SafezoneFunction *GetSZone() { return (szone != nullptr) ? szone : nullptr; }
 
         inline void operator()(vector<arma::mat> &drift, vector<arma::mat *> &vars, float mul) {
-            szone->updateDrift(drift, vars, mul);
+            szone->UpdateDrift(drift, vars, mul);
         }
 
         inline size_t operator()(const size_t counter) {
-            return (szone != nullptr) ? szone->checkIfAdmissible(counter) : NAN;
+            return (szone != nullptr) ? szone->CheckIfAdmissible(counter) : NAN;
         }
 
         inline float operator()(const vector<arma::mat> &mdl) {
-            return (szone != nullptr) ? szone->checkIfAdmissible(mdl) : NAN;
+            return (szone != nullptr) ? szone->CheckIfAdmissible(mdl) : NAN;
         }
 
         inline float operator()(const vector<arma::mat *> &mdl) {
-            return (szone != nullptr) ? szone->checkIfAdmissible(mdl) : NAN;
+            return (szone != nullptr) ? szone->CheckIfAdmissible(mdl) : NAN;
         }
 
         inline float operator()(const vector<arma::mat *> &par1, const vector<arma::mat> &par2) {
-            return (szone != nullptr) ? szone->checkIfAdmissible(par1, par2) : NAN;
+            return (szone != nullptr) ? szone->CheckIfAdmissible(par1, par2) : NAN;
         }
 
         inline size_t byte_size() const {
@@ -286,7 +286,7 @@ namespace gm_protocol {
 	    accuracy of the current global model.
     **/
     struct query_state {
-        initializer_list<Mat<double>> GlobalModel;  // The global model.
+        initializer_list<Mat<double>> globalModel;  // The global model.
 
         float accuracy; // The accuracy of the current global model.
 
@@ -322,7 +322,7 @@ namespace gm_protocol {
 
         virtual size_t byte_size() const {
             size_t num_of_params = 0;
-            for (arma::mat param:GlobalModel)
+            for (arma::mat param:globalModel)
                 num_of_params += param.n_elem;
             return (1 + num_of_params) * sizeof(float);
         }
@@ -364,7 +364,7 @@ namespace gm_protocol {
 
         static inline query_state *create_query_state(vector<arma::SizeMat> sz) { return new query_state(sz); }
 
-        virtual inline double queryAccuracy(RNNPredictor *lnr);
+        virtual inline double queryAccuracy(RNNLearner *lnr);
     };
 
     /** The star network topology using the Geometric Method for Distributed Machine Learning. **/

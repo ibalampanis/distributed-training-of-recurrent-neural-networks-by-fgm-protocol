@@ -1,13 +1,13 @@
 #include <mlpack/core.hpp>
 #include <jsoncpp/json/json.h>
 #include <iostream>
-#include "RNNPredictor.hh"
+#include "rnn_learner.hh"
 
 
-using namespace rnn_predictor;
+using namespace rnn_learner;
 using namespace arma;
 
-RNNPredictor::RNNPredictor(string cfg, string net_name) {
+RNNLearner::RNNLearner(string cfg) {
     try {
         std::ifstream cfgfile(cfg);
         cfgfile >> root;
@@ -31,7 +31,7 @@ RNNPredictor::RNNPredictor(string cfg, string net_name) {
     }
 }
 
-void RNNPredictor::createTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y, const size_t rho) {
+void RNNLearner::CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y, const size_t rho) {
     for (size_t i = 0; i < dataset.n_cols - rho; i++) {
         X.subcube(arma::span(), arma::span(i), arma::span()) = dataset.submat(arma::span(), arma::span(i, i + rho - 1));
         y.subcube(arma::span(), arma::span(i), arma::span()) = dataset.submat(
@@ -39,7 +39,7 @@ void RNNPredictor::createTimeSeriesData(arma::mat dataset, arma::cube &X, arma::
     }
 }
 
-double RNNPredictor::takeVectorAVG(const std::vector<double> &vec) {
+double RNNLearner::TakeVectorAVG(const std::vector<double> &vec) {
     double sum = 0;
     for (double i : vec)
         sum += i;
@@ -48,7 +48,7 @@ double RNNPredictor::takeVectorAVG(const std::vector<double> &vec) {
     return avg;
 }
 
-double RNNPredictor::calcMSE(arma::cube &pred, arma::cube &Y) {
+double RNNLearner::CalcMSE(arma::cube &pred, arma::cube &Y) {
     double err_sum = 0.0;
     arma::cube diff = pred - Y;
     for (size_t i = 0; i < diff.n_slices; i++) {
@@ -58,21 +58,21 @@ double RNNPredictor::calcMSE(arma::cube &pred, arma::cube &Y) {
     return (err_sum / (diff.n_elem + 1e-50));
 }
 
-double RNNPredictor::getModelAccuracy() const { return modelAccuracy; }
+double RNNLearner::GetModelAccuracy() const { return modelAccuracy; }
 
-int RNNPredictor::getNumberOfUpdates() const {
+int RNNLearner::GetNumberOfUpdates() const {
     return numberOfUpdates;
 }
 
-const Mat<double> &RNNPredictor::getModelParameters() const {
+const Mat<double> &RNNLearner::GetModelParameters() const {
     return modelParameters;
 }
 
-void RNNPredictor::setModelParameters(const Mat<double> &modelParameters) {
-    RNNPredictor::modelParameters = modelParameters;
+void RNNLearner::SetModelParameters(const Mat<double> &modelParameters) {
+    RNNLearner::modelParameters = modelParameters;
 }
 
-void RNNPredictor::CentralizedDataPreparation() {
+void RNNLearner::CentralizedDataPreparation() {
 
     arma::mat dataset;
     // In Armadillo rows represent features, columns represent data points.
@@ -93,7 +93,7 @@ void RNNPredictor::CentralizedDataPreparation() {
     y.set_size(outputSize, dataset.n_cols - rho + 1, rho);
 
 
-    createTimeSeriesData(dataset, X, y, rho);
+    CreateTimeSeriesData(dataset, X, y, rho);
 
     // Split the data into training and testing sets.
     size_t trainingSize = (1 - trainTestRatio) * X.n_cols;
@@ -104,7 +104,7 @@ void RNNPredictor::CentralizedDataPreparation() {
 
 }
 
-void RNNPredictor::TrainModel() {
+void RNNLearner::TrainModel() {
 
     // Model definition
     RNN<MeanSquaredError<>, HeInitialization> model(rho);
@@ -146,7 +146,7 @@ void RNNPredictor::TrainModel() {
         model.Predict(testX, predOut);
 
         // Calculating MSE and accuracy on test data points.
-        double testMSE = calcMSE(predOut, testY);
+        double testMSE = CalcMSE(predOut, testY);
         modelAccuracy = 100 - testMSE;
 //        modelParameters = static_cast<mat>(model.Parameters());
 
@@ -165,7 +165,7 @@ void RNNPredictor::TrainModel() {
     cout << "Training ... OK." << endl;
 
     cout << "Average accuracy during training: " << fixed << setprecision(2)
-         << (100 - takeVectorAVG(epoch_mses)) << " %" << endl;
+         << (100 - TakeVectorAVG(epoch_mses)) << " %" << endl;
 
     if (train_time.count() / 1e+9 < 60)
         cout << "Training time: " << setprecision(2) << fixed << train_time.count() / 1e+9 << " second(s)."
@@ -179,7 +179,7 @@ void RNNPredictor::TrainModel() {
 
 }
 
-void RNNPredictor::MakePrediction() {
+void RNNLearner::MakePrediction() {
 
     // Load RNN model and use it for prediction.
     RNN<MeanSquaredError<>, HeInitialization> modelP(rho);

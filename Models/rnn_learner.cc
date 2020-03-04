@@ -24,6 +24,7 @@ RNNLearner::RNNLearner(string cfg) {
         beta1 = root["hyperparameters"].get("beta1", 0).asDouble();
         beta2 = root["hyperparameters"].get("beta2", 0).asDouble();
         trainTestRatio = root["hyperparameters"].get("trainTestRatio", 0).asDouble();
+        datasetPath = root["data"].get("path", "").asString();
         maxRho = rho;
         numberOfUpdates = 0;
     } catch (...) {
@@ -77,7 +78,7 @@ void RNNLearner::CentralizedDataPreparation() {
     arma::mat dataset;
     // In Armadillo rows represent features, columns represent data points.
     cout << "Reading dataset ...";
-    data::Load(dataFile, dataset, true);
+    data::Load(datasetPath, dataset, true);
     cout << " OK." << endl;
 
     // Scale all data into the range (0, 1) for increased numerical stability.
@@ -193,16 +194,8 @@ void RNNLearner::MakePrediction() {
     modelP.Predict(testX, predOutP);
     cout << " OK." << endl;
     // Calculate MSE on prediction.
-    double testMSEPred = calcMSE(predOutP, testY);
+    double testMSEPred = CalcMSE(predOutP, testY);
     cout << "Prediction Accuracy: " << setprecision(2) << fixed << (100 - testMSEPred) << " %" << endl;
 
 }
-
-
-
-
-
-
-
-
 

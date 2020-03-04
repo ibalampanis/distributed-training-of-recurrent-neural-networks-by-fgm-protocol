@@ -1,6 +1,6 @@
 #include <jsoncpp/json/json.h>
 #include "gm_protocol.hh"
-#include "rnn_models/predictor/rnn_learner.hh"
+#include "Models/rnn_learner.hh"
 #include "dds/dsarch.hh"
 
 

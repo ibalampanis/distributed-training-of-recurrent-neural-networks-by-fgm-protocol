@@ -5,7 +5,7 @@
 #include <boost/shared_ptr.hpp>
 #include <random>
 #include "gm_protocol.hh"
-#include "rnn_models/predictor/rnn_learner.hh"
+#include "Models/rnn_learner.hh"
 
 namespace gm_protocol {
 
@@ -140,16 +140,16 @@ namespace gm_protocol {
         typedef coord_proxy coord_proxy_t;
         typedef continuous_query continuous_query_t;
 
-        continuous_query *Q;                // The query management object.
-        Safezone szone;                     // The safezone object.
-        RNNLearner *_learner;             // The learning algorithm.
+        continuous_query *Q;                // The query management object
+        Safezone szone;                     // The safezone object
+        RNNLearner *_learner;               // The learning algorithm
 
-        vector<arma::mat> drift;            // The drift of the node.
+        vector<arma::mat> drift;            // The drift of the node
 
-        int num_sites;                         // Number of sites.
+        int num_sites;                      // Number of sites
 
-        size_t datapoints_seen;              // Number of points the node has seen since the last synchronization.
-        coord_proxy_t coord;                 // The proxy of the coordinator/hub.
+        size_t datapoints_seen;             // Number of points the node has seen since the last synchronization
+        coord_proxy_t coord;                // The proxy of the coordinator/hub
 
         learning_node(network_t *net, source_id hid, continuous_query_t *_Q)
                 : local_site(net, hid), Q(_Q), coord(this) {
@@ -165,19 +165,21 @@ namespace gm_protocol {
 
         void update_drift(vector<arma::mat *> &params);
 
+        void update_stream(arma::mat &batch, arma::mat &labels);
+
         oneway set_HStatic_variables(const p_model_state &SHParams);
 
         //
         // Remote methods
         //
 
-        // called at the start of a round
+        // Called at the start of a round
         oneway reset(const Safezone &newsz);
 
-        // transfer data to the coordinator
+        // Transfer data to the coordinator
         model_state get_drift();
 
-        // set the drift vector (for rebalancing)
+        // Set the drift vector (for rebalancing)
         void set_drift(model_state mdl);
 
     };

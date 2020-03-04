@@ -1,12 +1,15 @@
-#include "rnn_models/predictor/rnn_learner.hh"
+#include "Models/rnn_learner.hh"
 #include <string>
 
 
 using namespace rnn_learner;
+using namespace std;
 
 int main(int argc, char **argv) {
 
-    std::string cfg = std::string(argv[1]);
+    if (argc != 2) return -1;
+
+    string cfg = string(argv[1]);
 
     auto *pLearner = new RNNLearner(cfg);
 

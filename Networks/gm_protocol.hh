@@ -11,7 +11,7 @@
 #include <mlpack/core.hpp>
 #include "dds/dsarch.hh"
 #include "dds/dds.hh"
-#include "rnn_models/predictor/rnn_learner.hh"
+#include "rnn_models/rnn_learner.hh"
 
 namespace gm_protocol {
 

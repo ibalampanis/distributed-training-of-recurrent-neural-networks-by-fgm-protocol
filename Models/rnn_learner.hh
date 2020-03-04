@@ -26,14 +26,15 @@ namespace rnn_learner {
     class RNNLearner {
 
     protected:
-        double trainTestRatio;                  // Testing data is taken from the dataset in this ratio.
-        int trainingEpochs;                     // Number of optimization epochs.
-        int lstmCells;                          // Number of hidden layers.
-        int rho;                                // Number of time steps to look backward for in the RNN.
-        int maxRho = rho;                       // Max Rho for LSTM.
-        double stepSize;                        // Step size of an optimizer.
+        string datasetPath;
+        double trainTestRatio;                  // Testing data is taken from the dataset in this ratio
+        int trainingEpochs;                     // Number of optimization epochs
+        int lstmCells;                          // Number of hidden layers
+        int rho;                                // Number of time steps to look backward for in the RNN
+        int maxRho = rho;                       // Max Rho for LSTM
+        double stepSize;                        // Step size of an optimizer
         int batchSize;                          // Number of data points in each iteration of SGD
-        int iterationsPerEpoch;                 // Number of iterations per cycle.
+        int iterationsPerEpoch;                 // Number of iterations per cycle
         double tolerance;                       // Optimizer tolerance
         bool bShuffle;                          // Let optimizer shuffle batches
         double epsilon;                         // Optimizer epsilon
@@ -48,8 +49,7 @@ namespace rnn_learner {
         /** Constructor **/
         RNNLearner(string cfg);
 
-        const string dataFile = "../data/EEG_Eye_State.csv";
-        const string modelFile = "../saved_models/eyeState.bin";
+        const string modelFile = "../SavedModels/eyeState.bin";
         size_t inputSize = 15, outputSize = 1;
         arma::cube trainX, trainY, testX, testY;
 

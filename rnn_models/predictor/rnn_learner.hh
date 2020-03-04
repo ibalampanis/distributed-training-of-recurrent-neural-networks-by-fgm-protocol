@@ -15,7 +15,7 @@
 #include <mlpack/methods/ann/loss_functions/mean_squared_error.hpp>
 #include <ensmallen.hpp>
 
-namespace rnn_predictor {
+namespace rnn_learner {
 
 
     using namespace std;
@@ -23,7 +23,7 @@ namespace rnn_predictor {
     using namespace mlpack::ann;
     using namespace ens;
 
-    class RNNPredictor {
+    class RNNLearner {
 
     protected:
         double trainTestRatio;                  // Testing data is taken from the dataset in this ratio.
@@ -46,7 +46,7 @@ namespace rnn_predictor {
 
     public:
         /** Constructor **/
-        RNNPredictor(string cfg, string net_name);
+        RNNLearner(string cfg);
 
         const string dataFile = "../data/EEG_Eye_State.csv";
         const string modelFile = "../saved_models/eyeState.bin";
@@ -54,19 +54,19 @@ namespace rnn_predictor {
         arma::cube trainX, trainY, testX, testY;
 
 
-        static void createTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y, size_t rho);
+        static void CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y, size_t rho);
 
-        static double takeVectorAVG(const std::vector<double> &vec);
+        static double TakeVectorAVG(const std::vector<double> &vec);
 
-        static double calcMSE(arma::cube &pred, arma::cube &Y);
+        static double CalcMSE(arma::cube &pred, arma::cube &Y);
 
-        double getModelAccuracy() const;
+        double GetModelAccuracy() const;
 
-        int getNumberOfUpdates() const;
+        int GetNumberOfUpdates() const;
 
-        const arma::Mat<double> &getModelParameters() const;
+        const arma::Mat<double> &GetModelParameters() const;
 
-        void setModelParameters(const arma::Mat<double> &modelParameters);
+        void SetModelParameters(const arma::Mat<double> &modelParameters);
 
         void CentralizedDataPreparation();
 

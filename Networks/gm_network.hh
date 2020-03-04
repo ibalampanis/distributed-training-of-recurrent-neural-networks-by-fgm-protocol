@@ -5,12 +5,12 @@
 #include <boost/shared_ptr.hpp>
 #include <random>
 #include "gm_protocol.hh"
-#include "RNN_models/predictor/RNNPredictor.hh"
+#include "rnn_models/predictor/rnn_learner.hh"
 
 namespace gm_protocol {
 
     using namespace dds;
-    using namespace rnn_predictor;
+    using namespace rnn_learner;
     using std::map;
     using std::cout;
     using std::endl;
@@ -38,7 +38,7 @@ namespace gm_protocol {
         /**
 	        Protocol Stuff
         **/
-        RNNPredictor *global_learner;
+        RNNLearner *global_learner;
         continuous_query *Q;            // continuous query
         query_state *query;             // current query state
         SafezoneFunction *safe_zone;    // the safe zone wrapper
@@ -141,8 +141,8 @@ namespace gm_protocol {
         typedef continuous_query continuous_query_t;
 
         continuous_query *Q;                // The query management object.
-        safezone szone;                     // The safezone object.
-        RNNPredictor *_learner;             // The learning algorithm.
+        Safezone szone;                     // The safezone object.
+        RNNLearner *_learner;             // The learning algorithm.
 
         vector<arma::mat> drift;            // The drift of the node.
 
@@ -172,7 +172,7 @@ namespace gm_protocol {
         //
 
         // called at the start of a round
-        oneway reset(const safezone &newsz);
+        oneway reset(const Safezone &newsz);
 
         // transfer data to the coordinator
         model_state get_drift();

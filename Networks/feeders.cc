@@ -12,7 +12,7 @@ using std::string;
 **/
 
 template<typename distrNetType>
-feeders::feeder<distrNetType>::feeder(string cfg) : config_file(std::move(cfg)) {
+feeders::Feeder<distrNetType>::Feeder(string cfg) : config_file(std::move(cfg)) {
     Json::Value root;
     std::ifstream cfgfile(config_file); // Parse from JSON file.
     cfgfile >> root;
@@ -66,7 +66,7 @@ feeders::feeder<distrNetType>::feeder(string cfg) : config_file(std::move(cfg)) 
 }
 
 template<typename distrNetType>
-void feeder<distrNetType>::initializeSimulation() {
+void Feeder<distrNetType>::InitializeSimulation() {
 
     cout << "Initializing the star nets..." << endl << endl << endl;
     Json::Value root;
@@ -85,7 +85,7 @@ void feeder<distrNetType>::initializeSimulation() {
              << endl;
 
         auto query = new gm_protocol::continuous_query(config_file, net_name);
-        addQuery(query);
+        AddQuery(query);
         cout << "Query added." << endl;
 
 
@@ -98,7 +98,7 @@ void feeder<distrNetType>::initializeSimulation() {
         count += number_of_nodes + 1; // We add one because of the coordinator.
 
         auto net = new GM_Net(node_ids, net_name, _query_container.at(i - 1));
-        addNet(net);
+        AddNet(net);
         cout << "Net " << net_name << " initialized." << endl << endl;
     }
     for (auto net:_net_container) {
@@ -144,7 +144,7 @@ void feeder<distrNetType>::initializeSimulation() {
 }
 
 template<typename distrNetType>
-void feeder<distrNetType>::printStarNets() const {
+void Feeder<distrNetType>::PrintStarNets() const {
     cout << endl << "Printing the nets." << endl;
     cout << "Number of networks : " << _net_container.size() << endl;
     for (auto net:_net_container) {
@@ -160,7 +160,7 @@ void feeder<distrNetType>::printStarNets() const {
 }
 
 template<typename distrNetType>
-void feeder<distrNetType>::gatherDifferentialInfo() {
+void Feeder<distrNetType>::GatherDifferentialInfo() {
     // Gathering the info of the communication triggered by the streaming batch.
     for (size_t i = 0; i < _net_container.size(); i++) {
         size_t batch_messages = 0;
@@ -190,7 +190,7 @@ void feeder<distrNetType>::gatherDifferentialInfo() {
 **/
 
 template<typename distrNetType>
-Random_Feeder<distrNetType>::Random_Feeder(const string &cfg) :feeder<distrNetType>(cfg) {
+RandomFeeder<distrNetType>::RandomFeeder(const string &cfg) :Feeder<distrNetType>(cfg) {
     try {
         Json::Value root;
         std::ifstream cfgfile(this->config_file); // Parse from JSON file.
@@ -225,7 +225,7 @@ Random_Feeder<distrNetType>::Random_Feeder(const string &cfg) :feeder<distrNetTy
         cout << "test_size : " << test_size << endl << endl;
 
         // Create the test dataset.
-        makeTestDataset();
+        MakeTestDataset();
         targets = 1;
 
     } catch (...) {
@@ -235,7 +235,7 @@ Random_Feeder<distrNetType>::Random_Feeder(const string &cfg) :feeder<distrNetTy
 }
 
 template<typename distrNetType>
-void Random_Feeder<distrNetType>::GenNewTarget() {
+void RandomFeeder<distrNetType>::GenNewTarget() {
     target = arma::zeros<arma::mat>(number_of_features, 1);
     for (size_t i = 0; i < target.n_elem; i++) {
         if ((double) std::rand() / RAND_MAX <= std::sqrt(1 - std::pow(2, -(1 / number_of_features)))) {
@@ -247,7 +247,7 @@ void Random_Feeder<distrNetType>::GenNewTarget() {
 }
 
 template<typename distrNetType>
-void Random_Feeder<distrNetType>::makeTestDataset() {
+void RandomFeeder<distrNetType>::MakeTestDataset() {
     GenNewTarget();
     this->testSet = arma::zeros<arma::mat>(number_of_features, this->test_size);
     this->testResponses = arma::zeros<arma::mat>(1, this->test_size);
@@ -266,7 +266,7 @@ void Random_Feeder<distrNetType>::makeTestDataset() {
 }
 
 template<typename distrNetType>
-arma::dvec Random_Feeder<distrNetType>::GenPoint() {
+arma::dvec RandomFeeder<distrNetType>::GenPoint() {
     arma::dvec point = arma::zeros<arma::dvec>(number_of_features);
     for (size_t j = 0; j < number_of_features; j++) {
         if ((double) std::rand() / RAND_MAX <= std::sqrt(1 - std::pow(2, -(1 / number_of_features)))) {
@@ -277,7 +277,7 @@ arma::dvec Random_Feeder<distrNetType>::GenPoint() {
 }
 
 template<typename distrNetType>
-void Random_Feeder<distrNetType>::TrainNetworks() {
+void RandomFeeder<distrNetType>::TrainNetworks() {
     size_t count = 0; // Count the number of processed elements.
 
     bool warm = false; // Variable indicating if the networks are warmed up.
@@ -286,7 +286,7 @@ void Random_Feeder<distrNetType>::TrainNetworks() {
     while (count < numOfPoints) {
 
         if ((double) std::rand() / RAND_MAX <= 0.0001) {
-            makeTestDataset();
+            MakeTestDataset();
         }
 
         arma::mat point = arma::zeros<arma::mat>(number_of_features, 1);
@@ -340,7 +340,7 @@ void Random_Feeder<distrNetType>::TrainNetworks() {
 }
 
 template<typename distrNetType>
-void Random_Feeder<distrNetType>::Train(arma::mat &point, arma::mat &label) {
+void RandomFeeder<distrNetType>::Train(arma::mat &point, arma::mat &label) {
     for (auto net:this->_net_container) {
         size_t random_node = std::rand() % (net->sites.size());
         if (net->cfg().learning_algorithm == "MLP") {

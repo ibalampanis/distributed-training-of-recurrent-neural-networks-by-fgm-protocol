@@ -21,7 +21,7 @@ namespace feeders {
 
     // vector container for the networks.
     template<typename distrNetType>
-    class net_container : public std::vector<distrNetType *> {
+    class NetContainer : public std::vector<distrNetType *> {
     public:
         using std::vector<distrNetType *>::vector;
 
@@ -32,7 +32,7 @@ namespace feeders {
     };
 
     // A vector container for the queries.
-    class query_container : public vector<continuous_query *> {
+    class QueryContainer : public vector<continuous_query *> {
     public:
         using vector<continuous_query *>::vector;
 
@@ -47,7 +47,7 @@ namespace feeders {
 	    by providing the appropriate data stream to the nodes of each net.
 	**/
     template<typename distrNetType>
-    class feeder {
+    class Feeder {
     protected:
         std::string config_file; // JSON file to read the hyperparameters.
         time_t seed; // The seed for the random generator.
@@ -59,8 +59,8 @@ namespace feeders {
         size_t test_size{}; // Size of test dataset. [optional]
         bool negative_labels; // If true it sets 0 labels to -1. [optional]
 
-        net_container<distrNetType> _net_container; // A container for networks.
-        query_container _query_container; // A container for queries.
+        NetContainer<distrNetType> _net_container; // A container for networks.
+        QueryContainer _query_container; // A container for queries.
 
         // Stream Distribution
         bool uniform_distr;
@@ -78,48 +78,48 @@ namespace feeders {
 
     public:
 
-        feeder(string cfg);
+        Feeder(string cfg);
 
         /**
             Method that creates the test dataset.
             This method passes one time through the entire dataset,
             if the dataset is stored in a hdf5 file.
         **/
-        virtual void makeTestDataset() {}
+        virtual void MakeTestDataset() {}
 
         /* Method that puts a network in the network container. */
-        void addNet(distrNetType *net) { _net_container.join(net); }
+        void AddNet(distrNetType *net) { _net_container.join(net); }
 
         /* Method that puts a network in the network container. */
-        void addQuery(continuous_query *qry) { _query_container.join(qry); }
+        void AddQuery(continuous_query *qry) { _query_container.join(qry); }
 
         /* Method initializing all the networks. */
-        void initializeSimulation();
+        void InitializeSimulation();
 
         /* Method that prints the star learning network for debbuging purposes. */
-        void printStarNets() const;
+        void PrintStarNets() const;
 
         /* Method that gathers communication info after each streaming batch. */
-        void gatherDifferentialInfo();
+        void GatherDifferentialInfo();
 
         // Getters.
-        arma::mat &getTestSet() { return testSet; }
+        inline arma::mat &GetTestSet() { return testSet; }
 
-        arma::mat &getTestSetLabels() { return testResponses; }
+        inline arma::mat &GetTestSetLabels() { return testResponses; }
 
-        arma::mat *getPTestSet() { return &testSet; }
+        inline arma::mat *GetPTestSet() { return &testSet; }
 
-        arma::mat *getPTestSetLabels() { return &testResponses; }
+        inline arma::mat *GetPTestSetLabels() { return &testResponses; }
 
-        size_t getRandomInt(size_t maxValue) { return std::rand() % maxValue; }
+        inline size_t GetRandomInt(size_t maxValue) { return std::rand() % maxValue; }
 
-        virtual size_t getNumberOfFeatures() { return 0; }
+        inline size_t GetNumberOfFeatures() { return 0; }
 
-        virtual void getStatistics() {}
+        virtual void GetStatistics() {}
     };
 
     template<typename distrNetType>
-    class Random_Feeder : public feeder<distrNetType> {
+    class RandomFeeder : public Feeder<distrNetType> {
     protected:
         size_t test_size; // Starting test data point.
         size_t number_of_features; // The number of features of each datapoint.
@@ -132,9 +132,9 @@ namespace feeders {
 
     public:
 
-        explicit Random_Feeder(const string &cfg);
+        explicit RandomFeeder(const string &cfg);
 
-        void makeTestDataset() override;
+        void MakeTestDataset() override;
 
         void GenNewTarget();
 
@@ -144,9 +144,9 @@ namespace feeders {
 
         void Train(arma::mat &batch, arma::mat &labels);
 
-        virtual void getStatistics() {}
+        virtual void GetStatistics() {}
 
-        inline size_t getNumberOfFeatures() override { return number_of_features; }
+        virtual size_t GetNumberOfFeatures() override { return number_of_features; }
     };
 
 }

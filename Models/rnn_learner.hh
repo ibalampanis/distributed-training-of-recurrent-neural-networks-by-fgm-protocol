@@ -56,8 +56,6 @@ namespace rnn_learner {
 
         static void CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y, size_t rho);
 
-        static double TakeVectorAVG(const std::vector<double> &vec);
-
         static double CalcMSE(arma::cube &pred, arma::cube &Y);
 
         double GetModelAccuracy() const;

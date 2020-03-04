@@ -8,6 +8,8 @@ using namespace rnn_learner;
 using namespace arma;
 
 RNNLearner::RNNLearner(string cfg) {
+
+    // Take values from JSON file and initialize parameters
     try {
         std::ifstream cfgfile(cfg);
         cfgfile >> root;
@@ -38,15 +40,6 @@ void RNNLearner::CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cu
         y.subcube(arma::span(), arma::span(i), arma::span()) = dataset.submat(
                 arma::span(dataset.n_rows - 1, dataset.n_rows - 1), arma::span(i + 1, i + rho));
     }
-}
-
-double RNNLearner::TakeVectorAVG(const std::vector<double> &vec) {
-    double sum = 0;
-    for (double i : vec)
-        sum += i;
-
-    double avg = sum / vec.size();
-    return avg;
 }
 
 double RNNLearner::CalcMSE(arma::cube &pred, arma::cube &Y) {
@@ -149,9 +142,6 @@ void RNNLearner::TrainModel() {
         // Calculating MSE and accuracy on test data points.
         double testMSE = CalcMSE(predOut, testY);
         modelAccuracy = 100 - testMSE;
-//        modelParameters = static_cast<mat>(model.Parameters());
-
-        epoch_mses.push_back(testMSE);
 
         // Print stats during training
         if (epoch % 10 == 0 || epoch == 1)
@@ -164,9 +154,6 @@ void RNNLearner::TrainModel() {
     auto end_train_time = std::chrono::high_resolution_clock::now();
     auto train_time = end_train_time - begin_train_time;
     cout << "Training ... OK." << endl;
-
-    cout << "Average accuracy during training: " << fixed << setprecision(2)
-         << (100 - TakeVectorAVG(epoch_mses)) << " %" << endl;
 
     if (train_time.count() / 1e+9 < 60)
         cout << "Training time: " << setprecision(2) << fixed << train_time.count() / 1e+9 << " second(s)."

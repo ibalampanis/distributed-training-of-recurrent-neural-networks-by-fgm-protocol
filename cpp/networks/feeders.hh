@@ -8,7 +8,7 @@
 #include <mlpack/core.hpp>
 #include "gm_protocol.hh"
 #include "gm_network.hh"
-#include "cpp/Networks/dds/dds.hh"
+#include "cpp/networks/dds/dds.hh"
 
 
 namespace feeders {

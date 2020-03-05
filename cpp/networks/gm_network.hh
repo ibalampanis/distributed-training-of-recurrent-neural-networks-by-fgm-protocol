@@ -5,7 +5,7 @@
 #include <boost/shared_ptr.hpp>
 #include <random>
 #include "gm_protocol.hh"
-#include "cpp/Models/rnn_learner.hh"
+#include "cpp/models/rnn_learner.hh"
 
 namespace gm_protocol {
 

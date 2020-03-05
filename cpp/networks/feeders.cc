@@ -140,7 +140,7 @@ void Feeder<distrNetType>::InitializeSimulation() {
     }
     msgs = 0;
     bts = 0;
-    cout << endl << "Networks initialized." << endl;
+    cout << endl << "networks initialized." << endl;
 }
 
 template<typename distrNetType>

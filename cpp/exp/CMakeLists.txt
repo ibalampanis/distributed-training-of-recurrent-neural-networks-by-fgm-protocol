@@ -13,8 +13,8 @@ include_directories("../..")
 ############################################################################
 
 set(SOURCES1 ${MODEL_SOURCE_DIR}/
-        ../Models/rnn_learner.cc
-        ../Models/rnn_learner.hh
+        ../models/rnn_learner.cc
+        ../models/rnn_learner.hh
         CentrEEG.cc)
 
 add_executable(CentrEEG ${SOURCES1})
@@ -29,20 +29,20 @@ target_link_libraries(CentrEEG
 ############################################################################
 
 set(SOURCES2 ${MODEL_SOURCE_DIR}/
-        ../Models/rnn_learner.cc
-        ../Models/rnn_learner.hh
-        ../Networks/dds/binc.hh
-        ../Networks/dds/dds.hh
-        ../Networks/dds/dds.cc
-        ../Networks/dds/dsarch.hh
-        ../Networks/dds/dsarch.cc
-        ../Networks/dds/dsarch_tests.hh
-        ../Networks/gm_network.hh
-        ../Networks/gm_network.cc
-        ../Networks/gm_protocol.cc
-        ../Networks/gm_protocol.hh
-        ../Networks/feeders.cc
-        ../Networks/feeders.hh
+        ../models/rnn_learner.cc
+        ../models/rnn_learner.hh
+        ../networks/dds/binc.hh
+        ../networks/dds/dds.hh
+        ../networks/dds/dds.cc
+        ../networks/dds/dsarch.hh
+        ../networks/dds/dsarch.cc
+        ../networks/dds/dsarch_tests.hh
+        ../networks/gm_network.hh
+        ../networks/gm_network.cc
+        ../networks/gm_protocol.cc
+        ../networks/gm_protocol.hh
+        ../networks/feeders.cc
+        ../networks/feeders.hh
         GMNetEEG.cc)
 
 add_executable(GMNetEEG ${SOURCES2})

@@ -1,7 +1,7 @@
 #include <jsoncpp/json/json.h>
 #include "gm_protocol.hh"
-#include "Models/rnn_learner.hh"
-#include "dds/dsarch.hh"
+#include "cpp/Models/rnn_learner.hh"
+#include "cpp/Networks/dds/dsarch.hh"
 
 
 using namespace gm_protocol;

@@ -6,7 +6,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 option(DEBUG "DEBUG" OFF)
 
 set(MODEL_SOURCE_DIR .)
-include_directories("..")
+include_directories("../..")
 
 ############################################################################
 ########################### CentrEEG #######################################
@@ -23,27 +23,6 @@ target_link_libraries(CentrEEG
         ${MLPACK_LIBRARIES}
         ${ARMADILLO_LIBRARIES}
         ${Boost_LIBRARIES})
-
-if (NOT EXISTS ${PROJECT_BINARY_DIR}/../data)
-    add_custom_command(TARGET CentrEEG POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E make_directory
-            ${PROJECT_BINARY_DIR}/../data)
-endif ()
-
-
-if (NOT EXISTS ${PROJECT_BINARY_DIR}/../../../saved_models)
-    add_custom_command(TARGET CentrEEG POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E make_directory
-            ${PROJECT_BINARY_DIR}/../../saved_models)
-endif ()
-
-
-if (NOT EXISTS ${PROJECT_BINARY_DIR}/../data/EEG_Eye_State.csv)
-    add_custom_command(TARGET CentrEEG POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy
-            ${CMAKE_CURRENT_SOURCE_DIR}/../../data/EEG_Eye_State.csv
-            ${PROJECT_BINARY_DIR}/../data/EEG_Eye_State.csv)
-endif ()
 
 ############################################################################
 ############################## GMNetEEG ####################################

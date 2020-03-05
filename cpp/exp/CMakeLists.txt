@@ -15,7 +15,7 @@ include_directories("../..")
 set(SOURCES1 ${MODEL_SOURCE_DIR}/
         ../models/rnn_learner.cc
         ../models/rnn_learner.hh
-        CentrEEG.cc)
+        centr_eeg.cc)
 
 add_executable(CentrEEG ${SOURCES1})
 target_link_libraries(CentrEEG
@@ -43,7 +43,7 @@ set(SOURCES2 ${MODEL_SOURCE_DIR}/
         ../networks/gm_protocol.hh
         ../networks/feeders.cc
         ../networks/feeders.hh
-        GMNetEEG.cc)
+        gm_net_eeg.cc)
 
 add_executable(GMNetEEG ${SOURCES2})
 target_link_libraries(GMNetEEG

@@ -1,0 +1,23 @@
+{
+  "hyperparameters": {
+    "trainingEpochs": "100",
+    "lstmCells": 10,
+    "rho": 15,
+    "stepSize": 5e-5,
+    "batchSize": 16,
+    "iterationsPerEpoch": 3000,
+    "tolerance": 1e-8,
+    "bShuffle": true,
+    "epsilon": 2e-8,
+    "beta1": 0.9,
+    "beta2": 0.99,
+    "trainTestRatio": 0.3
+  },
+  "data": {
+    "encoding": "UTF-8",
+    "path": "/home/ibalampanis/CLionProjects/Distributed_Training_of_Recurrent_Neural_Networks_by_FGM_protocol/datasets/EEG_Eye_State.csv",
+    "train_dset_name": "eegTrainSet",
+    "test_dset_name": "eegTestSet",
+    "save_model_path": "/home/ibalampanis/CLionProjects/Distributed_Training_of_Recurrent_Neural_Networks_by_FGM_protocol/savedModels/eyeState.bin"
+  }
+}

@@ -232,7 +232,7 @@ if (EXISTS "${ARMADILLO_INCLUDE_DIR}/armadillo_bits/config.hpp")
                 if (PKG_CONFIG_FOUND)
                     pkg_check_modules(HDF5 hdf5)
                     # But using pkgconfig is a little weird because HDF5_LIBRARIES won't
-                    # be filled with exact library paths, like the other scripts.  So
+                    # be filled with exact library paths, like the other bash.  So
                     # instead what we get is HDF5_LIBRARY_DIRS which is the equivalent of
                     # what we'd pass to -L.
                     if (HDF5_FOUND)
@@ -272,7 +272,7 @@ if (EXISTS "${ARMADILLO_INCLUDE_DIR}/armadillo_bits/config.hpp")
                 if (PKG_CONFIG_FOUND)
                     pkg_check_modules(HDF5 hdf5)
                     # But using pkgconfig is a little weird because HDF5_LIBRARIES won't
-                    # be filled with exact library paths, like the other scripts.  So
+                    # be filled with exact library paths, like the other bash.  So
                     # instead what we get is HDF5_LIBRARY_DIRS which is the equivalent of
                     # what we'd pass to -L.
                     if (HDF5_FOUND)

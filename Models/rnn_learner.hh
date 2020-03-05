@@ -22,11 +22,13 @@ namespace rnn_learner {
     using namespace mlpack;
     using namespace mlpack::ann;
     using namespace ens;
+    using namespace arma;
 
     class RNNLearner {
 
     protected:
         string datasetPath;
+        string saveModelPath;                   // Path for saving object of rnn model
         double trainTestRatio;                  // Testing data is taken from the dataset in this ratio
         int trainingEpochs;                     // Number of optimization epochs
         int lstmCells;                          // Number of hidden layers
@@ -41,7 +43,7 @@ namespace rnn_learner {
         double beta1;                           // Optimizer beta1
         double beta2;                           // Optimizer beta2
         double modelAccuracy;                   // Current accuracy of model
-        arma::Mat<double> modelParameters;      // Current model parameters
+        Mat<double> modelParameters;            // Current model parameters
         size_t numberOfUpdates;                 // A counter for parameters updates
         Json::Value root;                       // JSON file to read the hyperparameters
 
@@ -49,7 +51,6 @@ namespace rnn_learner {
         /** Constructor **/
         RNNLearner(string cfg);
 
-        const string modelFile = "../SavedModels/eyeState.bin";
         size_t inputSize = 15, outputSize = 1;
         arma::cube trainX, trainY, testX, testY;
 

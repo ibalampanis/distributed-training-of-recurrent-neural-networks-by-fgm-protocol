@@ -27,11 +27,14 @@ RNNLearner::RNNLearner(string cfg) {
         beta2 = root["hyperparameters"].get("beta2", 0).asDouble();
         trainTestRatio = root["hyperparameters"].get("trainTestRatio", 0).asDouble();
         datasetPath = root["data"].get("path", "").asString();
-        maxRho = rho;
-        numberOfUpdates = 0;
+        saveModelPath = root["data"].get("save_model_path", "").asString();
     } catch (...) {
         throw;
     }
+
+    maxRho = rho;
+    numberOfUpdates = 0;
+    modelAccuracy = 0.0;
 }
 
 void RNNLearner::CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y, const size_t rho) {
@@ -162,7 +165,7 @@ void RNNLearner::TrainModel() {
         cout << "Training time: " << setprecision(1) << train_time.count() / 6e+10 << " minute(s)." << endl;
 
     cout << "Saving Model ...";
-    data::Save(modelFile, "eyeState", model);
+    data::Save(saveModelPath, "eyeState", model);
     cout << " OK." << endl;
 
 }
@@ -172,7 +175,7 @@ void RNNLearner::MakePrediction() {
     // Load RNN model and use it for prediction.
     RNN<MeanSquaredError<>, HeInitialization> modelP(rho);
     cout << "Loading model ...";
-    data::Load(modelFile, "eyeState", modelP);
+    data::Load(saveModelPath, "eyeState", modelP);
     cout << " OK." << endl;
     arma::cube predOutP;
 

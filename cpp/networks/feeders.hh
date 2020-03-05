@@ -8,7 +8,7 @@
 #include <mlpack/core.hpp>
 #include "gm_protocol.hh"
 #include "gm_network.hh"
-#include "cpp/networks/dds/dds.hh"
+#include "dds/dds.hh"
 
 
 namespace feeders {
@@ -146,7 +146,7 @@ namespace feeders {
 
         virtual void GetStatistics() {}
 
-        virtual size_t GetNumberOfFeatures() override { return number_of_features; }
+        virtual size_t GetNumberOfFeatures() { return number_of_features; }
     };
 
 }

@@ -9,8 +9,8 @@
 #include <cassert>
 #include <ctime>
 #include <mlpack/core.hpp>
-#include "cpp/networks/dds/dsarch.hh"
-#include "cpp/networks/dds/dds.hh"
+#include "dds/dsarch.hh"
+#include "dds/dds.hh"
 #include "cpp/models/rnn_learner.hh"
 
 namespace gm_protocol {

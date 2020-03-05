@@ -2,6 +2,4 @@
 
 This is my work for my diploma thesis at Technical University of Crete. Still processing!
 
-cpp/networks/dds source folder has been cloned from **https://github.com/vsamtuc/ddssim** repo.
-
 More info about this work check thesis proposal [here](tex/proposal/proposal.pdf).

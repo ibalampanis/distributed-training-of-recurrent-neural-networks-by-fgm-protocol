@@ -8,8 +8,8 @@ using std::vector;
 using std::string;
 
 /**
-    Feeder
-**/
+ * Feeder
+ * **/
 
 template<typename distrNetType>
 feeders::Feeder<distrNetType>::Feeder(string cfg) : config_file(std::move(cfg)) {
@@ -186,8 +186,8 @@ void Feeder<distrNetType>::GatherDifferentialInfo() {
 }
 
 /**
-    Random Feeder
-**/
+ * Random Feeder
+ * **/
 
 template<typename distrNetType>
 RandomFeeder<distrNetType>::RandomFeeder(const string &cfg) :Feeder<distrNetType>(cfg) {

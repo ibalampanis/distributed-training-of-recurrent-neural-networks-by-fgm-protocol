@@ -16,11 +16,11 @@ Coordinator::Coordinator(network_t *nw, ContinuousQuery *_Q)
           sz_sent(0), total_updates(0) {
     InitializeLearner();
     query = Q->create_query_state();
-    safe_zone = query->safezone(cfg().cfgfile);
+    safezone = query->Safezone(cfg().cfgfile, cfg().distributedLearningAlgorithm);
 }
 
 Coordinator::~Coordinator() {
-    delete safe_zone;
+    delete safezone;
     delete query;
 }
 
@@ -31,7 +31,7 @@ void Coordinator::StartRound() {
             proxy[n].SetHStaticVariables(p_model_state(global_learner->getHModel(), 0));
         }
         sz_sent++;
-        proxy[n].Reset(Safezone(safe_zone));
+        proxy[n].Reset(Safezone(safezone));
     }
     num_rounds++;
 }
@@ -48,7 +48,7 @@ oneway Coordinator::LocalViolation(sender<node_t> ctx) {
     }
     cnt = 0;
 
-    if (SafezoneFunction *entity = static_cast<BatchLearningSZFunction *>(safe_zone)) {
+    if (SafezoneFunction *entity = static_cast<BatchLearningSZFunction *>(safezone)) {
         num_violations = 0;
         FinishRound();
     } else {
@@ -81,7 +81,7 @@ void Coordinator::KampRebalance(node_t *lvnode) {
     // find a balancing set
     vector<node_t *> nodes;
     nodes.reserve(k);
-    for (auto n:node_ptr) {
+    for (auto n:nodePtr) {
         if (B.find(n) == B.end())
             nodes.push_back(n);
     }
@@ -104,7 +104,7 @@ void Coordinator::KampRebalance(node_t *lvnode) {
         B.insert(n);
         for (size_t i = 0; i < Mean.size(); i++)
             Mean.at(i) /= cnt;
-        if (safe_zone->CheckIfAdmissible_v2(Mean) > 0. || B.size() == k)
+        if (safezone->CheckIfAdmissible_v2(Mean) > 0. || B.size() == k)
             break;
         for (size_t i = 0; i < Mean.size(); i++)
             Mean.at(i) *= cnt;
@@ -132,7 +132,7 @@ void Coordinator::KampRebalance(node_t *lvnode) {
 void Coordinator::FinishRound() {
 
     // Collect all data
-    for (auto n : node_ptr) {
+    for (auto n : nodePtr) {
         FetchUpdates(n);
     }
     for (size_t i = 0; i < Mean.size(); i++)

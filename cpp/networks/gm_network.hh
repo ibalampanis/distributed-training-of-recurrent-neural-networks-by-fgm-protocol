@@ -41,12 +41,12 @@ namespace gm_protocol {
         RNNLearner *global_learner;
         ContinuousQuery *Q;            // continuous query
         QueryState *query;             // current query state
-        SafezoneFunction *safe_zone;    // the safe zone wrapper
+        SafezoneFunction *safezone;    // the safe zone wrapper
         size_t k;                       // number of sites
 
         // index the nodes
-        map<node_t *, size_t> node_index;
-        vector<node_t *> node_ptr;
+        map<node_t *, size_t> nodeIndex;
+        vector<node_t *> nodePtr;
 
         Coordinator(network_t *nw, ContinuousQuery *_Q);
 
@@ -127,10 +127,9 @@ namespace gm_protocol {
     };
 
 
-/**
-	This is a site implementation for the classic Geometric Method protocol.
-
- */
+/** This is a site implementation for
+ * the classic Geometric Method protocol.
+ * */
     struct LearningNode : local_site {
 
         typedef Coordinator coordinator_t;
@@ -161,7 +160,7 @@ namespace gm_protocol {
 
         void InitializeLearner();
 
-        void SetupConnections() override;
+        void SetupConnections();
 
         void UpdateDrift(vector<arma::mat *> &params);
 

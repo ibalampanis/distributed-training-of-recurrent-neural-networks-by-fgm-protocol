@@ -27,7 +27,11 @@ namespace rnn_learner {
     class RNNLearner {
 
     protected:
-        string datasetPath;
+        arma::cube trainX, trainY;              // Trainset data points and labels
+        arma::cube testX, testY;                // Testset data points and labels
+        size_t inputSize;                       // Number of neurons at the input layer
+        size_t outputSize;                      // Number of neurons at the output layer
+        string datasetPath;                     // Path for finding dataset file
         string saveModelPath;                   // Path for saving object of rnn model
         double trainTestRatio;                  // Testing data is taken from the dataset in this ratio
         int trainingEpochs;                     // Number of optimization epochs
@@ -48,13 +52,13 @@ namespace rnn_learner {
         Json::Value root;                       // JSON file to read the hyperparameters
 
     public:
-        /** Constructor **/
+
+        /**
+         * Constructor and Destructor
+         * **/
         explicit RNNLearner(const string &cfg);
 
         ~RNNLearner();
-
-        size_t inputSize = 15, outputSize = 1;
-        arma::cube trainX, trainY, testX, testY;
 
         static void CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y, size_t rho);
 

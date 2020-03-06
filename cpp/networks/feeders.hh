@@ -25,27 +25,27 @@ namespace feeders {
     public:
         using std::vector<distrNetType *>::vector;
 
-        inline void join(distrNetType *net) { this->push_back(net); }
+        inline void Join(distrNetType *net) { this->push_back(net); }
 
-        inline void leave(int const i) { this->erase(this->begin() + i); }
+        inline void Leave(int const i) { this->erase(this->begin() + i); }
 
     };
 
     // A vector container for the queries.
-    class QueryContainer : public vector<continuous_query *> {
+    class QueryContainer : public vector<ContinuousQuery *> {
     public:
-        using vector<continuous_query *>::vector;
+        using vector<ContinuousQuery *>::vector;
 
-        inline void join(continuous_query *qry) { this->push_back(qry); }
+        inline void join(ContinuousQuery *qry) { this->push_back(qry); }
 
         inline void leave(int const i) { this->erase(this->begin() + i); }
 
     };
 
     /**
-	    A feeders purpose is to synchronize the testing of the networks
-	    by providing the appropriate data stream to the nodes of each net.
-	**/
+     * A feeders purpose is to synchronize the testing of the networks
+     * by providing the appropriate data stream to the nodes of each net.
+     * **/
     template<typename distrNetType>
     class Feeder {
     protected:
@@ -81,17 +81,17 @@ namespace feeders {
         Feeder(string cfg);
 
         /**
-            Method that creates the test dataset.
-            This method passes one time through the entire dataset,
-            if the dataset is stored in a hdf5 file.
-        **/
+         * Method that creates the test dataset.
+         * This method passes one time through the entire dataset,
+         * if the dataset is stored in a hdf5 file.
+         * **/
         virtual void MakeTestDataset() {}
 
         /* Method that puts a network in the network container. */
         void AddNet(distrNetType *net) { _net_container.join(net); }
 
         /* Method that puts a network in the network container. */
-        void AddQuery(continuous_query *qry) { _query_container.join(qry); }
+        void AddQuery(ContinuousQuery *qry) { _query_container.join(qry); }
 
         /* Method initializing all the networks. */
         void InitializeSimulation();
@@ -113,7 +113,7 @@ namespace feeders {
 
         inline size_t GetRandomInt(size_t maxValue) { return std::rand() % maxValue; }
 
-        inline size_t GetNumberOfFeatures() { return 0; }
+        virtual inline size_t GetNumberOfFeatures() { return 0; }
 
         virtual void GetStatistics() {}
     };
@@ -121,14 +121,14 @@ namespace feeders {
     template<typename distrNetType>
     class RandomFeeder : public Feeder<distrNetType> {
     protected:
-        size_t test_size; // Starting test data point.
-        size_t number_of_features; // The number of features of each datapoint.
-        bool linearly_seperable; // Determines if the random dataset is linearly seperable.
-        arma::mat target; // The moving target disjunction of the stream.
-        size_t targets; // The total number of changed targets.
 
-        size_t numOfPoints = 12800000; // Total number of datapoints.
-        size_t numOfMaxRounds = 100000; // Maximum number of monitored rounds.
+        size_t test_size;                   // Starting test data point.
+        size_t number_of_features;          // The number of features of each datapoint.
+        bool linearly_seperable;            // Determines if the random dataset is linearly seperable.
+        arma::mat target;                   // The moving target disjunction of the stream.
+        size_t targets;                     // The total number of changed targets.
+        size_t numOfPoints = 12800000;      // Total number of datapoints.
+        size_t numOfMaxRounds = 100000;     // Maximum number of monitored rounds.
 
     public:
 

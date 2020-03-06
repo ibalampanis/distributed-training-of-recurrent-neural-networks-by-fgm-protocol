@@ -25,14 +25,13 @@ namespace gm_protocol {
     using std::endl;
 
     /**
-	    A channel implementation which accounts a combined network cost.
-
-	    The network cost is computed as follows:
-	    for each transmit of b bytes, there is a total charge of
-	    header * ceiling(b/MSS) bytes.
-
-	    This cost is resembling the TCP segment cost.
-    **/
+     * A channel implementation which accounts a combined network cost.
+     * The network cost is computed as follows:
+     * for each transmit of b bytes, there is a total charge of
+     * header * ceiling(b/MSS) bytes.
+     *
+     * This cost is resembling the TCP segment cost.
+     * **/
     struct TcpChannel : channel {
         static constexpr size_t tcp_header_bytes = 40;
         static constexpr size_t tcp_mss = 1024;
@@ -68,12 +67,11 @@ namespace gm_protocol {
     };
 
     /**
-	    Wrapper for a state parameters.
-	
-	    This class wraps a reference to the parameters of a model
-	    together with a count of the updates it contains since the
-	    last synchronization.
-    **/
+     * Wrapper for a state parameters.
+     * This class wraps a reference to the parameters of a model
+     * together with a count of the updates it contains since the
+     * last synchronization.
+     * **/
     struct ModelState {
         const vector<arma::mat> &_model;
         size_t updates;
@@ -110,7 +108,9 @@ namespace gm_protocol {
         size_t GetByteSize() const;
     };
 
-    /** The base class of a safezone function for machine learning purposes. **/
+    /**
+     * The base class of a safezone function for machine learning purposes.
+     * **/
     struct SafezoneFunction {
 
         vector<arma::mat> &GlobalModel; // The global model.
@@ -152,11 +152,11 @@ namespace gm_protocol {
 
 
     /**
-	    This safezone function just checks the number of points
-	    a local site has proccesed since the last synchronisation. The threshold
-	    variable basically indicates the batch size. If the proccesed points reach
-	    the batch size, then the function returns an inadmissible region.
-    **/
+     * This safezone function just checks the number of points
+     * a local site has proccesed since the last synchronisation. The threshold
+     * variable basically indicates the batch size. If the proccesed points reach
+     * the batch size, then the function returns an inadmissible region.
+     * **/
     struct BatchLearningSZFunction : SafezoneFunction {
 
         size_t threshold; // The maximum number of points fitted by each node before requesting synch from the Hub.
@@ -173,11 +173,11 @@ namespace gm_protocol {
     };
 
     /**
-	    This safezone function implements the algorithm presented in
-	    in the paper "Communication-Efficient Distributed Online Prediction
-	    by Dynamic Model Synchronization"
-	    by Michael Kamp, Mario Boley, Assaf Schuster and Izchak Sharfman.
-    **/
+     * This safezone function implements the algorithm presented in
+     * in the paper "Communication-Efficient Distributed Online Prediction
+     * by Dynamic Model Synchronization"
+     * by Michael Kamp, Mario Boley, Assaf Schuster and Izchak Sharfman.
+     * **/
     struct VarianceSZFunction : SafezoneFunction {
 
         float threshold; // The threshold of the variance between the models of the network.
@@ -216,33 +216,31 @@ namespace gm_protocol {
     };
 
     /**
-	    A wrapper containing the safezone function for machine
-	    learning purposes.
-	
-	    It is essentially a wrapper for the more verbose, polymorphic \c safezone_func API,
-	    but it conforms to the standard functional API. It is copyable and in addition, it
-	    provides a byte_size() method, making it suitable for integration with the middleware.
-	**/
+     * A wrapper containing the safezone function for machine
+     * learning purposes.
+     *
+     * It is essentially a wrapper for the more verbose, polymorphic \c safezone_func API,
+     * but it conforms to the standard functional API. It is copyable and in addition, it
+     * provides a byte_size() method, making it suitable for integration with the middleware.
+     * **/
     class Safezone {
         SafezoneFunction *szone;        // the safezone function, if any
 
     public:
-        /// null state
+
         Safezone();
 
         ~Safezone();
 
-        /// valid safezone
-        Safezone(SafezoneFunction *sz);
-        //~safezone();
+        // Valid safezone
+        explicit Safezone(SafezoneFunction *sz);
 
-        /// Movable
+        // Movable
         Safezone(Safezone &&);
 
         Safezone &operator=(Safezone &&);
 
-
-        /// Copyable
+        // Copyable
         Safezone(const Safezone &);
 
         Safezone &operator=(const Safezone &);
@@ -281,11 +279,11 @@ namespace gm_protocol {
 
 
     /**
-	    Base class for a query state object.
-
-	    A query state holds the current global estimate model. It also holds the
-	    accuracy of the current global model.
-    **/
+     * Base class for a query state object.
+     *
+     * A query state holds the current global estimate model. It also holds the
+     * accuracy of the current global model.
+     * **/
     struct QueryState {
         vector<arma::mat> globalModel;  // The global model.
 
@@ -331,7 +329,9 @@ namespace gm_protocol {
     };
 
 
-    /** Query and protocol configuration. **/
+    /**
+     * Query and protocol configuration.
+     * **/
     struct ProtocolConfig {
         string cfgfile;             // The JSON file containing the info for the test.
         string networkName;        // The name of the network being queried.
@@ -346,9 +346,9 @@ namespace gm_protocol {
 
 
     /**
-	    A base class for a continuous query.
-	    Objects inheriting this class must override the virtual methods.
-	**/
+     * A base class for a continuous query.
+     * Objects inheriting this class must override the virtual methods.
+     * **/
     struct ContinuousQuery {
         // These are attributes requested by the user
         ProtocolConfig config;
@@ -369,7 +369,10 @@ namespace gm_protocol {
         virtual inline double QueryAccuracy(RNNLearner *lnr);
     };
 
-    /** The star network topology using the Geometric Method for Distributed Machine Learning. **/
+    /**
+     * The star network topology using the Geometric Method
+     * for Distributed Machine Learning.
+     * */
     template<typename Net, typename Coord, typename Node>
     struct GmLearningNetwork : star_network<Net, Coord, Node> {
         typedef Coord coordinator_t;

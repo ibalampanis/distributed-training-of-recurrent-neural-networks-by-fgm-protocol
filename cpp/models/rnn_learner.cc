@@ -26,6 +26,8 @@ RNNLearner::RNNLearner(const string &cfg) {
         beta1 = root["hyperparameters"].get("beta1", 0).asDouble();
         beta2 = root["hyperparameters"].get("beta2", 0).asDouble();
         trainTestRatio = root["hyperparameters"].get("trainTestRatio", 0).asDouble();
+        inputSize = root["data"].get("input_size", 0).asInt();
+        outputSize = root["data"].get("output_size", 0).asInt();
         datasetPath = root["data"].get("path", "").asString();
         saveModelPath = root["data"].get("save_model_path", "").asString();
     } catch (...) {

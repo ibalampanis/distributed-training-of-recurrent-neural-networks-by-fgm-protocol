@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
     std::string cfg = std::string(argv[1]);
 
     RandomFeeder<GM_Net> sim(cfg);
-    sim.InitializeSimulation();
+    sim.InitializeSimulation(); // TODO
     sim.PrintStarNets();
 //    sim.TrainNetworks();
 

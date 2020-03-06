@@ -7,7 +7,7 @@
 using namespace rnn_learner;
 using namespace arma;
 
-RNNLearner::RNNLearner(string cfg) {
+RNNLearner::RNNLearner(const string &cfg) {
 
     // Take values from JSON file and initialize parameters
     try {
@@ -61,11 +61,11 @@ int RNNLearner::GetNumberOfUpdates() const {
     return numberOfUpdates;
 }
 
-const Mat<double> &RNNLearner::GetModelParameters() const {
+vector<arma::mat *> &RNNLearner::GetModelParameters() {
     return modelParameters;
 }
 
-void RNNLearner::SetModelParameters(const Mat<double> &modelParameters) {
+void RNNLearner::SetModelParameters(vector<arma::mat *> &modelParameters) {
     RNNLearner::modelParameters = modelParameters;
 }
 
@@ -188,4 +188,6 @@ void RNNLearner::MakePrediction() {
     cout << "Prediction Accuracy: " << setprecision(2) << fixed << (100 - testMSEPred) << " %" << endl;
 
 }
+
+RNNLearner::~RNNLearner() = default;
 

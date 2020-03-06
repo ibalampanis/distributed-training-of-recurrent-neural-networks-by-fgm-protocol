@@ -7,10 +7,10 @@
 using namespace gm_protocol;
 
 /*********************************************
-	model_state & p_model_state
+	Model State & p ModelState (pointer)
 *********************************************/
 
-size_t model_state::byte_size() const {
+size_t ModelState::GetByteSize() const {
     size_t num_of_params = 0;
     for (arma::mat param:_model) {
         num_of_params += param.n_elem;
@@ -18,7 +18,7 @@ size_t model_state::byte_size() const {
     return num_of_params * sizeof(float);
 }
 
-size_t p_model_state::byte_size() const {
+size_t PModelState::GetByteSize() const {
     size_t num_of_params = 0;
     for (arma::mat *param:_model) {
         num_of_params += param->n_elem;
@@ -26,11 +26,11 @@ size_t p_model_state::byte_size() const {
     return num_of_params * sizeof(float);
 }
 
-size_t int_num::byte_size() const {
+size_t IntNum::GetByteSize() const {
     return sizeof(size_t);
 }
 
-size_t matrix_message::byte_size() const {
+size_t MatrixMessage::GetByteSize() const {
     return sizeof(float) * sub_params.n_elem;
 }
 
@@ -53,7 +53,7 @@ SafezoneFunction::~SafezoneFunction() {}
 
 
 /*********************************************
-	Batch Learning
+	Batch Learning Safezone Function
 *********************************************/
 
 BatchLearningSZFunction::BatchLearningSZFunction(vector<arma::mat> &GlMd) : SafezoneFunction(GlMd), threshold(32) {
@@ -70,7 +70,7 @@ size_t BatchLearningSZFunction::CheckIfAdmissible(const size_t counter) const {
     return sz;
 }
 
-size_t BatchLearningSZFunction::byte_size() const {
+size_t BatchLearningSZFunction::GetByteSize() const {
     size_t num_of_params = 0;
     for (arma::mat param:GlobalModel) {
         num_of_params += param.n_elem;
@@ -86,26 +86,26 @@ BatchLearningSZFunction::~BatchLearningSZFunction() {}
 *********************************************/
 
 VarianceSZFunction::VarianceSZFunction(vector<arma::mat> &GlMd) : SafezoneFunction(GlMd), threshold(1.),
-                                                                  batch_size(32) {
+                                                                  batchSize(32) {
     hyperparameters.push_back(1.);
     hyperparameters.push_back(32.);
 }
 
 VarianceSZFunction::VarianceSZFunction(vector<arma::mat> &GlMd, size_t batch_sz) : SafezoneFunction(GlMd),
-                                                                                   threshold(1.), batch_size(batch_sz) {
+                                                                                   threshold(1.), batchSize(batch_sz) {
     hyperparameters.push_back(1.);
     hyperparameters.push_back(batch_sz);
 }
 
 VarianceSZFunction::VarianceSZFunction(vector<arma::mat> &GlMd, float thr) : SafezoneFunction(GlMd), threshold(thr),
-                                                                             batch_size(32) {
+                                                                             batchSize(32) {
     hyperparameters.push_back(thr);
     hyperparameters.push_back(32.);
 }
 
 VarianceSZFunction::VarianceSZFunction(vector<arma::mat> &GlMd, float thr, size_t batch_sz) : SafezoneFunction(GlMd),
                                                                                               threshold(thr),
-                                                                                              batch_size(batch_sz) {
+                                                                                              batchSize(batch_sz) {
     hyperparameters.push_back(thr);
     hyperparameters.push_back(batch_sz);
 }
@@ -128,7 +128,7 @@ float VarianceSZFunction::Zeta(const vector<arma::mat *> &mdl) const {
     return std::sqrt(threshold) - std::sqrt(res);
 }
 
-size_t VarianceSZFunction::CheckIfAdmissible(const size_t counter) const { return batch_size - counter; }
+size_t VarianceSZFunction::CheckIfAdmissible(const size_t counter) const { return batchSize - counter; }
 
 float VarianceSZFunction::CheckIfAdmissible(const vector<arma::mat> &mdl) const {
     float var = 0.;
@@ -186,24 +186,23 @@ float VarianceSZFunction::CheckIfAdmissible_v2(const vector<arma::mat *> &drift)
     return threshold - var;
 }
 
-size_t VarianceSZFunction::byte_size() const {
+size_t VarianceSZFunction::GetByteSize() const {
     size_t num_of_params = 0;
-    for (arma::mat param:GlobalModel) {
+    for (const arma::mat &param:GlobalModel) {
         num_of_params += param.n_elem;
     }
     return (1 + num_of_params) * sizeof(float) + sizeof(size_t);
 }
 
-VarianceSZFunction::~VarianceSZFunction() {}
-
+VarianceSZFunction::~VarianceSZFunction() = default;
 
 /*********************************************
-	safezone
+	Safezone
 *********************************************/
 
 Safezone::Safezone() : szone(nullptr) {}
 
-Safezone::~Safezone() {}
+Safezone::~Safezone() = default;
 
 // valid safezone
 Safezone::Safezone(SafezoneFunction *sz) : szone(sz) {}
@@ -226,47 +225,108 @@ Safezone &Safezone::operator=(const Safezone &other) {
     return *this;
 }
 
-
 /*********************************************
-	continuous_query
+	Query State
 *********************************************/
 
-continuous_query::continuous_query(string cfg, string nm) {
+QueryState::QueryState() { accuracy = 0.0; }
+
+QueryState::QueryState(const vector<arma::SizeMat> &vsz) {
+    for (auto sz:vsz)
+        globalModel.emplace_back(sz, arma::fill::zeros);
+    accuracy = 0.0;
+}
+
+void QueryState::InitializeGlobalModel(const vector<arma::SizeMat> &vsz) {
+    for (auto sz:vsz)
+        globalModel.emplace_back(sz, arma::fill::zeros);
+}
+
+void QueryState::UpdateEstimate(vector<arma::mat> &mdl) {
+    for (size_t i = 0; i < mdl.size(); i++)
+        globalModel.at(i) -= globalModel.at(i) - mdl.at(i);
+}
+
+void QueryState::UpdateEstimate(vector<arma::mat *> &mdl) {
+    for (size_t i = 0; i < mdl.size(); i++)
+        globalModel.at(i) -= globalModel.at(i) - *mdl.at(i);
+}
+
+void QueryState::UpdateEstimateV2(vector<arma::mat> &mdl) {
+    for (size_t i = 0; i < mdl.size(); i++)
+        globalModel.at(i) += mdl.at(i);
+}
+
+void QueryState::UpdateEstimateV2(vector<arma::mat *> &mdl) {
+    for (size_t i = 0; i < mdl.size(); i++)
+        globalModel.at(i) += *mdl.at(i);
+}
+
+QueryState::~QueryState() = default;
+
+SafezoneFunction *QueryState::Safezone(const string &cfg, string algo) {
+
+    Json::Value root;
+    std::ifstream cfgfl(cfg);
+    cfgfl >> root;
+
+    string algorithm = root[algo].get("algorithm", "Variance_Monitoring").asString();
+    cout << algorithm << endl;
+    if (algorithm == "Batch_Learning") {
+        auto safe_zone = new BatchLearningSZFunction(globalModel, root[algo].get("batch_size", 32).asInt64());
+        return safe_zone;
+    } else if (algorithm == "Variance_Monitoring") {
+        auto safe_zone = new VarianceSZFunction(globalModel,
+                                                root[algo].get("threshold", 1.).asFloat(),
+                                                root[algo].get("batch_size", 32).asInt64());
+        return safe_zone;
+    } else {
+        return nullptr;
+    }
+}
+
+/*********************************************
+	Continuous Query
+*********************************************/
+
+ContinuousQuery::ContinuousQuery(const string &cfg, string nm) {
     cout << "Initializing the query..." << endl;
     Json::Value root;
     std::ifstream cfgfl(cfg);
     cfgfl >> root;
 
-    config.distributed_learning_algorithm = root["gm_network_" + nm].get("distributed_learning_algorithm", "Trash").asString();
-    config.network_name = nm;
-    config.precision = root[config.distributed_learning_algorithm].get("precision", 0.01).asFloat();
-    config.rebalancing = root[config.distributed_learning_algorithm].get("rebalancing", false).asBool();
-    config.reb_mult = root[config.distributed_learning_algorithm].get("reb_mult", -1.).asFloat();
-    config.beta_mu = root[config.distributed_learning_algorithm].get("beta_mu", 0.5).asFloat();
-    config.max_rebs = root[config.distributed_learning_algorithm].get("max_rebs", 2).asInt64();
+    config.learningAlgorithm = root["gm_network_" + nm]
+            .get("learning_algorithm", "Trash").asString();
+    config.distributedLearningAlgorithm = root["gm_network_" + nm]
+            .get("distributed_learning_algorithm", "Trash").asString();
+    config.networkName = nm;
+    config.precision = root[config.distributedLearningAlgorithm].get("precision", 0.01).asFloat();
+    config.rebalancing = root[config.distributedLearningAlgorithm].get("rebalancing", false).asBool();
+    config.reb_mult = root[config.distributedLearningAlgorithm].get("reb_mult", -1.).asFloat();
+    config.betaMu = root[config.distributedLearningAlgorithm].get("beta_mu", 0.5).asFloat();
+    config.maxRebs = root[config.distributedLearningAlgorithm].get("max_rebs", 2).asInt64();
 
     config.cfgfile = cfg;
 
     cout << "Query initialized : ";
-    cout << config.distributed_learning_algorithm << ", ";
-    cout << config.network_name << ", ";
+    cout << config.networkName << ", ";
     cout << config.cfgfile << endl;
 }
 
-void continuous_query::setTestSet(arma::mat *tSet, arma::mat *tRes) {
+void ContinuousQuery::SetTestSet(arma::mat *tSet, arma::mat *tRes) {
     testSet = tSet;
     testResponses = tRes;
 }
 
-double continuous_query::queryAccuracy(RNNLearner *rnn) { return rnn->GetModelAccuracy(); }
+double ContinuousQuery::QueryAccuracy(RNNLearner *rnn) { return rnn->GetModelAccuracy(); }
 
 /*********************************************
-	tcp_channel
+	TCP Channel
 *********************************************/
 
-tcp_channel::tcp_channel(host *src, host *dst, rpcc_t endp) : channel(src, dst, endp), tcp_byts(0) {}
+TcpChannel::TcpChannel(host *src, host *dst, rpcc_t endp) : channel(src, dst, endp), tcp_byts(0) {}
 
-void tcp_channel::transmit(size_t msg_size) {
+void TcpChannel::transmit(size_t msg_size) {
     // update parent statistics
     channel::transmit(msg_size);
 

@@ -33,38 +33,38 @@ namespace gm_protocol {
 
 	    This cost is resembling the TCP segment cost.
     **/
-    struct tcp_channel : channel {
+    struct TcpChannel : channel {
         static constexpr size_t tcp_header_bytes = 40;
         static constexpr size_t tcp_mss = 1024;
 
-        tcp_channel(host *src, host *dst, rpcc_t endp);
+        TcpChannel(host *src, host *dst, rpcc_t endp);
 
         void transmit(size_t msg_size) override;
 
-        size_t tcp_bytes() const { return tcp_byts; }
+        size_t GetTcp_byts() const { return tcp_byts; }
 
     protected:
         size_t tcp_byts;
 
     };
 
-    struct float_value {
+    struct FloatValue {
 
         const float value;
 
-        float_value(float qntm) : value(qntm) {}
+        FloatValue(float qntm) : value(qntm) {}
 
-        size_t byte_size() const { return sizeof(float); }
+        size_t ByteSize() const { return sizeof(float); }
 
     };
 
-    struct increment {
+    struct Increment {
 
         const int increase;
 
-        inline increment(int inc) : increase(inc) {}
+        inline Increment(int inc) : increase(inc) {}
 
-        size_t byte_size() const { return sizeof(int); }
+        size_t ByteSize() const { return sizeof(int); }
     };
 
     /**
@@ -74,40 +74,40 @@ namespace gm_protocol {
 	    together with a count of the updates it contains since the
 	    last synchronization.
     **/
-    struct model_state {
+    struct ModelState {
         const vector<arma::mat> &_model;
         size_t updates;
 
-        model_state(const vector<arma::mat> &_mdl, size_t _updates) : _model(_mdl), updates(_updates) {}
+        ModelState(const vector<arma::mat> &_mdl, size_t _updates) : _model(_mdl), updates(_updates) {}
 
-        size_t byte_size() const;
+        size_t GetByteSize() const;
     };
 
-    struct p_model_state {
+    struct PModelState {
         const vector<arma::mat *> &_model;
         size_t updates;
 
-        p_model_state(const vector<arma::mat *> &_mdl, size_t _updates) : _model(_mdl), updates(_updates) {}
+        PModelState(const vector<arma::mat *> &_mdl, size_t _updates) : _model(_mdl), updates(_updates) {}
 
-        size_t byte_size() const;
+        size_t GetByteSize() const;
     };
 
-    struct int_num {
+    struct IntNum {
 
         const size_t number;
 
-        int_num(const size_t nb) : number(nb) {}
+        IntNum(const size_t nb) : number(nb) {}
 
-        size_t byte_size() const;
+        size_t GetByteSize() const;
 
     };
 
-    struct matrix_message {
+    struct MatrixMessage {
         const arma::mat &sub_params;
 
-        matrix_message(const arma::mat sb_prms) : sub_params(sb_prms) {}
+        MatrixMessage(const arma::mat sb_prms) : sub_params(sb_prms) {}
 
-        size_t byte_size() const;
+        size_t GetByteSize() const;
     };
 
     /** The base class of a safezone function for machine learning purposes. **/
@@ -120,7 +120,7 @@ namespace gm_protocol {
 
         ~SafezoneFunction();
 
-        const vector<arma::mat> &getGlobalModel() const { return GlobalModel; }
+        inline const vector<arma::mat> &GetGlobalModel() const { return GlobalModel; }
 
         void UpdateDrift(vector<arma::mat> &drift, vector<arma::mat *> &vars, float mul) const;
 
@@ -143,9 +143,9 @@ namespace gm_protocol {
 
         float CheckIfAdmissible_v2(const vector<arma::mat *> &drift) const { return 0.; }
 
-        size_t byte_size() const { return 0; }
+        size_t GetByteSize() const { return 0; }
 
-        vector<float> hyper() const { return hyperparameters; }
+        vector<float> GetHyperparameters() const { return hyperparameters; }
 
         void Print() { cout << endl << "Simple safezone function." << endl; }
     };
@@ -169,7 +169,7 @@ namespace gm_protocol {
 
         size_t CheckIfAdmissible(const size_t counter) const;
 
-        size_t byte_size() const;
+        size_t GetByteSize() const;
     };
 
     /**
@@ -181,7 +181,7 @@ namespace gm_protocol {
     struct VarianceSZFunction : SafezoneFunction {
 
         float threshold; // The threshold of the variance between the models of the network.
-        size_t batch_size; // The number of points seen by the node since the last synchronization.
+        size_t batchSize; // The number of points seen by the node since the last synchronization.
 
         VarianceSZFunction(vector<arma::mat> &GlMd);
 
@@ -212,7 +212,7 @@ namespace gm_protocol {
 
         float CheckIfAdmissible_v2(const vector<arma::mat *> &drift) const;
 
-        size_t byte_size() const;
+        size_t GetByteSize() const;
     };
 
     /**
@@ -240,6 +240,7 @@ namespace gm_protocol {
         Safezone(Safezone &&);
 
         Safezone &operator=(Safezone &&);
+
 
         /// Copyable
         Safezone(const Safezone &);
@@ -272,8 +273,8 @@ namespace gm_protocol {
             return (szone != nullptr) ? szone->CheckIfAdmissible(par1, par2) : NAN;
         }
 
-        inline size_t byte_size() const {
-            return (szone != nullptr) ? szone->byte_size() : 0;
+        inline size_t GetByteSize() const {
+            return (szone != nullptr) ? szone->GetByteSize() : 0;
         }
 
     };
@@ -285,31 +286,31 @@ namespace gm_protocol {
 	    A query state holds the current global estimate model. It also holds the
 	    accuracy of the current global model.
     **/
-    struct query_state {
-        initializer_list<Mat<double>> globalModel;  // The global model.
+    struct QueryState {
+        vector<arma::mat> globalModel;  // The global model.
 
         float accuracy; // The accuracy of the current global model.
 
-        query_state();
+        QueryState();
 
-        query_state(vector<arma::SizeMat> vsz);
+        explicit QueryState(const vector<arma::SizeMat> &vsz);
 
-        ~query_state();
+        ~QueryState();
 
-        void initializeGlobalModel(vector<arma::SizeMat> vsz);
+        void InitializeGlobalModel(const vector<arma::SizeMat> &vsz);
 
         /** Update the global model parameters.
 
             After this function, the query estimate, accuracy and
             safezone should adjust to the new global model.
             */
-        void update_estimate(vector<arma::mat> &mdl);
+        void UpdateEstimate(vector<arma::mat> &mdl);
 
-        void update_estimate(vector<arma::mat *> &mdl);
+        void UpdateEstimate(vector<arma::mat *> &mdl);
 
-        void update_estimate_v2(vector<arma::mat> &mdl);
+        void UpdateEstimateV2(vector<arma::mat> &mdl);
 
-        void update_estimate_v2(vector<arma::mat *> &mdl);
+        void UpdateEstimateV2(vector<arma::mat *> &mdl);
 
         /**
             Return a ml_safezone_func for the safe zone function.
@@ -318,9 +319,9 @@ namespace gm_protocol {
             It is the caller's responsibility to delete the returned object,
             and do so before this object is destroyed.
         **/
-        SafezoneFunction *safezone(string cfg, string algo);
+        SafezoneFunction *Safezone(const string &cfg, string algo);
 
-        virtual size_t byte_size() const {
+        virtual size_t GetByteSize() const {
             size_t num_of_params = 0;
             for (arma::mat param:globalModel)
                 num_of_params += param.n_elem;
@@ -331,15 +332,16 @@ namespace gm_protocol {
 
 
     /** Query and protocol configuration. **/
-    struct protocol_config {
+    struct ProtocolConfig {
         string cfgfile;             // The JSON file containing the info for the test.
-        string network_name;        // The name of the network being queried.
+        string networkName;        // The name of the network being queried.
         bool rebalancing = false;   // A boolean determining whether the monitoring protocol should run with rabalancing.
-        float beta_mu = 0.5;        // Beta vector coefficient of rebalancing.
-        int max_rebs = 2;           // Maximum number of rebalances
-        string distributed_learning_algorithm;
+        float betaMu = 0.5;        // Beta vector coefficient of rebalancing.
+        int maxRebs = 2;           // Maximum number of rebalances
         float precision;
         float reb_mult;
+        string learningAlgorithm;
+        string distributedLearningAlgorithm;
     };
 
 
@@ -347,75 +349,75 @@ namespace gm_protocol {
 	    A base class for a continuous query.
 	    Objects inheriting this class must override the virtual methods.
 	**/
-    struct continuous_query {
+    struct ContinuousQuery {
         // These are attributes requested by the user
-        protocol_config config;
+        ProtocolConfig config;
 
         arma::mat *testSet;         // Test dataset without labels.
         arma::mat *testResponses;   // Labels of the test dataset.
 
-        continuous_query(string cfg, string nm);
+        ContinuousQuery(const string &cfg, string nm);
 
-        virtual ~continuous_query() = default;
+        virtual ~ContinuousQuery() = default;
 
-        void setTestSet(arma::mat *tSet, arma::mat *tRes);
+        void SetTestSet(arma::mat *tSet, arma::mat *tRes);
 
-        static inline query_state *create_query_state() { return new query_state(); }
+        static inline QueryState *create_query_state() { return new QueryState(); }
 
-        static inline query_state *create_query_state(vector<arma::SizeMat> sz) { return new query_state(sz); }
+        static inline QueryState *create_query_state(vector<arma::SizeMat> sz) { return new QueryState(sz); }
 
-        virtual inline double queryAccuracy(RNNLearner *lnr);
+        virtual inline double QueryAccuracy(RNNLearner *lnr);
     };
 
     /** The star network topology using the Geometric Method for Distributed Machine Learning. **/
     template<typename Net, typename Coord, typename Node>
-    struct gm_learning_network : star_network<Net, Coord, Node> {
+    struct GmLearningNetwork : star_network<Net, Coord, Node> {
         typedef Coord coordinator_t;
         typedef Node node_t;
         typedef Net network_t;
         typedef star_network<network_t, coordinator_t, node_t> star_network_t;
 
-        continuous_query *Q;
+        ContinuousQuery *Q;
 
-        const protocol_config &cfg() const { return Q->config; }
+        const ProtocolConfig &cfg() const { return Q->config; }
 
-        gm_learning_network(const set<source_id> &_hids, const string &_name, continuous_query *_Q)
+        GmLearningNetwork(const set<source_id> &_hids, const string &_name, ContinuousQuery *_Q)
                 : star_network_t(_hids), Q(_Q) {
             this->set_name(_name);
             this->setup(Q);
         }
 
-        channel *create_channel(host *src, host *dst, rpcc_t endp) const {
+        channel *CreateChannel(host *src, host *dst, rpcc_t endp) const {
             if (!dst->is_mcast())
-                return new tcp_channel(src, dst, endp);
+                return new TcpChannel(src, dst, endp);
             else
-                return create_channel(src, dst, endp);
+                return CreateChannel(src, dst, endp);
         }
 
         /** This is called to update a specific learning node in the network. **/
-        void process_record(size_t randSite, arma::mat &batch, arma::mat &labels) {
+        void ProcessRecord(size_t randSite, arma::mat &batch, arma::mat &labels) {
             this->source_site(this->sites.at(randSite)->site_id())->update_stream(batch, labels);
         }
 
-        void warmup(arma::mat &batch, arma::mat &labels) {
+        void Warmup(arma::mat &batch, arma::mat &labels) {
             // let the coordinator initialize the nodes
             this->hub->warmup(batch, labels);
         }
 
         /** This is called to update a specific learning node in the network. **/
-        void end_warmup() {
+        void EndWarmup() {
             this->hub->end_warmup();
         }
 
-        void start_round() {
+        void StartRound() {
             this->hub->start_round();
         }
 
-        void process_fini() {
+        void FinishProcess() {
             this->hub->finish_rounds();
         }
 
-        ~gm_learning_network() { delete Q; }
+        ~GmLearningNetwork() { delete Q; }
     };
 
 

@@ -43,17 +43,18 @@ namespace rnn_learner {
         double beta1;                           // Optimizer beta1
         double beta2;                           // Optimizer beta2
         double modelAccuracy;                   // Current accuracy of model
-        Mat<double> modelParameters;            // Current model parameters
+        vector<arma::mat *> modelParameters;    // Current model parameters
         size_t numberOfUpdates;                 // A counter for parameters updates
         Json::Value root;                       // JSON file to read the hyperparameters
 
     public:
         /** Constructor **/
-        RNNLearner(string cfg);
+        explicit RNNLearner(const string &cfg);
+
+        ~RNNLearner();
 
         size_t inputSize = 15, outputSize = 1;
         arma::cube trainX, trainY, testX, testY;
-
 
         static void CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y, size_t rho);
 
@@ -63,9 +64,9 @@ namespace rnn_learner {
 
         int GetNumberOfUpdates() const;
 
-        const arma::Mat<double> &GetModelParameters() const;
+        vector<arma::mat *> &GetModelParameters();
 
-        void SetModelParameters(const arma::Mat<double> &modelParameters);
+        void SetModelParameters(vector<arma::mat *> &modelParameters);
 
         void CentralizedDataPreparation();
 

@@ -16,21 +16,21 @@ namespace gm_protocol {
     using std::endl;
 
 
-    struct node_proxy;
-    struct coordinator;
-    struct learning_node;
-    struct learning_node_proxy;
+    struct NodeProxy;
+    struct Coordinator;
+    struct LearningNode;
+    struct LearningNodeProxy;
 
-    struct GM_Net : gm_learning_network<GM_Net, coordinator, learning_node> {
-        typedef gm_learning_network<network_t, coordinator_t, node_t> gm_learning_network_t;
+    struct GM_Net : GmLearningNetwork<GM_Net, Coordinator, LearningNode> {
+        typedef ::gm_protocol::GmLearningNetwork<network_t, coordinator_t, node_t> gm_learning_network_t;
 
-        GM_Net(const set<source_id> &_hids, const string &_name, continuous_query *_Q);
+        GM_Net(const set<source_id> &_hids, const string &_name, ContinuousQuery *_Q);
     };
 
-    struct coordinator : process {
-        typedef coordinator coordinator_t;
-        typedef learning_node node_t;
-        typedef learning_node_proxy node_proxy_t;
+    struct Coordinator : process {
+        typedef Coordinator coordinator_t;
+        typedef LearningNode node_t;
+        typedef LearningNodeProxy node_proxy_t;
         typedef GM_Net network_t;
 
         proxy_map<node_proxy_t, node_t> proxy;
@@ -39,8 +39,8 @@ namespace gm_protocol {
 	        Protocol Stuff
         **/
         RNNLearner *global_learner;
-        continuous_query *Q;            // continuous query
-        query_state *query;             // current query state
+        ContinuousQuery *Q;            // continuous query
+        QueryState *query;             // current query state
         SafezoneFunction *safe_zone;    // the safe zone wrapper
         size_t k;                       // number of sites
 
@@ -48,55 +48,55 @@ namespace gm_protocol {
         map<node_t *, size_t> node_index;
         vector<node_t *> node_ptr;
 
-        coordinator(network_t *nw, continuous_query *_Q);
+        Coordinator(network_t *nw, ContinuousQuery *_Q);
 
-        ~coordinator();
+        ~Coordinator();
 
         inline network_t *net() { return static_cast<network_t *>(host::net()); }
 
-        inline const protocol_config &cfg() const { return Q->config; }
+        inline const ProtocolConfig &cfg() const { return Q->config; }
 
         // Initialize the Learner and its' variables.
-        void initializeLearner();
+        void InitializeLearner();
 
-        void setup_connections() override;
+        void SetupConnections() override;
 
         // load the warmup dataset
-        void warmup(arma::mat &batch, arma::mat &labels);
+        void Warmup(arma::mat &batch, arma::mat &labels);
 
         // Ending the warmup of the network.
-        void end_warmup();
+        void EndWarmup();
 
         // initialize a new round
-        void start_round();
+        void StartRound();
 
-        void finish_round();
+        void FinishRound();
 
-        void finish_rounds();
+        void FinishRounds();
 
         // rebalance algorithm by Kamp
-        void Kamp_Rebalance(node_t *n);
+        void KampRebalance(node_t *n);
 
         // Printing and saving the accuracy.
         void Progress();
 
         // Getting the accuracy of the global learner.
-        double getAccuracy();
+        double GetAccuracy();
 
         // Get the communication statistics of experiment.
         vector<size_t> Statistics() const;
 
         // get the model of a node
-        void fetch_updates(node_t *n);
+        void FetchUpdates(node_t *n);
 
         // remote call on host violation
-        oneway local_violation(sender<node_t> ctx);
+        oneway LocalViolation(sender<node_t> ctx);
 
-        matrix_message hybrid_drift(sender<node_t> ctx, int_num rows, int_num cols);
+        MatrixMessage HybridDrift(sender<node_t> ctx, IntNum rows, IntNum cols);
 
-        matrix_message virtual_drift(sender<node_t> ctx, int_num rows);
+        MatrixMessage VirtualDrift(sender<node_t> ctx, IntNum rows);
 
-        oneway real_drift(sender<node_t> ctx, int_num cols);
+        oneway RealDrift(sender<node_t> ctx, IntNum cols);
 
         set<node_t *> B;                     // initialized by local_violation(),
         // updated by rebalancing algo
@@ -116,12 +116,12 @@ namespace gm_protocol {
 
     };
 
-    struct coord_proxy : remote_proxy<coordinator> {
-        using coordinator_t = coordinator;
-        REMOTE_METHOD(coordinator_t, local_violation);
-        REMOTE_METHOD(coordinator_t, hybrid_drift);
-        REMOTE_METHOD(coordinator_t, virtual_drift);
-        REMOTE_METHOD(coordinator_t, real_drift);
+    struct coord_proxy : remote_proxy<Coordinator> {
+        using coordinator_t = Coordinator;
+        REMOTE_METHOD(coordinator_t, LocalViolation);
+        REMOTE_METHOD(coordinator_t, HybridDrift);
+        REMOTE_METHOD(coordinator_t, VirtualDrift);
+        REMOTE_METHOD(coordinator_t, RealDrift);
 
         coord_proxy(process *c) : remote_proxy<coordinator_t>(c) {}
     };
@@ -131,16 +131,16 @@ namespace gm_protocol {
 	This is a site implementation for the classic Geometric Method protocol.
 
  */
-    struct learning_node : local_site {
+    struct LearningNode : local_site {
 
-        typedef coordinator coordinator_t;
-        typedef learning_node node_t;
-        typedef learning_node_proxy node_proxy_t;
+        typedef Coordinator coordinator_t;
+        typedef LearningNode node_t;
+        typedef LearningNodeProxy node_proxy_t;
         typedef GM_Net network_t;
         typedef coord_proxy coord_proxy_t;
-        typedef continuous_query continuous_query_t;
+        typedef ContinuousQuery continuous_query_t;
 
-        continuous_query *Q;                // The query management object
+        continuous_query_t *Q;                // The query management object
         Safezone szone;                     // The safezone object
         RNNLearner *_learner;               // The learning algorithm
 
@@ -151,47 +151,50 @@ namespace gm_protocol {
         size_t datapoints_seen;             // Number of points the node has seen since the last synchronization
         coord_proxy_t coord;                // The proxy of the coordinator/hub
 
-        learning_node(network_t *net, source_id hid, continuous_query_t *_Q)
+        LearningNode(network_t *net, source_id hid, continuous_query_t *_Q)
                 : local_site(net, hid), Q(_Q), coord(this) {
             coord <<= net->hub;
-            initializeLearner();
+            InitializeLearner();
         };
 
-        inline const protocol_config &cfg() const { return Q->config; }
+        inline const ProtocolConfig &cfg() const { return Q->config; }
 
-        void initializeLearner();
+        void InitializeLearner();
 
-        void setup_connections() override;
+        void SetupConnections() override;
 
-        void update_drift(vector<arma::mat *> &params);
+        void UpdateDrift(vector<arma::mat *> &params);
 
-        void update_stream(arma::mat &batch, arma::mat &labels);
+        void UpdateStream(arma::mat &batch, arma::mat &labels);
 
-        oneway set_HStatic_variables(const p_model_state &SHParams);
+        oneway SetHStaticVariables(const PModelState &SHParams);
 
         //
         // Remote methods
         //
 
         // Called at the start of a round
-        oneway reset(const Safezone &newsz);
+        oneway Reset(const Safezone &newsz);
 
         // Transfer data to the coordinator
-        model_state get_drift();
+        ModelState GetDrift();
 
         // Set the drift vector (for rebalancing)
-        void set_drift(model_state mdl);
+        void SetDrift(ModelState mdl);
 
     };
 
-    struct learning_node_proxy : remote_proxy<learning_node> {
-        typedef learning_node node_t;
-        REMOTE_METHOD(node_t, reset);
-        REMOTE_METHOD(node_t, get_drift);
-        REMOTE_METHOD(node_t, set_drift);
-        REMOTE_METHOD(node_t, set_HStatic_variables);
+    struct LearningNodeProxy : remote_proxy<LearningNode> {
+        typedef LearningNode node_t;
+        REMOTE_METHOD(node_t, Reset);
+        REMOTE_METHOD(node_t, GetDrift);
+        REMOTE_METHOD(node_t, SetDrift);
+        REMOTE_METHOD(node_t, SetHStaticVariables);
 
-        learning_node_proxy(process *p) : remote_proxy<node_t>(p) {}
+        learning_node_proxy(process
+        *p) :
+
+        remote_proxy<node_t>(p) {}
     };
 
 
@@ -199,8 +202,8 @@ namespace gm_protocol {
 
 namespace dds {
     template<>
-    inline size_t byte_size<gm_protocol::learning_node *>(
-            gm_protocol::learning_node *const &) { return 4; }
+    inline size_t byte_size<gm_protocol::LearningNode *>(
+            gm_protocol::LearningNode *const &) { return 4; }
 }
 
 #endif

@@ -17,7 +17,6 @@
 
 namespace rnn_learner {
 
-
     using namespace std;
     using namespace mlpack;
     using namespace mlpack::ann;
@@ -27,36 +26,47 @@ namespace rnn_learner {
     class RNNLearner {
 
     protected:
-        arma::cube trainX, trainY;              // Trainset data points and labels
-        arma::cube testX, testY;                // Testset data points and labels
-        size_t inputSize;                       // Number of neurons at the input layer
-        size_t outputSize;                      // Number of neurons at the output layer
-        string datasetPath;                     // Path for finding dataset file
-        string saveModelPath;                   // Path for saving object of rnn model
-        double trainTestRatio;                  // Testing data is taken from the dataset in this ratio
-        int trainingEpochs;                     // Number of optimization epochs
-        int lstmCells;                          // Number of hidden layers
-        int rho;                                // Number of time steps to look backward for in the RNN
-        int maxRho = rho;                       // Max Rho for LSTM
-        double stepSize;                        // Step size of an optimizer
-        int batchSize;                          // Number of data points in each iteration of SGD
-        int iterationsPerEpoch;                 // Number of iterations per cycle
-        double tolerance;                       // Optimizer tolerance
-        bool bShuffle;                          // Let optimizer shuffle batches
-        double epsilon;                         // Optimizer epsilon
-        double beta1;                           // Optimizer beta1
-        double beta2;                           // Optimizer beta2
-        double modelAccuracy;                   // Current accuracy of model
-        vector<arma::mat *> modelParameters;    // Current model parameters
-        size_t numberOfUpdates;                 // A counter for parameters updates
-        Json::Value root;                       // JSON file to read the hyperparameters
+
+        /**
+         * Dataset parameters
+         */
+        arma::cube trainX, trainY;                          // Trainset data points and labels
+        arma::cube testX, testY;                            // Testset data points and labels
+        size_t inputSize;                                   // Number of neurons at the input layer
+        size_t outputSize;                                  // Number of neurons at the output layer
+        string datasetPath;                                 // Path for finding dataset file
+        string saveModelPath;                               // Path for saving object of rnn model
+        double trainTestRatio;                              // Testing data is taken from the dataset in this ratio
+
+        RNN<MeanSquaredError<>, HeInitialization> model;    // RNN model
+        SGD<AdamUpdate> optimizer;                          // SGD optimizer
+
+        /**
+         * Model and Optimizer parameters
+         */
+        int trainingEpochs;                                 // Number of optimization epochs
+        int lstmCells;                                      // Number of hidden layers
+        int rho;                                            // Number of time steps to look backward for in the RNN
+        int maxRho = rho;                                   // Max Rho for LSTM
+        double stepSize;                                    // Step size of an optimizer
+        int batchSize;                                      // Number of data points in each iteration of SGD
+        int iterationsPerEpoch;                             // Number of iterations per cycle
+        double tolerance;                                   // Optimizer tolerance
+        bool bShuffle;                                      // Let optimizer shuffle batches
+        double epsilon;                                     // Optimizer epsilon
+        double beta1;                                       // Optimizer beta1
+        double beta2;                                       // Optimizer beta2
+
+        double modelAccuracy;                               // Current accuracy of model
+        size_t numberOfUpdates;                             // A counter for parameters updates
+        Json::Value root;                                   // JSON file to read the hyperparameters
 
     public:
 
         /**
          * Constructor and Destructor
-         * **/
-        explicit RNNLearner(const string &cfg);
+         */
+        explicit RNNLearner(const string &cfg, const RNN<MeanSquaredError<>, HeInitialization> &model);
 
         ~RNNLearner();
 
@@ -68,16 +78,13 @@ namespace rnn_learner {
 
         int GetNumberOfUpdates() const;
 
-        vector<arma::mat *> &GetModelParameters();
-
-        void SetModelParameters(vector<arma::mat *> &modelParameters);
-
         void CentralizedDataPreparation();
+
+        void BuildModel();
 
         void TrainModel();
 
         void MakePrediction();
-
 
     };
 }

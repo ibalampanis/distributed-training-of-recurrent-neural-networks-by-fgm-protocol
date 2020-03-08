@@ -11,9 +11,10 @@ int main(int argc, char **argv) {
 
     string cfg = string(argv[1]);
 
-    auto *pLearner = new RNNLearner(cfg);
+    auto *pLearner = new RNNLearner(cfg, RNN<MeanSquaredError<>, HeInitialization>(0));
 
     pLearner->CentralizedDataPreparation();
+    pLearner->BuildModel();
     pLearner->TrainModel();
     pLearner->MakePrediction();
 

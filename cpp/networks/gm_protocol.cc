@@ -3,8 +3,15 @@
 #include "cpp/models/rnn_learner.hh"
 #include "dds/dsarch.hh"
 
-
 using namespace gm_protocol;
+using namespace dds;
+using namespace arma;
+using namespace rnn_learner;
+using std::map;
+using std::string;
+using std::vector;
+using std::cout;
+using std::endl;
 
 /*********************************************
 	Model State & p ModelState (pointer)
@@ -38,13 +45,13 @@ size_t MatrixMessage::GetByteSize() const {
 	Safezone Function
 *********************************************/
 
-SafezoneFunction::SafezoneFunction(vector<arma::mat> &mdl) : GlobalModel(mdl) {}
+SafezoneFunction::SafezoneFunction(vector<arma::mat> &mdl) : globalModel(mdl) {}
 
 void SafezoneFunction::UpdateDrift(vector<arma::mat> &drift, vector<arma::mat *> &vars, float mul) const {
     drift.clear();
-    for (size_t i = 0; i < GlobalModel.size(); i++) {
+    for (size_t i = 0; i < globalModel.size(); i++) {
         arma::mat dr = arma::mat(arma::size(*vars.at(i)), arma::fill::zeros);
-        dr = mul * (*vars.at(i) - GlobalModel.at(i));
+        dr = mul * (*vars.at(i) - globalModel.at(i));
         drift.push_back(dr);
     }
 }
@@ -72,7 +79,7 @@ size_t BatchLearningSZFunction::CheckIfAdmissible(const size_t counter) const {
 
 size_t BatchLearningSZFunction::GetByteSize() const {
     size_t num_of_params = 0;
-    for (arma::mat param:GlobalModel) {
+    for (arma::mat param:globalModel) {
         num_of_params += param.n_elem;
     }
     return num_of_params * sizeof(float) + sizeof(size_t);
@@ -113,7 +120,7 @@ VarianceSZFunction::VarianceSZFunction(vector<arma::mat> &GlMd, float thr, size_
 float VarianceSZFunction::Zeta(const vector<arma::mat> &mdl) const {
     float res = 0.;
     for (size_t i = 0; i < mdl.size(); i++) {
-        arma::mat subtr = GlobalModel.at(i) - mdl.at(i);
+        arma::mat subtr = globalModel.at(i) - mdl.at(i);
         res += arma::dot(subtr, subtr);
     }
     return std::sqrt(threshold) - std::sqrt(res);
@@ -122,7 +129,7 @@ float VarianceSZFunction::Zeta(const vector<arma::mat> &mdl) const {
 float VarianceSZFunction::Zeta(const vector<arma::mat *> &mdl) const {
     float res = 0.;
     for (size_t i = 0; i < mdl.size(); i++) {
-        arma::mat subtr = GlobalModel.at(i) - *mdl.at(i);
+        arma::mat subtr = globalModel.at(i) - *mdl.at(i);
         res += arma::dot(subtr, subtr);
     }
     return std::sqrt(threshold) - std::sqrt(res);
@@ -133,7 +140,7 @@ size_t VarianceSZFunction::CheckIfAdmissible(const size_t counter) const { retur
 float VarianceSZFunction::CheckIfAdmissible(const vector<arma::mat> &mdl) const {
     float var = 0.;
     for (size_t i = 0; i < mdl.size(); i++) {
-        arma::mat sub = mdl.at(i) - GlobalModel.at(i);
+        arma::mat sub = mdl.at(i) - globalModel.at(i);
         var += arma::dot(sub, sub);
     }
     return threshold - var;
@@ -142,7 +149,7 @@ float VarianceSZFunction::CheckIfAdmissible(const vector<arma::mat> &mdl) const 
 float VarianceSZFunction::CheckIfAdmissible(const vector<arma::mat *> &mdl) const {
     float var = 0.;
     for (size_t i = 0; i < mdl.size(); i++) {
-        arma::mat sub = *mdl.at(i) - GlobalModel.at(i);
+        arma::mat sub = *mdl.at(i) - globalModel.at(i);
         var += arma::dot(sub, sub);
     }
     return threshold - var;
@@ -157,8 +164,8 @@ float VarianceSZFunction::CheckIfAdmissible(const vector<arma::mat *> &par1, con
     return std::sqrt(threshold) - std::sqrt(res);
 }
 
-float VarianceSZFunction::CheckIfAdmissible_reb(const vector<arma::mat *> &par1, const vector<arma::mat> &par2,
-                                                float coef) const {
+float VarianceSZFunction::CheckIfAdmissibleReb(const vector<arma::mat *> &par1, const vector<arma::mat> &par2,
+                                               float coef) const {
     float res = 0.;
     for (size_t i = 0; i < par1.size(); i++) {
         arma::mat subtr = *par1.at(i) - par2.at(i);
@@ -170,7 +177,7 @@ float VarianceSZFunction::CheckIfAdmissible_reb(const vector<arma::mat *> &par1,
     return coef * (std::sqrt(threshold) - std::sqrt(res));
 }
 
-float VarianceSZFunction::CheckIfAdmissible_v2(const vector<arma::mat> &drift) const {
+float VarianceSZFunction::CheckIfAdmissibleV2(const vector<arma::mat> &drift) const {
     float var = 0.;
     for (size_t i = 0; i < drift.size(); i++) {
         var += arma::dot(drift.at(i), drift.at(i));
@@ -178,7 +185,7 @@ float VarianceSZFunction::CheckIfAdmissible_v2(const vector<arma::mat> &drift) c
     return threshold - var;
 }
 
-float VarianceSZFunction::CheckIfAdmissible_v2(const vector<arma::mat *> &drift) const {
+float VarianceSZFunction::CheckIfAdmissibleV2(const vector<arma::mat *> &drift) const {
     float var = 0.;
     for (size_t i = 0; i < drift.size(); i++) {
         var += arma::dot(*drift.at(i), *drift.at(i));
@@ -188,7 +195,7 @@ float VarianceSZFunction::CheckIfAdmissible_v2(const vector<arma::mat *> &drift)
 
 size_t VarianceSZFunction::GetByteSize() const {
     size_t num_of_params = 0;
-    for (const arma::mat &param:GlobalModel) {
+    for (const arma::mat &param:globalModel) {
         num_of_params += param.n_elem;
     }
     return (1 + num_of_params) * sizeof(float) + sizeof(size_t);
@@ -237,6 +244,8 @@ QueryState::QueryState(const vector<arma::SizeMat> &vsz) {
     accuracy = 0.0;
 }
 
+QueryState::~QueryState() = default;
+
 void QueryState::InitializeGlobalModel(const vector<arma::SizeMat> &vsz) {
     for (auto sz:vsz)
         globalModel.emplace_back(sz, arma::fill::zeros);
@@ -262,8 +271,6 @@ void QueryState::UpdateEstimateV2(vector<arma::mat *> &mdl) {
         globalModel.at(i) += *mdl.at(i);
 }
 
-QueryState::~QueryState() = default;
-
 SafezoneFunction *QueryState::Safezone(const string &cfg, string algo) {
 
     Json::Value root;
@@ -283,6 +290,13 @@ SafezoneFunction *QueryState::Safezone(const string &cfg, string algo) {
     } else {
         return nullptr;
     }
+}
+
+size_t QueryState::GetByteSize() const {
+    size_t num_of_params = 0;
+    for (const arma::mat &param:globalModel)
+        num_of_params += param.n_elem;
+    return (1 + num_of_params) * sizeof(float);
 }
 
 /*********************************************
@@ -334,3 +348,40 @@ void TcpChannel::transmit(size_t msg_size) {
     size_t segno = (msg_size + tcp_mss - 1) / tcp_mss;
     tcp_byts += msg_size + segno * tcp_header_bytes;
 }
+
+/*********************************************
+	GM Learning Network
+*********************************************/
+
+template<typename Net, typename Coord, typename Node>
+GmLearningNetwork<Net, Coord, Node>::GmLearningNetwork(const set<source_id> &_hids, const string &_name,
+                                                       ContinuousQuery *_Q)
+        : star_network_t(_hids), Q(_Q) {
+    this->set_name(_name);
+    this->setup(Q);
+}
+
+template<typename Net, typename Coord, typename Node>
+GmLearningNetwork<Net, Coord, Node>::~GmLearningNetwork() { delete Q; }
+
+template<typename Net, typename Coord, typename Node>
+const ProtocolConfig &GmLearningNetwork<Net, Coord, Node>::cfg() const { return Q->config; }
+
+template<typename Net, typename Coord, typename Node>
+channel *GmLearningNetwork<Net, Coord, Node>::CreateChannel(host *src, host *dst, rpcc_t endp) const {
+    if (!dst->is_mcast())
+        return new TcpChannel(src, dst, endp);
+    else
+        return CreateChannel(src, dst, endp);
+}
+
+template<typename Net, typename Coord, typename Node>
+void GmLearningNetwork<Net, Coord, Node>::ProcessRecord(size_t randSite, arma::mat &batch, arma::mat &labels) {
+    this->source_site(this->sites.at(randSite)->site_id())->update_stream(batch, labels);
+}
+
+template<typename Net, typename Coord, typename Node>
+void GmLearningNetwork<Net, Coord, Node>::StartRound() { this->hub->start_round(); }
+
+template<typename Net, typename Coord, typename Node>
+void GmLearningNetwork<Net, Coord, Node>::FinishProcess() { this->hub->finish_rounds(); }

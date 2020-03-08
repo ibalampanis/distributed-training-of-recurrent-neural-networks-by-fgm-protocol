@@ -19,9 +19,12 @@ namespace feeders {
     using std::vector;
     using std::string;
 
-    // vector container for the networks.
+    /**
+     * Vector container for the networks.
+     */
     template<typename distrNetType>
     class NetContainer : public std::vector<distrNetType *> {
+
     public:
         using std::vector<distrNetType *>::vector;
 
@@ -31,122 +34,101 @@ namespace feeders {
 
     };
 
-    // A vector container for the queries.
+    /**
+     * Vector container for the queries.
+     */
     class QueryContainer : public vector<ContinuousQuery *> {
+
     public:
         using vector<ContinuousQuery *>::vector;
 
-        inline void join(ContinuousQuery *qry) { this->push_back(qry); }
+        inline void Join(ContinuousQuery *qry) { this->push_back(qry); }
 
-        inline void leave(int const i) { this->erase(this->begin() + i); }
+        inline void Leave(int const i) { this->erase(this->begin() + i); }
 
     };
 
     /**
-     * A feeders purpose is to synchronize the testing of the networks
-     * by providing the appropriate data stream to the nodes of each net.
-     * **/
+     * The purpose of Feeder class is to synchronize the testing of the networks
+     * by providing the appropriate data points to the nodes of each net.
+     */
     template<typename distrNetType>
     class Feeder {
     protected:
-        std::string config_file; // JSON file to read the hyperparameters.
-        time_t seed; // The seed for the random generator.
-        size_t batchSize{}; // The batch learning size.
-        size_t warmupSize{}; // The size of the warmup dataset.
-        arma::mat testSet; // Test dataset for validation of the classification algorithm.
-        arma::mat testResponses; // Arma row vector containing the labels of the evaluation set.
+        std::string configFile;                     // JSON file to read the hyperparameters.
+        time_t seed;                                // The seed for the random generator.
+        size_t batchSize{};                         // The batch learning size.
+        size_t warmupSize{};                        // The size of the warmup dataset.
+        size_t testSize;                            // Starting test data point.
+        size_t numberOfFeatures;                    // The number of features of each datapoint.
+        arma::mat target;                           // The moving target disjunction of the stream.
+        size_t targets;                             // The total number of changed targets.
+        size_t numOfPoints = 12800000;              // Total number of datapoints.
+        size_t numOfMaxRounds = 100000;             // Maximum number of monitored rounds.
 
-        size_t test_size{}; // Size of test dataset. [optional]
-        bool negative_labels; // If true it sets 0 labels to -1. [optional]
 
-        NetContainer<distrNetType> _net_container; // A container for networks.
-        QueryContainer _query_container; // A container for queries.
+        NetContainer<distrNetType> _netContainer;   // A container for networks.
+        QueryContainer _queryContainer;             // A container for queries.
 
         // Stream Distribution
-        bool uniform_distr;
+        bool uniformDistr;
         vector<vector<set<size_t>>> net_dists;
-        float B_prob;
-        float site_ratio;
+        float Bprob;
+        float siteRatio;
 
-        // Statistics collection.
+        // Statistics collection
         vector<chan_frame> stats;
-        vector<vector<vector<size_t>>> differential_communication;
+        vector<vector<vector<size_t>>> differentialCommunication;
         size_t msgs{};
         size_t bts{};
-        vector<vector<double>> differential_accuracy;
-        bool log_diff_acc;
+        vector<vector<double>> differentialAccuracy;
+        bool logDiffAcc;
 
     public:
-
-        Feeder(string cfg);
 
         /**
-         * Method that creates the test dataset.
-         * This method passes one time through the entire dataset,
-         * if the dataset is stored in a hdf5 file.
-         * **/
-        virtual void MakeTestDataset() {}
+         * Constructor
+         */
+        explicit Feeder(const string &cfg);
 
-        /* Method that puts a network in the network container. */
-        void AddNet(distrNetType *net) { _net_container.join(net); }
+        /**
+         * This method puts a network in the network container.
+         */
+        void AddNet(distrNetType *net);
 
-        /* Method that puts a network in the network container. */
-        void AddQuery(ContinuousQuery *qry) { _query_container.join(qry); }
+        /**
+         * This method puts a query in the query container.
+         */
+        void AddQuery(ContinuousQuery *qry);
 
-        /* Method initializing all the networks. */
+        /**
+         * This method initializes all the networks.
+         */
         void InitializeSimulation();
 
-        /* Method that prints the star learning network for debbuging purposes. */
+        /**
+         * This method prints the star learning network for debbuging purposes.
+         */
         void PrintStarNets() const;
 
-        /* Method that gathers communication info after each streaming batch. */
+        /**
+         * This method gathers communication info after each streaming batch.
+         */
         void GatherDifferentialInfo();
-
-        // Getters.
-        inline arma::mat &GetTestSet() { return testSet; }
-
-        inline arma::mat &GetTestSetLabels() { return testResponses; }
-
-        inline arma::mat *GetPTestSet() { return &testSet; }
-
-        inline arma::mat *GetPTestSetLabels() { return &testResponses; }
-
-        inline size_t GetRandomInt(size_t maxValue) { return std::rand() % maxValue; }
-
-        virtual inline size_t GetNumberOfFeatures() { return 0; }
-
-        virtual void GetStatistics() {}
-    };
-
-    template<typename distrNetType>
-    class RandomFeeder : public Feeder<distrNetType> {
-    protected:
-
-        size_t test_size;                   // Starting test data point.
-        size_t number_of_features;          // The number of features of each datapoint.
-        bool linearly_seperable;            // Determines if the random dataset is linearly seperable.
-        arma::mat target;                   // The moving target disjunction of the stream.
-        size_t targets;                     // The total number of changed targets.
-        size_t numOfPoints = 12800000;      // Total number of datapoints.
-        size_t numOfMaxRounds = 100000;     // Maximum number of monitored rounds.
-
-    public:
-
-        explicit RandomFeeder(const string &cfg);
-
-        void MakeTestDataset() override;
-
-        void GenNewTarget();
-
-        arma::dvec GenPoint();
 
         void TrainNetworks();
 
         void Train(arma::mat &batch, arma::mat &labels);
 
-        virtual void GetStatistics() {}
+        /**
+         * Getters
+         */
+        size_t GetRandomInt(size_t maxValue);
 
-        virtual size_t GetNumberOfFeatures() { return number_of_features; }
+        void GetStatistics() {}
+
+        size_t GetNumberOfFeatures();
+
     };
 
 }

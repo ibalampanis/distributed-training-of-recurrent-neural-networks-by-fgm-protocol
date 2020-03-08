@@ -8,10 +8,10 @@ int main(int argc, char **argv) {
 
     std::string cfg = std::string(argv[1]);
 
-    RandomFeeder<GM_Net> sim(cfg);
+    Feeder<GmNet> sim(cfg);
     sim.InitializeSimulation(); // TODO
     sim.PrintStarNets();
-//    sim.TrainNetworks();
+    sim.TrainNetworks();
 
     return 0;
 }

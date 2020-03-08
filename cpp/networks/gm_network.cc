@@ -3,6 +3,15 @@
 
 using namespace gm_protocol;
 
+/*********************************************
+	Network
+*********************************************/
+
+gm_protocol::GmNet::GmNet(const set<source_id> &_hids, const string &_name, ContinuousQuery *_Q)
+        : gm_learning_network_t(_hids, _name, _Q) {
+    this->set_protocol_name("ML_GM");
+}
+
 
 /*********************************************
 	Coordinator Side
@@ -48,7 +57,7 @@ oneway Coordinator::LocalViolation(sender<node_t> ctx) {
     }
     cnt = 0;
 
-    if (SafezoneFunction *entity = static_cast<BatchLearningSZFunction *>(safezone)) {
+    if (SafezoneFunction *entity = (VarianceSZFunction *) safezone) {
         num_violations = 0;
         FinishRound();
     } else {
@@ -240,7 +249,7 @@ void Coordinator::FinishRounds() {
     query->accuracy = Q->QueryAccuracy(global_learner);
 
     // See the total number of points received by all the nodes. For debugging.
-    for (auto nd:node_ptr) {
+    for (auto nd:nodePtr) {
         total_updates += nd->_learner->GetNumberOfUpdates();
     }
 
@@ -254,35 +263,19 @@ void Coordinator::FinishRounds() {
 
 }
 
-void Coordinator::Warmup(arma::mat &batch, arma::mat &labels) {
-    global_learner->fit(batch, labels);
-    total_updates += batch.n_cols;
-    if (query->globalModel.size() == 0) {
-        vector<arma::SizeMat> model_sizes = global_learner->modelDimensions();
-        query->InitializeGlobalModel(model_sizes);
-        for (arma::SizeMat sz:model_sizes)
-            Mean.push_back(arma::mat(sz, arma::fill::zeros));
-    }
-}
-
-void Coordinator::EndWarmup() {
-    query->UpdateEstimateV2(global_learner->GetModelParameters());
-    StartRound();
-}
-
 void Coordinator::SetupConnections() {
     using boost::adaptors::map_values;
     proxy.add_sites(net()->sites);
     for (auto n : net()->sites) {
-        node_index[n] = node_ptr.size();
-        node_ptr.push_back(n);
+        nodeIndex[n] = nodePtr.size();
+        nodePtr.push_back(n);
     }
-    k = node_ptr.size();
+    k = nodePtr.size();
 }
 
 void Coordinator::InitializeLearner() {
 
-    global_learner = new RNNLearner(cfg().cfgfile);
+    global_learner = new RNNLearner(cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(0));
 }
 
 
@@ -344,11 +337,11 @@ void LearningNode::UpdateStream(arma::mat &batch, arma::mat &labels) {
             datapoints_seen = 0;
             szone(drift, _learner->GetModelParameters(), 1.);
             if (szone.GetSZone()->CheckIfAdmissible_v2(drift) < 0.)
-                coord.local_violation(this);
+                coord.LocalViolation(this);
         }
     } else {
         if (szone(datapoints_seen) <= 0.)
-            coord.local_violation(this);
+            coord.LocalViolation(this);
     }
 }
 
@@ -370,9 +363,7 @@ oneway LearningNode::augmentBetaMatrix(IntNum cols) {
 
 void LearningNode::InitializeLearner() {
 
-    _learner = new RNNLearner(cfg().cfgfile);
-
-    _learner->initializeModel(Q->testSet->n_rows);
+    _learner = new RNNLearner(cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(0));
 
 }
 
@@ -380,8 +371,4 @@ void LearningNode::SetupConnections() {
     num_sites = coord.proc()->k;
 }
 
-gm_protocol::GM_Net::GM_Net(const set<source_id> &_hids, const string &_name, ContinuousQuery *_Q)
-        : gm_learning_network_t(_hids, _name, _Q) {
-    this->set_protocol_name("ML_GM");
-}
 

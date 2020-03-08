@@ -3,11 +3,10 @@
 #include <iostream>
 #include "rnn_learner.hh"
 
-
 using namespace rnn_learner;
 using namespace arma;
 
-RNNLearner::RNNLearner(const string &cfg) {
+RNNLearner::RNNLearner(const string &cfg, const RNN<MeanSquaredError<>, HeInitialization> &model) : model(model) {
 
     // Take values from JSON file and initialize parameters
     try {
@@ -39,6 +38,8 @@ RNNLearner::RNNLearner(const string &cfg) {
     modelAccuracy = 0.0;
 }
 
+RNNLearner::~RNNLearner() = default;
+
 void RNNLearner::CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y, const size_t rho) {
     for (size_t i = 0; i < dataset.n_cols - rho; i++) {
         X.subcube(arma::span(), arma::span(i), arma::span()) = dataset.submat(arma::span(), arma::span(i, i + rho - 1));
@@ -61,14 +62,6 @@ double RNNLearner::GetModelAccuracy() const { return modelAccuracy; }
 
 int RNNLearner::GetNumberOfUpdates() const {
     return numberOfUpdates;
-}
-
-vector<arma::mat *> &RNNLearner::GetModelParameters() {
-    return modelParameters;
-}
-
-void RNNLearner::SetModelParameters(vector<arma::mat *> &modelParameters) {
-    RNNLearner::modelParameters = modelParameters;
 }
 
 void RNNLearner::CentralizedDataPreparation() {
@@ -103,10 +96,10 @@ void RNNLearner::CentralizedDataPreparation() {
 
 }
 
-void RNNLearner::TrainModel() {
+void RNNLearner::BuildModel() {
 
     // Model definition
-    RNN<MeanSquaredError<>, HeInitialization> model(rho);
+    model = RNN<MeanSquaredError<>, HeInitialization>(rho);
 
     // Model building
     model.Add<IdentityLayer<> >();
@@ -122,8 +115,12 @@ void RNNLearner::TrainModel() {
 
 
     // Define and set parameters for the Stochastic Gradient Descent (SGD) optimizer.
-    SGD<AdamUpdate> optimizer(stepSize, batchSize, iterationsPerEpoch, tolerance,
-                              bShuffle, AdamUpdate(epsilon, beta1, beta2));
+    optimizer = SGD<AdamUpdate>(stepSize, batchSize, iterationsPerEpoch, tolerance,
+                                bShuffle, AdamUpdate(epsilon, beta1, beta2));
+
+}
+
+void RNNLearner::TrainModel() {
 
     cout << "Training ..." << endl;
     cout << "===========================================" << endl;
@@ -190,6 +187,3 @@ void RNNLearner::MakePrediction() {
     cout << "Prediction Accuracy: " << setprecision(2) << fixed << (100 - testMSEPred) << " %" << endl;
 
 }
-
-RNNLearner::~RNNLearner() = default;
-

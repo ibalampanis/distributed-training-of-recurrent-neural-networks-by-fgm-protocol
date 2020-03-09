@@ -275,7 +275,12 @@ void Coordinator::SetupConnections() {
 
 void Coordinator::InitializeLearner() {
 
-    global_learner = new RNNLearner(cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(15));
+    Json::Value root;
+    std::ifstream cfgfile(cfg().cfgfile);
+    cfgfile >> root;
+    string temp = root["hyperparameters"].get("rho", 0).asString();
+    int rho = std::stoi(temp);
+    global_learner = new RNNLearner(cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(rho));
 }
 
 
@@ -351,7 +356,12 @@ oneway LearningNode::SetHStaticVariables(const PModelState &SHParams) {
 
 void LearningNode::InitializeLearner() {
 
-    _learner = new RNNLearner(cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(15));
+    Json::Value root;
+    std::ifstream cfgfile(cfg().cfgfile);
+    cfgfile >> root;
+    string temp = root["hyperparameters"].get("rho", 0).asString();
+    int rho = std::stoi(temp);
+    _learner = new RNNLearner(cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(rho));
 
 }
 

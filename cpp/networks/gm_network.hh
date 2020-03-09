@@ -67,16 +67,17 @@ namespace gm_protocol {
         size_t sz_sent;                     // Total safe zones sent
         size_t total_updates;               // Number of stream updates received
 
+        /** Constructor and Destructor */
         Coordinator(network_t *nw, Query *_Q);
 
         ~Coordinator() override;
 
-        inline network_t *net() { return dynamic_cast<network_t *>(host::net()); }
+        network_t *Net();
 
-        inline const ProtocolConfig &cfg() const { return Q->config; }
+        const ProtocolConfig &Cfg();
 
         /** Initialize learner and  variables */
-        void InitializeLearner();
+        void InitializeGlobalLearner();
 
         void SetupConnections();
 
@@ -94,7 +95,7 @@ namespace gm_protocol {
         void Progress();
 
         /** Getting the accuracy of the global learner */
-        double GetAccuracy();
+        double Accuracy();
 
         /** Get the communication statistics of experiment */
         vector<size_t> Statistics() const;
@@ -148,13 +149,9 @@ namespace gm_protocol {
         coord_proxy_t coord;                // The proxy of the coordinator/hub
 
         /** Constructor */
-        LearningNode(network_t *net, source_id hid, query_t *_Q)
-                : local_site(net, hid), Q(_Q), coord(this) {
-            coord <<= net->hub;
-            InitializeLearner();
-        };
+        LearningNode(network_t *net, source_id hid, query_t *_Q);
 
-        inline const ProtocolConfig &cfg() const { return Q->config; }
+        const ProtocolConfig &Cfg() const;
 
         void InitializeLearner();
 
@@ -177,7 +174,7 @@ namespace gm_protocol {
         /** Set the drift vector (for rebalancing) */
         void SetDrift(ModelState mdl);
 
-        oneway SetHStaticVariables(const PModelState &SHParams);
+        oneway SetGlobalParameters(const PModelState &SHParams);
 
     };
 
@@ -186,7 +183,7 @@ namespace gm_protocol {
         REMOTE_METHOD(node_t, Reset);
         REMOTE_METHOD(node_t, GetDrift);
         REMOTE_METHOD(node_t, SetDrift);
-        REMOTE_METHOD(node_t, SetHStaticVariables);
+        REMOTE_METHOD(node_t, SetGlobalParameters);
 
         LearningNodeProxy(process *p) : remote_proxy<node_t>(p) {}
     };

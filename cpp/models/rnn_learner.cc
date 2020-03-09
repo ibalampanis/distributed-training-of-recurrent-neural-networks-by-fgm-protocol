@@ -58,9 +58,13 @@ double RNNLearner::CalcMSE(arma::cube &pred, arma::cube &Y) {
     return (err_sum / (diff.n_elem + 1e-50));
 }
 
-double RNNLearner::GetModelAccuracy() const { return modelAccuracy; }
+arma::mat RNNLearner::ModelParameters() const {
+    return model.Parameters();
+}
 
-int RNNLearner::GetNumberOfUpdates() const {
+double RNNLearner::ModelAccuracy() const { return modelAccuracy; }
+
+int RNNLearner::NumberOfUpdates() const {
     return numberOfUpdates;
 }
 
@@ -98,10 +102,10 @@ void RNNLearner::CentralizedDataPreparation() {
 
 void RNNLearner::BuildModel() {
 
-    // Model definition
+    /** Model definition */
     model = RNN<MeanSquaredError<>, HeInitialization>(rho);
 
-    // Model building
+    /** Model building */
     model.Add<IdentityLayer<> >();
     model.Add<LSTM<> >(inputSize, lstmCells, maxRho);
     model.Add<Dropout<> >(0.5);
@@ -113,10 +117,9 @@ void RNNLearner::BuildModel() {
     model.Add<ReLULayer<> >();
     model.Add<Linear<> >(lstmCells, outputSize);
 
-
-    // Define and set parameters for the Stochastic Gradient Descent (SGD) optimizer.
-    optimizer = SGD<AdamUpdate>(stepSize, batchSize, iterationsPerEpoch, tolerance,
-                                bShuffle, AdamUpdate(epsilon, beta1, beta2));
+    /** Define and set parameters for the Stochastic Gradient Descent (SGD) optimizer. */
+    optimizer = SGD<AdamUpdate>(stepSize, batchSize, iterationsPerEpoch, tolerance, bShuffle,
+                                AdamUpdate(epsilon, beta1, beta2));
 
 }
 
@@ -187,3 +190,5 @@ void RNNLearner::MakePrediction() {
     cout << "Prediction Accuracy: " << setprecision(2) << fixed << (100 - testMSEPred) << " %" << endl;
 
 }
+
+

@@ -41,8 +41,8 @@ set(SOURCES2 ${MODEL_SOURCE_DIR}/
         ../networks/gm_network.cc
         ../networks/gm_protocol.cc
         ../networks/gm_protocol.hh
-        ../networks/feeders.cc
-        ../networks/feeders.hh
+        ../networks/controller.cc
+        ../networks/controller.hh
         gm_net_eeg.cc)
 
 add_executable(GMNetEEG ${SOURCES2})

@@ -1,5 +1,5 @@
-#ifndef DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_FEEDERS_HH
-#define DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_FEEDERS_HH
+#ifndef DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_CONTROLLER_HH
+#define DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_CONTROLLER_HH
 
 
 #include <fstream>
@@ -11,7 +11,7 @@
 #include "dds/dds.hh"
 
 
-namespace feeders {
+namespace controller {
 
     using namespace gm_protocol;
     using namespace arma;
@@ -28,32 +28,32 @@ namespace feeders {
     public:
         using std::vector<distrNetType *>::vector;
 
-        inline void Join(distrNetType *net) { this->push_back(net); }
+        void Join(distrNetType *net);
 
-        inline void Leave(int const i) { this->erase(this->begin() + i); }
+        void Leave(int i);
 
     };
 
     /**
      * Vector container for the queries.
      */
-    class QueryContainer : public vector<ContinuousQuery *> {
+    class QueryContainer : public vector<Query *> {
 
     public:
-        using vector<ContinuousQuery *>::vector;
+        using vector<Query *>::vector;
 
-        inline void Join(ContinuousQuery *qry) { this->push_back(qry); }
+        void Join(Query *qry);
 
-        inline void Leave(int const i) { this->erase(this->begin() + i); }
+        void Leave(int i);
 
     };
 
     /**
-     * The purpose of Feeder class is to synchronize the testing of the networks
+     * The purpose of Controller class is to synchronize the testing of the networks
      * by providing the appropriate data points to the nodes of each net.
      */
     template<typename distrNetType>
-    class Feeder {
+    class Controller {
     protected:
         std::string configFile;                     // JSON file to read the hyperparameters.
         time_t seed;                                // The seed for the random generator.
@@ -86,43 +86,29 @@ namespace feeders {
 
     public:
 
-        /**
-         * Constructor
-         */
-        explicit Feeder(const string &cfg);
+        /** Constructor */
+        explicit Controller(const string &cfg);
 
-        /**
-         * This method puts a network in the network container.
-         */
+        /** This method puts a network in the network container */
         void AddNet(distrNetType *net);
 
-        /**
-         * This method puts a query in the query container.
-         */
-        void AddQuery(ContinuousQuery *qry);
+        /** This method puts a query in the query container */
+        void AddQuery(Query *qry);
 
-        /**
-         * This method initializes all the networks.
-         */
+        /** This method initializes all the networks */
         void InitializeSimulation();
 
-        /**
-         * This method prints the star learning network for debbuging purposes.
-         */
+        /** This method prints the star learning network for debbuging purposes */
         void PrintStarNets() const;
 
-        /**
-         * This method gathers communication info after each streaming batch.
-         */
+        /** This method gathers communication info after each streaming batch */
         void GatherDifferentialInfo();
 
         void TrainNetworks();
 
         void Train(arma::mat &batch, arma::mat &labels);
 
-        /**
-         * Getters
-         */
+        /** Getters */
         size_t GetRandomInt(size_t maxValue);
 
         void GetStatistics() {}
@@ -133,4 +119,4 @@ namespace feeders {
 
 }
 
-#endif //DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_FEEDERS_HH
+#endif //DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_CONTROLLER_HH

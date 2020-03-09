@@ -27,9 +27,7 @@ namespace rnn_learner {
 
     protected:
 
-        /**
-         * Dataset parameters
-         */
+        /** Dataset parameters */
         arma::cube trainX, trainY;                          // Trainset data points and labels
         arma::cube testX, testY;                            // Testset data points and labels
         size_t inputSize;                                   // Number of neurons at the input layer
@@ -41,9 +39,7 @@ namespace rnn_learner {
         RNN<MeanSquaredError<>, HeInitialization> model;    // RNN model
         SGD<AdamUpdate> optimizer;                          // SGD optimizer
 
-        /**
-         * Model and Optimizer parameters
-         */
+        /** Model and Optimizer parameters */
         int trainingEpochs;                                 // Number of optimization epochs
         int lstmCells;                                      // Number of hidden layers
         int rho;                                            // Number of time steps to look backward for in the RNN
@@ -63,9 +59,7 @@ namespace rnn_learner {
 
     public:
 
-        /**
-         * Constructor and Destructor
-         */
+        /** Constructor and Destructor */
         explicit RNNLearner(const string &cfg, const RNN<MeanSquaredError<>, HeInitialization> &model);
 
         ~RNNLearner();

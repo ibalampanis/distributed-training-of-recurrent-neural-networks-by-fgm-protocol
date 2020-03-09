@@ -1,18 +1,35 @@
-#include "feeders.hh"
+#include "controller.hh"
 
 using namespace gm_protocol;
 using namespace arma;
 using namespace dds;
-using namespace feeders;
+using namespace controller;
 using std::vector;
 using std::string;
 
-/**
- * Feeder
- * **/
+/*********************************************
+	NetContainer
+*********************************************/
+template<typename distrNetType>
+void NetContainer<distrNetType>::Join(distrNetType *net) { this->push_back(net); }
 
 template<typename distrNetType>
-Feeder<distrNetType>::Feeder(const string &cfg) : configFile(std::move(cfg)) {
+void NetContainer<distrNetType>::Leave(int i) { this->erase(this->begin() + i); }
+
+
+/*********************************************
+	QueryContainer
+*********************************************/
+void QueryContainer::Join(Query *qry) { this->push_back(qry); }
+
+void QueryContainer::Leave(int i) { this->erase(this->begin() + i); }
+
+
+/*********************************************
+	Controller
+*********************************************/
+template<typename distrNetType>
+Controller<distrNetType>::Controller(const string &cfg) : configFile(std::move(cfg)) {
     Json::Value root;
     std::ifstream cfgfile(configFile); // Parse from JSON file.
     cfgfile >> root;
@@ -74,20 +91,20 @@ Feeder<distrNetType>::Feeder(const string &cfg) : configFile(std::move(cfg)) {
         targets = 1;
 
     } catch (...) {
-        cout << endl << "Something went wrong in Random Feeder object construction." << endl;
+        cout << endl << "Something went wrong in Controller object construction." << endl;
         throw;
     }
 
 }
 
 template<typename distrNetType>
-void Feeder<distrNetType>::AddNet(distrNetType *net) { _netContainer.Join(net); }
+void Controller<distrNetType>::AddNet(distrNetType *net) { _netContainer.Join(net); }
 
 template<typename distrNetType>
-void Feeder<distrNetType>::AddQuery(ContinuousQuery *qry) { _queryContainer.Join(qry); }
+void Controller<distrNetType>::AddQuery(Query *qry) { _queryContainer.Join(qry); }
 
 template<typename distrNetType>
-void Feeder<distrNetType>::InitializeSimulation() {
+void Controller<distrNetType>::InitializeSimulation() {
 
     cout << "Initializing the star nets..." << endl << endl << endl;
     Json::Value root;
@@ -105,7 +122,7 @@ void Feeder<distrNetType>::InitializeSimulation() {
         cout << "Initializing the network " << netName << " with " << learningAlgorithm << " learner."
              << endl;
 
-        auto query = new gm_protocol::ContinuousQuery(configFile, netName);
+        auto query = new gm_protocol::Query(configFile, netName);
         AddQuery(query);
         cout << "Query added." << endl;
 
@@ -165,7 +182,7 @@ void Feeder<distrNetType>::InitializeSimulation() {
 }
 
 template<typename distrNetType>
-void Feeder<distrNetType>::PrintStarNets() const {
+void Controller<distrNetType>::PrintStarNets() const {
     cout << endl << "Printing the nets." << endl;
     cout << "Number of networks : " << _netContainer.size() << endl;
     for (auto net:_netContainer) {
@@ -181,7 +198,7 @@ void Feeder<distrNetType>::PrintStarNets() const {
 }
 
 template<typename distrNetType>
-void Feeder<distrNetType>::GatherDifferentialInfo() {
+void Controller<distrNetType>::GatherDifferentialInfo() {
     // Gathering the info of the communication triggered by the streaming batch.
     for (size_t i = 0; i < _netContainer.size(); i++) {
         size_t batch_messages = 0;
@@ -207,7 +224,7 @@ void Feeder<distrNetType>::GatherDifferentialInfo() {
 }
 
 template<typename distrNetType>
-void Feeder<distrNetType>::TrainNetworks() {
+void Controller<distrNetType>::TrainNetworks() {
     size_t count = 0; // Count the number of processed elements.
 
 
@@ -247,7 +264,7 @@ void Feeder<distrNetType>::TrainNetworks() {
 }
 
 template<typename distrNetType>
-void Feeder<distrNetType>::Train(arma::mat &point, arma::mat &label) {
+void Controller<distrNetType>::Train(arma::mat &point, arma::mat &label) {
     for (auto net:this->_netContainer) {
 
         size_t random_node = std::rand() % (net->sites.size());
@@ -259,8 +276,7 @@ void Feeder<distrNetType>::Train(arma::mat &point, arma::mat &label) {
 }
 
 template<typename distrNetType>
-size_t Feeder<distrNetType>::GetRandomInt(size_t maxValue) { return std::rand() % maxValue; }
+size_t Controller<distrNetType>::GetRandomInt(size_t maxValue) { return std::rand() % maxValue; }
 
 template<typename distrNetType>
-size_t Feeder<distrNetType>::GetNumberOfFeatures() { return numberOfFeatures; }
-
+size_t Controller<distrNetType>::GetNumberOfFeatures() { return numberOfFeatures; }

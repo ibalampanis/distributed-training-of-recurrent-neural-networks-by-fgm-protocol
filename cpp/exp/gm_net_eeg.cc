@@ -1,14 +1,14 @@
 #include <string>
-#include "cpp/networks/feeders.hh"
+#include "cpp/networks/controller.hh"
 
-using namespace feeders;
+using namespace controller;
 using namespace gm_protocol;
 
 int main(int argc, char **argv) {
 
     std::string cfg = std::string(argv[1]);
 
-    Feeder<GmNet> sim(cfg);
+    Controller<GmNet> sim(cfg);
     sim.InitializeSimulation(); // TODO
     sim.PrintStarNets();
     sim.TrainNetworks();

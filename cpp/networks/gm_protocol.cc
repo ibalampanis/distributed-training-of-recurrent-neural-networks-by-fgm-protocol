@@ -14,8 +14,40 @@ using std::cout;
 using std::endl;
 
 /*********************************************
-	Model State & p ModelState (pointer)
+	TCP Channel
 *********************************************/
+TcpChannel::TcpChannel(host *src, host *dst, rpcc_t endp) : channel(src, dst, endp), tcpBytes(0) {}
+
+void TcpChannel::transmit(size_t msg_size) {
+    // update parent statistics
+    channel::transmit(msg_size);
+
+    // update tcp byte count
+    size_t segno = (msg_size + tcpMsgSize - 1) / tcpMsgSize;
+    tcpBytes += msg_size + segno * tcpHeaderBytes;
+}
+
+
+/*********************************************
+	Float Value
+*********************************************/
+FloatValue::FloatValue(float qntm) : value(qntm) {}
+
+size_t FloatValue::ByteSize() const { return sizeof(float); }
+
+
+/*********************************************
+	Increment
+*********************************************/
+Increment::Increment(int inc) : increase(inc) {}
+
+size_t Increment::ByteSize() const { return sizeof(int); }
+
+
+/*********************************************
+	Model State
+*********************************************/
+ModelState::ModelState(const vector<arma::mat> &_mdl, size_t _updates) : _model(_mdl), updates(_updates) {}
 
 size_t ModelState::GetByteSize() const {
     size_t num_of_params = 0;
@@ -25,6 +57,12 @@ size_t ModelState::GetByteSize() const {
     return num_of_params * sizeof(float);
 }
 
+
+/*********************************************
+	p ModelState (pointer)
+*********************************************/
+PModelState::PModelState(const vector<arma::mat *> &_mdl, size_t _updates) : _model(_mdl), updates(_updates) {}
+
 size_t PModelState::GetByteSize() const {
     size_t num_of_params = 0;
     for (arma::mat *param:_model) {
@@ -33,19 +71,35 @@ size_t PModelState::GetByteSize() const {
     return num_of_params * sizeof(float);
 }
 
+
+/*********************************************
+	IntNum
+*********************************************/
+IntNum::IntNum(size_t nb) : number(nb) {}
+
 size_t IntNum::GetByteSize() const {
     return sizeof(size_t);
 }
+
+
+/*********************************************
+	Matrix Message
+*********************************************/
+MatrixMessage::MatrixMessage(const arma::mat &sb_prms) : sub_params(sb_prms) {}
 
 size_t MatrixMessage::GetByteSize() const {
     return sizeof(float) * sub_params.n_elem;
 }
 
+
 /*********************************************
 	Safezone Function
 *********************************************/
-
 SafezoneFunction::SafezoneFunction(vector<arma::mat> &mdl) : globalModel(mdl) {}
+
+SafezoneFunction::~SafezoneFunction() = default;
+
+const vector<arma::mat> &SafezoneFunction::GetGlobalModel() const { return globalModel; }
 
 void SafezoneFunction::UpdateDrift(vector<arma::mat> &drift, vector<arma::mat *> &vars, float mul) const {
     drift.clear();
@@ -56,42 +110,14 @@ void SafezoneFunction::UpdateDrift(vector<arma::mat> &drift, vector<arma::mat *>
     }
 }
 
-SafezoneFunction::~SafezoneFunction() {}
+vector<float> SafezoneFunction::GetHyperparameters() const { return hyperparameters; }
 
-
-/*********************************************
-	Batch Learning Safezone Function
-*********************************************/
-
-BatchLearningSZFunction::BatchLearningSZFunction(vector<arma::mat> &GlMd) : SafezoneFunction(GlMd), threshold(32) {
-    hyperparameters.push_back(32.);
-}
-
-BatchLearningSZFunction::BatchLearningSZFunction(vector<arma::mat> &GlMd, size_t thr) : SafezoneFunction(GlMd),
-                                                                                        threshold(thr) {
-    hyperparameters.push_back(thr);
-}
-
-size_t BatchLearningSZFunction::CheckIfAdmissible(const size_t counter) const {
-    size_t sz = threshold - counter;
-    return sz;
-}
-
-size_t BatchLearningSZFunction::GetByteSize() const {
-    size_t num_of_params = 0;
-    for (arma::mat param:globalModel) {
-        num_of_params += param.n_elem;
-    }
-    return num_of_params * sizeof(float) + sizeof(size_t);
-}
-
-BatchLearningSZFunction::~BatchLearningSZFunction() {}
+void SafezoneFunction::Print() { cout << endl << "Simple safezone function." << endl; }
 
 
 /*********************************************
 	Variance Safezone Function
 *********************************************/
-
 VarianceSZFunction::VarianceSZFunction(vector<arma::mat> &GlMd) : SafezoneFunction(GlMd), threshold(1.),
                                                                   batchSize(32) {
     hyperparameters.push_back(1.);
@@ -116,6 +142,8 @@ VarianceSZFunction::VarianceSZFunction(vector<arma::mat> &GlMd, float thr, size_
     hyperparameters.push_back(thr);
     hyperparameters.push_back(batch_sz);
 }
+
+VarianceSZFunction::~VarianceSZFunction() = default;
 
 float VarianceSZFunction::Zeta(const vector<arma::mat> &mdl) const {
     float res = 0.;
@@ -201,12 +229,38 @@ size_t VarianceSZFunction::GetByteSize() const {
     return (1 + num_of_params) * sizeof(float) + sizeof(size_t);
 }
 
-VarianceSZFunction::~VarianceSZFunction() = default;
+
+/*********************************************
+	Batch Learning Safezone Function
+*********************************************/
+BatchLearningSZFunction::BatchLearningSZFunction(vector<arma::mat> &GlMd) : SafezoneFunction(GlMd), threshold(32) {
+    hyperparameters.push_back(32.);
+}
+
+BatchLearningSZFunction::BatchLearningSZFunction(vector<arma::mat> &GlMd, size_t thr) : SafezoneFunction(GlMd),
+                                                                                        threshold(thr) {
+    hyperparameters.push_back(thr);
+}
+
+BatchLearningSZFunction::~BatchLearningSZFunction() = default;
+
+size_t BatchLearningSZFunction::CheckIfAdmissible(const size_t counter) const {
+    size_t sz = threshold - counter;
+    return sz;
+}
+
+size_t BatchLearningSZFunction::GetByteSize() const {
+    size_t num_of_params = 0;
+    for (arma::mat param:globalModel) {
+        num_of_params += param.n_elem;
+    }
+    return num_of_params * sizeof(float) + sizeof(size_t);
+}
+
 
 /*********************************************
 	Safezone
 *********************************************/
-
 Safezone::Safezone() : szone(nullptr) {}
 
 Safezone::~Safezone() = default;
@@ -215,9 +269,9 @@ Safezone::~Safezone() = default;
 Safezone::Safezone(SafezoneFunction *sz) : szone(sz) {}
 
 // Movable
-Safezone::Safezone(Safezone &&other) { Swap(other); }
+Safezone::Safezone(Safezone &&other) noexcept { Swap(other); }
 
-Safezone &Safezone::operator=(Safezone &&other) {
+Safezone &Safezone::operator=(Safezone &&other) noexcept {
     Swap(other);
     return *this;
 }
@@ -232,10 +286,38 @@ Safezone &Safezone::operator=(const Safezone &other) {
     return *this;
 }
 
+void Safezone::Swap(Safezone &other) { std::swap(szone, other.szone); }
+
+SafezoneFunction *Safezone::GetSzone() { return (szone != nullptr) ? szone : nullptr; }
+
+void Safezone::operator()(vector<arma::mat> &drift, vector<arma::mat *> &vars, float mul) {
+    szone->UpdateDrift(drift, vars, mul);
+}
+
+size_t Safezone::operator()(size_t counter) {
+    return (szone != nullptr) ? szone->CheckIfAdmissible(counter) : NAN;
+}
+
+float Safezone::operator()(const vector<arma::mat> &mdl) {
+    return (szone != nullptr) ? szone->CheckIfAdmissible(mdl) : NAN;
+}
+
+float Safezone::operator()(const vector<arma::mat *> &mdl) {
+    return (szone != nullptr) ? szone->CheckIfAdmissible(mdl) : NAN;
+}
+
+float Safezone::operator()(const vector<arma::mat *> &par1, const vector<arma::mat> &par2) {
+    return (szone != nullptr) ? szone->CheckIfAdmissible(par1, par2) : NAN;
+}
+
+size_t Safezone::GetByteSize() const {
+    return (szone != nullptr) ? szone->GetByteSize() : 0;
+}
+
+
 /*********************************************
 	Query State
 *********************************************/
-
 QueryState::QueryState() { accuracy = 0.0; }
 
 QueryState::QueryState(const vector<arma::SizeMat> &vsz) {
@@ -299,11 +381,11 @@ size_t QueryState::GetByteSize() const {
     return (1 + num_of_params) * sizeof(float);
 }
 
-/*********************************************
-	Continuous Query
-*********************************************/
 
-ContinuousQuery::ContinuousQuery(const string &cfg, string nm) {
+/*********************************************
+	Query
+*********************************************/
+Query::Query(const string &cfg, string nm) {
     cout << "Initializing the query..." << endl;
     Json::Value root;
     std::ifstream cfgfl(cfg);
@@ -327,35 +409,25 @@ ContinuousQuery::ContinuousQuery(const string &cfg, string nm) {
     cout << config.cfgfile << endl;
 }
 
-void ContinuousQuery::SetTestSet(arma::mat *tSet, arma::mat *tRes) {
+Query::~Query() = default;
+
+void Query::SetTestSet(arma::mat *tSet, arma::mat *tRes) {
     testSet = tSet;
     testResponses = tRes;
 }
 
-double ContinuousQuery::QueryAccuracy(RNNLearner *rnn) { return rnn->GetModelAccuracy(); }
+QueryState *Query::createQueryState() { return new QueryState(); }
 
-/*********************************************
-	TCP Channel
-*********************************************/
+QueryState *Query::createQueryState(vector<arma::SizeMat> sz) { return new QueryState(sz); }
 
-TcpChannel::TcpChannel(host *src, host *dst, rpcc_t endp) : channel(src, dst, endp), tcp_byts(0) {}
+double Query::QueryAccuracy(RNNLearner *rnn) { return rnn->GetModelAccuracy(); }
 
-void TcpChannel::transmit(size_t msg_size) {
-    // update parent statistics
-    channel::transmit(msg_size);
-
-    // update tcp byte count
-    size_t segno = (msg_size + tcp_mss - 1) / tcp_mss;
-    tcp_byts += msg_size + segno * tcp_header_bytes;
-}
 
 /*********************************************
 	GM Learning Network
 *********************************************/
-
 template<typename Net, typename Coord, typename Node>
-GmLearningNetwork<Net, Coord, Node>::GmLearningNetwork(const set<source_id> &_hids, const string &_name,
-                                                       ContinuousQuery *_Q)
+GmLearningNetwork<Net, Coord, Node>::GmLearningNetwork(const set<source_id> &_hids, const string &_name, Query *_Q)
         : star_network_t(_hids), Q(_Q) {
     this->set_name(_name);
     this->setup(Q);

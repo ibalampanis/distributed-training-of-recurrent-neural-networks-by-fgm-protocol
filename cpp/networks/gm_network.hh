@@ -27,7 +27,7 @@ namespace gm_protocol {
     struct GmNet : GmLearningNetwork<GmNet, Coordinator, LearningNode> {
         typedef ::gm_protocol::GmLearningNetwork<network_t, coordinator_t, node_t> gm_learning_network_t;
 
-        GmNet(const set<source_id> &_hids, const string &_name, ContinuousQuery *_Q);
+        GmNet(const set<source_id> &_hids, const string &_name, Query *_Q);
     };
 
 
@@ -42,11 +42,9 @@ namespace gm_protocol {
 
         proxy_map<node_proxy_t, node_t> proxy;
 
-        /**
-         * Protocol Stuff
-         */
+        /** Protocol Stuff */
         RNNLearner *global_learner;         // ML model
-        ContinuousQuery *Q;                 // continuous query
+        Query *Q;                           // query
         QueryState *query;                  // current query state
         SafezoneFunction *safezone;         // the safe zone wrapper
         size_t k;                           // number of sites
@@ -63,15 +61,13 @@ namespace gm_protocol {
 
         int cnt;                            // Helping counter.
 
-        /**
-         * Statistics
-         */
+        /** Statistics */
         size_t num_rounds;                  // Total number of rounds
         size_t num_subrounds;               // Total number of subrounds
         size_t sz_sent;                     // Total safe zones sent
         size_t total_updates;               // Number of stream updates received
 
-        Coordinator(network_t *nw, ContinuousQuery *_Q);
+        Coordinator(network_t *nw, Query *_Q);
 
         ~Coordinator() override;
 
@@ -79,50 +75,34 @@ namespace gm_protocol {
 
         inline const ProtocolConfig &cfg() const { return Q->config; }
 
-        /**
-         * Initialize learner and  variables.
-         */
+        /** Initialize learner and  variables */
         void InitializeLearner();
 
         void SetupConnections();
 
-        /**
-          * Initialize a new round.
-          */
+        /** Initialize a new round */
         void StartRound();
 
         void FinishRound();
 
         void FinishRounds();
 
-        /**
-         * Rebalance algorithm by Kamp
-         */
+        /** Rebalance algorithm by Kamp */
         void KampRebalance(node_t *n);
 
-        /**
-         * Printing and saving the accuracy.
-         */
+        /** Printing and saving the accuracy */
         void Progress();
 
-        /**
-         * Getting the accuracy of the global learner.
-         */
+        /** Getting the accuracy of the global learner */
         double GetAccuracy();
 
-        /**
-         * Get the communication statistics of experiment.
-         */
+        /** Get the communication statistics of experiment */
         vector<size_t> Statistics() const;
 
-        /**
-         * Get a model of a node.
-         */
+        /** Get a model of a node */
         void FetchUpdates(node_t *n);
 
-        /**
-         * Remote call on host violation.
-         */
+        /** Remote call on host violation */
         oneway LocalViolation(sender<node_t> ctx);
 
         MatrixMessage HybridDrift(sender<node_t> ctx, IntNum rows, IntNum cols);
@@ -154,9 +134,9 @@ namespace gm_protocol {
         typedef LearningNodeProxy node_proxy_t;
         typedef GmNet network_t;
         typedef CoordinatorProxy coord_proxy_t;
-        typedef ContinuousQuery continuous_query_t;
+        typedef Query query_t;
 
-        continuous_query_t *Q;                // The query management object
+        query_t *Q;                         // The query management object
         Safezone szone;                     // The safezone object
         RNNLearner *_learner;               // The learning algorithm
 
@@ -167,10 +147,8 @@ namespace gm_protocol {
         size_t datapoints_seen;             // Number of points the node has seen since the last synchronization
         coord_proxy_t coord;                // The proxy of the coordinator/hub
 
-        /**
-         * Constructor
-         */
-        LearningNode(network_t *net, source_id hid, continuous_query_t *_Q)
+        /** Constructor */
+        LearningNode(network_t *net, source_id hid, query_t *_Q)
                 : local_site(net, hid), Q(_Q), coord(this) {
             coord <<= net->hub;
             InitializeLearner();
@@ -190,13 +168,13 @@ namespace gm_protocol {
          * Remote Methods
          */
 
-        // Call at the start of a round
+        /** Call at the start of a round */
         oneway Reset(const Safezone &newsz);
 
-        // Transfer data to the coordinator
+        /** Transfer data to the coordinator */
         ModelState GetDrift();
 
-        // Set the drift vector (for rebalancing)
+        /** Set the drift vector (for rebalancing) */
         void SetDrift(ModelState mdl);
 
         oneway SetHStaticVariables(const PModelState &SHParams);

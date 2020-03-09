@@ -34,17 +34,17 @@ namespace gm_protocol {
      * This cost is resembling the TCP segment cost.
      */
     struct TcpChannel : channel {
-        static constexpr size_t tcp_header_bytes = 40;
-        static constexpr size_t tcp_mss = 1024;
+        static constexpr size_t tcpHeaderBytes = 40;
+        static constexpr size_t tcpMsgSize = 1024;
 
         TcpChannel(host *src, host *dst, rpcc_t endp);
 
         void transmit(size_t msg_size) override;
 
-        size_t GetTcp_byts() const { return tcp_byts; }
+        size_t GetTcpBytes() const { return tcpBytes; }
 
     protected:
-        size_t tcp_byts;
+        size_t tcpBytes;
 
     };
 
@@ -52,9 +52,9 @@ namespace gm_protocol {
 
         const float value;
 
-        FloatValue(float qntm) : value(qntm) {}
+        explicit FloatValue(float qntm);
 
-        size_t ByteSize() const { return sizeof(float); }
+        size_t ByteSize() const;
 
     };
 
@@ -62,11 +62,10 @@ namespace gm_protocol {
 
         const int increase;
 
-        inline Increment(int inc) : increase(inc) {}
+        explicit Increment(int inc);
 
-        size_t ByteSize() const { return sizeof(int); }
+        size_t ByteSize() const;
     };
-
 
     /**
      * Wrapper for a state parameters.
@@ -78,7 +77,7 @@ namespace gm_protocol {
         const vector<arma::mat> &_model;
         size_t updates;
 
-        ModelState(const vector<arma::mat> &_mdl, size_t _updates) : _model(_mdl), updates(_updates) {}
+        ModelState(const vector<arma::mat> &_mdl, size_t _updates);
 
         size_t GetByteSize() const;
     };
@@ -87,7 +86,7 @@ namespace gm_protocol {
         const vector<arma::mat *> &_model;
         size_t updates;
 
-        PModelState(const vector<arma::mat *> &_mdl, size_t _updates) : _model(_mdl), updates(_updates) {}
+        PModelState(const vector<arma::mat *> &_mdl, size_t _updates);
 
         size_t GetByteSize() const;
     };
@@ -96,7 +95,7 @@ namespace gm_protocol {
 
         const size_t number;
 
-        IntNum(const size_t nb) : number(nb) {}
+        explicit IntNum(size_t nb);
 
         size_t GetByteSize() const;
 
@@ -105,7 +104,7 @@ namespace gm_protocol {
     struct MatrixMessage {
         const arma::mat &sub_params;
 
-        MatrixMessage(const arma::mat sb_prms) : sub_params(sb_prms) {}
+        explicit MatrixMessage(const arma::mat &sb_prms);
 
         size_t GetByteSize() const;
     };
@@ -122,7 +121,7 @@ namespace gm_protocol {
 
         ~SafezoneFunction();
 
-        inline const vector<arma::mat> &GetGlobalModel() const { return globalModel; }
+        const vector<arma::mat> &GetGlobalModel() const;
 
         void UpdateDrift(vector<arma::mat> &drift, vector<arma::mat *> &vars, float mul) const;
 
@@ -136,7 +135,8 @@ namespace gm_protocol {
 
         virtual float CheckIfAdmissible(const vector<arma::mat *> &mdl) const { return 0.; }
 
-        float CheckIfAdmissible(const vector<arma::mat *> &par1, const vector<arma::mat> &par2) const { return 0.; }
+        virtual float
+        CheckIfAdmissible(const vector<arma::mat *> &par1, const vector<arma::mat> &par2) const { return 0.; }
 
         virtual float CheckIfAdmissibleReb(const vector<arma::mat *> &par1, const vector<arma::mat> &par2,
                                            float coef) const { return 0.; }
@@ -147,36 +147,10 @@ namespace gm_protocol {
 
         virtual size_t GetByteSize() const { return 0; }
 
-        inline vector<float> GetHyperparameters() const { return hyperparameters; }
+        vector<float> GetHyperparameters() const;
 
-        inline void Print() { cout << endl << "Simple safezone function." << endl; }
+        static void Print();
     };
-
-
-    /**
-     * This safezone function just checks the number of points
-     * a local site has proccesed since the last synchronisation. The threshold
-     * variable basically indicates the batch size. If the proccesed points reach
-     * the batch size, then the function returns an inadmissible region.
-     */
-    struct BatchLearningSZFunction : SafezoneFunction {
-
-        size_t threshold; // The maximum number of points fitted by each node before requesting synch from the Hub.
-
-        /**
-         * Constructors and Destructor
-         */
-        explicit BatchLearningSZFunction(vector<arma::mat> &GlMd);
-
-        BatchLearningSZFunction(vector<arma::mat> &GlMd, size_t thr);
-
-        ~BatchLearningSZFunction();
-
-        size_t CheckIfAdmissible(size_t counter) const;
-
-        size_t GetByteSize() const;
-    };
-
 
     /**
      * This safezone function implements the algorithm presented in
@@ -189,9 +163,7 @@ namespace gm_protocol {
         float threshold; // The threshold of the variance between the models of the network.
         size_t batchSize; // The number of points seen by the node since the last synchronization.
 
-        /**
-         * Constructors and Destructor
-         */
+        /** Constructors and Destructor */
         VarianceSZFunction(vector<arma::mat> &GlMd);
 
         VarianceSZFunction(vector<arma::mat> &GlMd, size_t batch_sz);
@@ -212,7 +184,7 @@ namespace gm_protocol {
 
         float CheckIfAdmissible(const vector<arma::mat *> &mdl) const override;
 
-        float CheckIfAdmissible(const vector<arma::mat *> &par1, const vector<arma::mat> &par2) const;
+        virtual float CheckIfAdmissible(const vector<arma::mat *> &par1, const vector<arma::mat> &par2) const;
 
         float CheckIfAdmissibleReb(const vector<arma::mat *> &par1, const vector<arma::mat> &par2,
                                    float coef) const;
@@ -221,9 +193,30 @@ namespace gm_protocol {
 
         float CheckIfAdmissibleV2(const vector<arma::mat *> &drift) const;
 
-        size_t GetByteSize() const;
+        size_t GetByteSize() const override;
     };
 
+    /**
+     * This safezone function just checks the number of points
+     * a local site has proccesed since the last synchronisation. The threshold
+     * variable basically indicates the batch size. If the proccesed points reach
+     * the batch size, then the function returns an inadmissible region.
+     */
+    struct BatchLearningSZFunction : SafezoneFunction {
+
+        size_t threshold; // The maximum number of points fitted by each node before requesting synch from the Hub.
+
+        /** Constructors and Destructor */
+        explicit BatchLearningSZFunction(vector<arma::mat> &GlMd);
+
+        BatchLearningSZFunction(vector<arma::mat> &GlMd, size_t thr);
+
+        ~BatchLearningSZFunction();
+
+        size_t CheckIfAdmissible(size_t counter) const override;
+
+        size_t GetByteSize() const override;
+    };
 
     /**
      * A wrapper containing the safezone function for machine
@@ -246,44 +239,30 @@ namespace gm_protocol {
         explicit Safezone(SafezoneFunction *sz);
 
         // Movable
-        Safezone(Safezone &&);
+        Safezone(Safezone &&) noexcept;
 
-        Safezone &operator=(Safezone &&);
+        Safezone &operator=(Safezone &&) noexcept;
 
         // Copyable
         Safezone(const Safezone &);
 
         Safezone &operator=(const Safezone &);
 
-        void Swap(Safezone &other) {
-            std::swap(szone, other.szone);
-        }
+        void Swap(Safezone &other);
 
-        SafezoneFunction *GetSZone() { return (szone != nullptr) ? szone : nullptr; }
+        SafezoneFunction *GetSzone();
 
-        inline void operator()(vector<arma::mat> &drift, vector<arma::mat *> &vars, float mul) {
-            szone->UpdateDrift(drift, vars, mul);
-        }
+        void operator()(vector<arma::mat> &drift, vector<arma::mat *> &vars, float mul);
 
-        inline size_t operator()(const size_t counter) {
-            return (szone != nullptr) ? szone->CheckIfAdmissible(counter) : NAN;
-        }
+        size_t operator()(size_t counter);
 
-        inline float operator()(const vector<arma::mat> &mdl) {
-            return (szone != nullptr) ? szone->CheckIfAdmissible(mdl) : NAN;
-        }
+        float operator()(const vector<arma::mat> &mdl);
 
-        inline float operator()(const vector<arma::mat *> &mdl) {
-            return (szone != nullptr) ? szone->CheckIfAdmissible(mdl) : NAN;
-        }
+        float operator()(const vector<arma::mat *> &mdl);
 
-        inline float operator()(const vector<arma::mat *> &par1, const vector<arma::mat> &par2) {
-            return (szone != nullptr) ? szone->CheckIfAdmissible(par1, par2) : NAN;
-        }
+        float operator()(const vector<arma::mat *> &par1, const vector<arma::mat> &par2);
 
-        inline size_t GetByteSize() const {
-            return (szone != nullptr) ? szone->GetByteSize() : 0;
-        }
+        size_t GetByteSize() const;
 
     };
 
@@ -299,10 +278,9 @@ namespace gm_protocol {
 
         float accuracy; // The accuracy of the current global model.
 
+        /** Constructor and Destructor */
         QueryState();
-
         explicit QueryState(const vector<arma::SizeMat> &vsz);
-
         ~QueryState();
 
         void InitializeGlobalModel(const vector<arma::SizeMat> &vsz);
@@ -322,7 +300,7 @@ namespace gm_protocol {
         void UpdateEstimateV2(vector<arma::mat *> &mdl);
 
         /**
-         * Return a ml_safezone_func for the safe zone function.
+         * Return a SafezoneFunction object for the safe zone function.
          *
          * The returned object shares state with this object.
          * It is the caller's responsibility to delete the returned object
@@ -355,24 +333,24 @@ namespace gm_protocol {
      * A base class for a continuous query.
      * Objects inheriting this class must override the virtual methods.
      */
-    struct ContinuousQuery {
+    struct Query {
         // These are attributes requested by the user
         ProtocolConfig config;
 
         arma::mat *testSet;         // Test dataset without labels.
         arma::mat *testResponses;   // Labels of the test dataset.
 
-        ContinuousQuery(const string &cfg, string nm);
+        Query(const string &cfg, string nm);
 
-        virtual ~ContinuousQuery() = default;
+        ~Query();
 
         void SetTestSet(arma::mat *tSet, arma::mat *tRes);
 
-        static inline QueryState *create_query_state() { return new QueryState(); }
+        static QueryState *createQueryState();
 
-        static inline QueryState *create_query_state(vector<arma::SizeMat> sz) { return new QueryState(sz); }
+        static QueryState *createQueryState(vector<arma::SizeMat> sz);
 
-        virtual inline double QueryAccuracy(RNNLearner *lnr);
+        double QueryAccuracy(RNNLearner *lnr);
     };
 
 
@@ -387,12 +365,12 @@ namespace gm_protocol {
         typedef Net network_t;
         typedef star_network<network_t, coordinator_t, node_t> star_network_t;
 
-        ContinuousQuery *Q;
+        Query *Q;
 
         /**
          * Constructor and Destructor
          */
-        GmLearningNetwork(const set<source_id> &_hids, const string &_name, ContinuousQuery *_Q);
+        GmLearningNetwork(const set<source_id> &_hids, const string &_name, Query *_Q);
 
         ~GmLearningNetwork();
 

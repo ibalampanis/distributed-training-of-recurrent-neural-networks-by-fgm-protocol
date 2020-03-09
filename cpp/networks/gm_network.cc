@@ -7,7 +7,7 @@ using namespace gm_protocol;
 	Network
 *********************************************/
 
-gm_protocol::GmNet::GmNet(const set<source_id> &_hids, const string &_name, ContinuousQuery *_Q)
+gm_protocol::GmNet::GmNet(const set<source_id> &_hids, const string &_name, Query *_Q)
         : gm_learning_network_t(_hids, _name, _Q) {
     this->set_protocol_name("ML_GM");
 }
@@ -17,7 +17,7 @@ gm_protocol::GmNet::GmNet(const set<source_id> &_hids, const string &_name, Cont
 	Coordinator Side
 *********************************************/
 
-Coordinator::Coordinator(network_t *nw, ContinuousQuery *_Q)
+Coordinator::Coordinator(network_t *nw, Query *_Q)
         : process(nw), proxy(this),
           Q(_Q),
           k(0),
@@ -113,7 +113,7 @@ void Coordinator::KampRebalance(node_t *lvnode) {
         B.insert(n);
         for (size_t i = 0; i < Mean.size(); i++)
             Mean.at(i) /= cnt;
-        if (safezone->CheckIfAdmissible_v2(Mean) > 0. || B.size() == k)
+        if (safezone->CheckIfAdmissibleV2(Mean) > 0. || B.size() == k)
             break;
         for (size_t i = 0; i < Mean.size(); i++)
             Mean.at(i) *= cnt;
@@ -275,7 +275,7 @@ void Coordinator::SetupConnections() {
 
 void Coordinator::InitializeLearner() {
 
-    global_learner = new RNNLearner(cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(0));
+    global_learner = new RNNLearner(cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(15));
 }
 
 
@@ -286,7 +286,7 @@ void Coordinator::InitializeLearner() {
 oneway LearningNode::Reset(const Safezone &newsz) {
     szone = newsz;       // Reset the safezone object
     datapoints_seen = 0; // Reset the drift vector
-    _learner->UpdateModel(szone.GetSZone()->GetGlobalModel()); // Updates the parameters of the local learner
+    _learner->UpdateModel(szone.GetSzone()->GetGlobalModel()); // Updates the parameters of the local learner
 }
 
 ModelState LearningNode::GetDrift() {
@@ -332,11 +332,11 @@ void LearningNode::UpdateStream(arma::mat &batch, arma::mat &labels) {
     _learner->fit(batch, labels);
     datapoints_seen += batch.n_cols;
 
-    if (SafezoneFunction *entity = static_cast<VarianceSZFunction *>(szone.GetSZone())) {
+    if (SafezoneFunction *entity = static_cast<VarianceSZFunction *>(szone.GetSzone())) {
         if (szone(datapoints_seen) <= 0) {
             datapoints_seen = 0;
             szone(drift, _learner->GetModelParameters(), 1.);
-            if (szone.GetSZone()->CheckIfAdmissible_v2(drift) < 0.)
+            if (szone.GetSzone()->CheckIfAdmissibleV2(drift) < 0.)
                 coord.LocalViolation(this);
         }
     } else {
@@ -349,26 +349,13 @@ oneway LearningNode::SetHStaticVariables(const PModelState &SHParams) {
     _learner->restoreModel(SHParams._model);
 }
 
-oneway LearningNode::augmentAlphaMatrix(MatrixMessage params) {
-    arma::mat newA = arma::zeros<arma::mat>(_learner->getHModel().at(0)->n_rows + params.sub_params.n_rows,
-                                            _learner->getHModel().at(0)->n_cols);
-    newA.rows(0, _learner->getHModel().at(0)->n_rows - 1) += *_learner->getHModel().at(0);
-    newA.rows(_learner->getHModel().at(0)->n_rows, newA.n_rows - 1) += params.sub_params;
-    *_learner->getHModel().at(0) = newA;
-}
-
-oneway LearningNode::augmentBetaMatrix(IntNum cols) {
-    _learner->handleRD(cols.number);
-}
-
 void LearningNode::InitializeLearner() {
 
-    _learner = new RNNLearner(cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(0));
+    _learner = new RNNLearner(cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(15));
 
 }
 
 void LearningNode::SetupConnections() {
     num_sites = coord.proc()->k;
 }
-
 

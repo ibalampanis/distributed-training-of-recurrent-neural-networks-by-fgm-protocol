@@ -108,12 +108,9 @@ namespace controller {
 
         void Train(arma::mat &batch, arma::mat &labels);
 
-        /** Getters */
-        size_t GetRandomInt(size_t maxValue);
+        size_t RandomInt(size_t maxValue);
 
-        void GetStatistics() {}
-
-        size_t GetNumberOfFeatures();
+        size_t NumberOfFeatures();
 
     };
 

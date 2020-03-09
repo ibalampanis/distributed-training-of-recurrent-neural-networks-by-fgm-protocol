@@ -68,9 +68,11 @@ namespace rnn_learner {
 
         static double CalcMSE(arma::cube &pred, arma::cube &Y);
 
-        double GetModelAccuracy() const;
+        arma::mat ModelParameters() const;
 
-        int GetNumberOfUpdates() const;
+        double ModelAccuracy() const;
+
+        int NumberOfUpdates() const;
 
         void CentralizedDataPreparation();
 

@@ -27,6 +27,8 @@ void TcpChannel::transmit(size_t msg_size) {
     tcpBytes += msg_size + segno * tcpHeaderBytes;
 }
 
+size_t TcpChannel::TcpBytes() const { return tcpBytes; }
+
 
 /*********************************************
 	Float Value
@@ -49,7 +51,7 @@ size_t Increment::ByteSize() const { return sizeof(int); }
 *********************************************/
 ModelState::ModelState(const vector<arma::mat> &_mdl, size_t _updates) : _model(_mdl), updates(_updates) {}
 
-size_t ModelState::GetByteSize() const {
+size_t ModelState::ByteSize() const {
     size_t num_of_params = 0;
     for (arma::mat param:_model) {
         num_of_params += param.n_elem;
@@ -63,7 +65,7 @@ size_t ModelState::GetByteSize() const {
 *********************************************/
 PModelState::PModelState(const vector<arma::mat *> &_mdl, size_t _updates) : _model(_mdl), updates(_updates) {}
 
-size_t PModelState::GetByteSize() const {
+size_t PModelState::ByteSize() const {
     size_t num_of_params = 0;
     for (arma::mat *param:_model) {
         num_of_params += param->n_elem;
@@ -77,7 +79,7 @@ size_t PModelState::GetByteSize() const {
 *********************************************/
 IntNum::IntNum(size_t nb) : number(nb) {}
 
-size_t IntNum::GetByteSize() const {
+size_t IntNum::ByteSize() const {
     return sizeof(size_t);
 }
 
@@ -87,7 +89,7 @@ size_t IntNum::GetByteSize() const {
 *********************************************/
 MatrixMessage::MatrixMessage(const arma::mat &sb_prms) : sub_params(sb_prms) {}
 
-size_t MatrixMessage::GetByteSize() const {
+size_t MatrixMessage::ByteSize() const {
     return sizeof(float) * sub_params.n_elem;
 }
 
@@ -110,7 +112,7 @@ void SafezoneFunction::UpdateDrift(vector<arma::mat> &drift, vector<arma::mat *>
     }
 }
 
-vector<float> SafezoneFunction::GetHyperparameters() const { return hyperparameters; }
+vector<float> SafezoneFunction::Hyperparameters() const { return hyperparameters; }
 
 void SafezoneFunction::Print() { cout << endl << "Simple safezone function." << endl; }
 
@@ -221,7 +223,7 @@ float VarianceSZFunction::CheckIfAdmissibleV2(const vector<arma::mat *> &drift) 
     return threshold - var;
 }
 
-size_t VarianceSZFunction::GetByteSize() const {
+size_t VarianceSZFunction::ByteSize() const {
     size_t num_of_params = 0;
     for (const arma::mat &param:globalModel) {
         num_of_params += param.n_elem;
@@ -249,7 +251,7 @@ size_t BatchLearningSZFunction::CheckIfAdmissible(const size_t counter) const {
     return sz;
 }
 
-size_t BatchLearningSZFunction::GetByteSize() const {
+size_t BatchLearningSZFunction::ByteSize() const {
     size_t num_of_params = 0;
     for (arma::mat param:globalModel) {
         num_of_params += param.n_elem;
@@ -288,7 +290,7 @@ Safezone &Safezone::operator=(const Safezone &other) {
 
 void Safezone::Swap(Safezone &other) { std::swap(szone, other.szone); }
 
-SafezoneFunction *Safezone::GetSzone() { return (szone != nullptr) ? szone : nullptr; }
+SafezoneFunction *Safezone::Szone() { return (szone != nullptr) ? szone : nullptr; }
 
 void Safezone::operator()(vector<arma::mat> &drift, vector<arma::mat *> &vars, float mul) {
     szone->UpdateDrift(drift, vars, mul);
@@ -310,8 +312,8 @@ float Safezone::operator()(const vector<arma::mat *> &par1, const vector<arma::m
     return (szone != nullptr) ? szone->CheckIfAdmissible(par1, par2) : NAN;
 }
 
-size_t Safezone::GetByteSize() const {
-    return (szone != nullptr) ? szone->GetByteSize() : 0;
+size_t Safezone::ByteSize() const {
+    return (szone != nullptr) ? szone->ByteSize() : 0;
 }
 
 
@@ -374,7 +376,7 @@ SafezoneFunction *QueryState::Safezone(const string &cfg, string algo) {
     }
 }
 
-size_t QueryState::GetByteSize() const {
+size_t QueryState::ByteSize() const {
     size_t num_of_params = 0;
     for (const arma::mat &param:globalModel)
         num_of_params += param.n_elem;
@@ -411,16 +413,11 @@ Query::Query(const string &cfg, string nm) {
 
 Query::~Query() = default;
 
-void Query::SetTestSet(arma::mat *tSet, arma::mat *tRes) {
-    testSet = tSet;
-    testResponses = tRes;
-}
+QueryState *Query::CreateQueryState() { return new QueryState(); }
 
-QueryState *Query::createQueryState() { return new QueryState(); }
+QueryState *Query::CreateQueryState(vector<arma::SizeMat> sz) { return new QueryState(sz); }
 
-QueryState *Query::createQueryState(vector<arma::SizeMat> sz) { return new QueryState(sz); }
-
-double Query::QueryAccuracy(RNNLearner *rnn) { return rnn->GetModelAccuracy(); }
+double Query::QueryAccuracy(RNNLearner *rnn) { return rnn->ModelAccuracy(); }
 
 
 /*********************************************
@@ -437,7 +434,7 @@ template<typename Net, typename Coord, typename Node>
 GmLearningNetwork<Net, Coord, Node>::~GmLearningNetwork() { delete Q; }
 
 template<typename Net, typename Coord, typename Node>
-const ProtocolConfig &GmLearningNetwork<Net, Coord, Node>::cfg() const { return Q->config; }
+const ProtocolConfig &GmLearningNetwork<Net, Coord, Node>::Cfg() const { return Q->config; }
 
 template<typename Net, typename Coord, typename Node>
 channel *GmLearningNetwork<Net, Coord, Node>::CreateChannel(host *src, host *dst, rpcc_t endp) const {

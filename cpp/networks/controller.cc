@@ -276,7 +276,7 @@ void Controller<distrNetType>::Train(arma::mat &point, arma::mat &label) {
 }
 
 template<typename distrNetType>
-size_t Controller<distrNetType>::GetRandomInt(size_t maxValue) { return std::rand() % maxValue; }
+size_t Controller<distrNetType>::RandomInt(size_t maxValue) { return std::rand() % maxValue; }
 
 template<typename distrNetType>
-size_t Controller<distrNetType>::GetNumberOfFeatures() { return numberOfFeatures; }
+size_t Controller<distrNetType>::NumberOfFeatures() { return numberOfFeatures; }

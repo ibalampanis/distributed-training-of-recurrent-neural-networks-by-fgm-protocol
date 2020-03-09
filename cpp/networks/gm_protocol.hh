@@ -41,7 +41,7 @@ namespace gm_protocol {
 
         void transmit(size_t msg_size) override;
 
-        size_t GetTcpBytes() const { return tcpBytes; }
+        size_t TcpBytes() const;
 
     protected:
         size_t tcpBytes;
@@ -79,7 +79,7 @@ namespace gm_protocol {
 
         ModelState(const vector<arma::mat> &_mdl, size_t _updates);
 
-        size_t GetByteSize() const;
+        size_t ByteSize() const;
     };
 
     struct PModelState {
@@ -88,7 +88,7 @@ namespace gm_protocol {
 
         PModelState(const vector<arma::mat *> &_mdl, size_t _updates);
 
-        size_t GetByteSize() const;
+        size_t ByteSize() const;
     };
 
     struct IntNum {
@@ -97,7 +97,7 @@ namespace gm_protocol {
 
         explicit IntNum(size_t nb);
 
-        size_t GetByteSize() const;
+        size_t ByteSize() const;
 
     };
 
@@ -106,7 +106,7 @@ namespace gm_protocol {
 
         explicit MatrixMessage(const arma::mat &sb_prms);
 
-        size_t GetByteSize() const;
+        size_t ByteSize() const;
     };
 
     /**
@@ -145,9 +145,9 @@ namespace gm_protocol {
 
         virtual float CheckIfAdmissibleV2(const vector<arma::mat *> &drift) const { return 0.; }
 
-        virtual size_t GetByteSize() const { return 0; }
+        virtual size_t ByteSize() const { return 0; }
 
-        vector<float> GetHyperparameters() const;
+        vector<float> Hyperparameters() const;
 
         static void Print();
     };
@@ -193,7 +193,7 @@ namespace gm_protocol {
 
         float CheckIfAdmissibleV2(const vector<arma::mat *> &drift) const;
 
-        size_t GetByteSize() const override;
+        size_t ByteSize() const override;
     };
 
     /**
@@ -215,7 +215,7 @@ namespace gm_protocol {
 
         size_t CheckIfAdmissible(size_t counter) const override;
 
-        size_t GetByteSize() const override;
+        size_t ByteSize() const override;
     };
 
     /**
@@ -250,7 +250,7 @@ namespace gm_protocol {
 
         void Swap(Safezone &other);
 
-        SafezoneFunction *GetSzone();
+        SafezoneFunction *Szone();
 
         void operator()(vector<arma::mat> &drift, vector<arma::mat *> &vars, float mul);
 
@@ -262,7 +262,7 @@ namespace gm_protocol {
 
         float operator()(const vector<arma::mat *> &par1, const vector<arma::mat> &par2);
 
-        size_t GetByteSize() const;
+        size_t ByteSize() const;
 
     };
 
@@ -280,7 +280,9 @@ namespace gm_protocol {
 
         /** Constructor and Destructor */
         QueryState();
+
         explicit QueryState(const vector<arma::SizeMat> &vsz);
+
         ~QueryState();
 
         void InitializeGlobalModel(const vector<arma::SizeMat> &vsz);
@@ -308,7 +310,7 @@ namespace gm_protocol {
          */
         SafezoneFunction *Safezone(const string &cfg, string algo);
 
-        size_t GetByteSize() const;
+        size_t ByteSize() const;
 
     };
 
@@ -337,18 +339,13 @@ namespace gm_protocol {
         // These are attributes requested by the user
         ProtocolConfig config;
 
-        arma::mat *testSet;         // Test dataset without labels.
-        arma::mat *testResponses;   // Labels of the test dataset.
-
         Query(const string &cfg, string nm);
 
         ~Query();
 
-        void SetTestSet(arma::mat *tSet, arma::mat *tRes);
+        static QueryState *CreateQueryState();
 
-        static QueryState *createQueryState();
-
-        static QueryState *createQueryState(vector<arma::SizeMat> sz);
+        static QueryState *CreateQueryState(vector<arma::SizeMat> sz);
 
         double QueryAccuracy(RNNLearner *lnr);
     };
@@ -374,7 +371,7 @@ namespace gm_protocol {
 
         ~GmLearningNetwork();
 
-        const ProtocolConfig &cfg() const;
+        const ProtocolConfig &Cfg() const;
 
         channel *CreateChannel(host *src, host *dst, rpcc_t endp) const;
 

@@ -43,7 +43,7 @@ namespace gm_protocol {
         proxy_map<node_proxy_t, node_t> proxy;
 
         /** Protocol Stuff */
-        RNNLearner *global_learner;         // ML model
+        RNNLearner *globalLearner;         // ML model
         Query *Q;                           // query
         QueryState *query;                  // current query state
         SafezoneFunction *safezone;         // the safe zone wrapper
@@ -56,16 +56,16 @@ namespace gm_protocol {
         set<node_t *> B;                    // initialized by local_violation(), updated by rebalancing algorithm
         set<node_t *> Bcompl;               // Complement of B, updated by rebalancing algo
 
-        vector<arma::mat> Mean;             // Used to compute the mean model
-        size_t num_violations;              // Number of violations in the same round (for rebalancing)
+        arma::mat Mean;                     // Used to compute the mean model
+        size_t numViolations;              // Number of violations in the same round (for rebalancing)
 
         int cnt;                            // Helping counter.
 
         /** Statistics */
-        size_t num_rounds;                  // Total number of rounds
-        size_t num_subrounds;               // Total number of subrounds
-        size_t sz_sent;                     // Total safe zones sent
-        size_t total_updates;               // Number of stream updates received
+        size_t numRounds;                  // Total number of rounds
+        size_t numSubrounds;               // Total number of subrounds
+        size_t szSent;                     // Total safe zones sent
+        size_t totalUpdates;               // Number of stream updates received
 
         /** Constructor and Destructor */
         Coordinator(network_t *nw, Query *_Q);
@@ -74,7 +74,7 @@ namespace gm_protocol {
 
         network_t *Net();
 
-        const ProtocolConfig &Cfg();
+        const ProtocolConfig &Cfg() const;
 
         /** Initialize learner and  variables */
         void InitializeGlobalLearner();
@@ -106,20 +106,14 @@ namespace gm_protocol {
         /** Remote call on host violation */
         oneway LocalViolation(sender<node_t> ctx);
 
-        MatrixMessage HybridDrift(sender<node_t> ctx, IntNum rows, IntNum cols);
-
-        MatrixMessage VirtualDrift(sender<node_t> ctx, IntNum rows);
-
-        oneway RealDrift(sender<node_t> ctx, IntNum cols);
+        oneway Drift(sender<node_t> ctx, IntNum cols);
 
     };
 
     struct CoordinatorProxy : remote_proxy<Coordinator> {
         using coordinator_t = Coordinator;
         REMOTE_METHOD(coordinator_t, LocalViolation);
-        REMOTE_METHOD(coordinator_t, HybridDrift);
-        REMOTE_METHOD(coordinator_t, VirtualDrift);
-        REMOTE_METHOD(coordinator_t, RealDrift);
+        REMOTE_METHOD(coordinator_t, Drift);
 
         CoordinatorProxy(process *c) : remote_proxy<coordinator_t>(c) {}
     };
@@ -141,7 +135,7 @@ namespace gm_protocol {
         Safezone szone;                     // The safezone object
         RNNLearner *_learner;               // The learning algorithm
 
-        vector<arma::mat> drift;            // The drift of the node
+        arma::mat drift;                    // The drift of the node
 
         int num_sites;                      // Number of sites
 
@@ -174,7 +168,7 @@ namespace gm_protocol {
         /** Set the drift vector (for rebalancing) */
         void SetDrift(ModelState mdl);
 
-        oneway SetGlobalParameters(const PModelState &SHParams);
+        oneway SetGlobalParameters(const ModelState &SHParams);
 
     };
 

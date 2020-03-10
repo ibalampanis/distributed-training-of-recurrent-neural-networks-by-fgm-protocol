@@ -74,10 +74,10 @@ namespace gm_protocol {
      * last synchronization.
      */
     struct ModelState {
-        const vector<arma::mat> &_model;
+        const arma::mat _model;
         size_t updates;
 
-        ModelState(const vector<arma::mat> &_mdl, size_t _updates);
+        ModelState(const arma::mat _mdl, size_t _updates);
 
         size_t ByteSize() const;
     };
@@ -114,36 +114,26 @@ namespace gm_protocol {
      */
     struct SafezoneFunction {
 
-        vector<arma::mat> &globalModel; // The global model.
+        arma::mat globalModel;          // The global model.
         vector<float> hyperparameters; // A vector of hyperparameters.
 
-        explicit SafezoneFunction(vector<arma::mat> &mdl);
+        explicit SafezoneFunction(arma::mat mdl);
 
         ~SafezoneFunction();
 
-        const vector<arma::mat> &GetGlobalModel() const;
+        const arma::mat GlobalModel() const;
 
-        void UpdateDrift(vector<arma::mat> &drift, vector<arma::mat *> &vars, float mul) const;
+        void UpdateDrift(arma::mat drift, arma::mat vars, float mul) const;
 
         virtual float Zeta(const vector<arma::mat> &pars) const { return 0.; }
 
-        virtual float Zeta(const vector<arma::mat *> &pars) const { return 0.; }
-
         virtual size_t CheckIfAdmissible(const size_t counter) const { return 0.; }
 
-        virtual float CheckIfAdmissible(const vector<arma::mat> &mdl) const { return 0.; }
+        virtual float CheckIfAdmissible(const arma::mat mdl) const { return 0.; }
 
-        virtual float CheckIfAdmissible(const vector<arma::mat *> &mdl) const { return 0.; }
-
-        virtual float
-        CheckIfAdmissible(const vector<arma::mat *> &par1, const vector<arma::mat> &par2) const { return 0.; }
 
         virtual float CheckIfAdmissibleReb(const vector<arma::mat *> &par1, const vector<arma::mat> &par2,
                                            float coef) const { return 0.; }
-
-        float CheckIfAdmissibleV2(const vector<arma::mat> &drift) const { return 0.; }
-
-        virtual float CheckIfAdmissibleV2(const vector<arma::mat *> &drift) const { return 0.; }
 
         virtual size_t ByteSize() const { return 0; }
 
@@ -160,38 +150,20 @@ namespace gm_protocol {
      */
     struct VarianceSZFunction : SafezoneFunction {
 
-        float threshold; // The threshold of the variance between the models of the network.
+        double threshold; // The threshold of the variance between the models of the network.
         size_t batchSize; // The number of points seen by the node since the last synchronization.
 
         /** Constructors and Destructor */
-        VarianceSZFunction(vector<arma::mat> &GlMd);
-
-        VarianceSZFunction(vector<arma::mat> &GlMd, size_t batch_sz);
-
-        VarianceSZFunction(vector<arma::mat> &GlMd, float thr);
-
-        VarianceSZFunction(vector<arma::mat> &GlMd, float thr, size_t batch_sz);
+        VarianceSZFunction(arma::mat GlMd, float thr, size_t batch_sz);
 
         ~VarianceSZFunction();
 
         float Zeta(const vector<arma::mat> &pars) const override;
 
-        float Zeta(const vector<arma::mat *> &pars) const override;
-
-        size_t CheckIfAdmissible(size_t counter) const override;
-
-        float CheckIfAdmissible(const vector<arma::mat> &mdl) const override;
-
-        float CheckIfAdmissible(const vector<arma::mat *> &mdl) const override;
-
-        virtual float CheckIfAdmissible(const vector<arma::mat *> &par1, const vector<arma::mat> &par2) const;
+        float CheckIfAdmissible(const arma::mat mdl) const override;
 
         float CheckIfAdmissibleReb(const vector<arma::mat *> &par1, const vector<arma::mat> &par2,
                                    float coef) const;
-
-        float CheckIfAdmissibleV2(const vector<arma::mat> &drift) const;
-
-        float CheckIfAdmissibleV2(const vector<arma::mat *> &drift) const;
 
         size_t ByteSize() const override;
     };
@@ -209,7 +181,7 @@ namespace gm_protocol {
         /** Constructors and Destructor */
         explicit BatchLearningSZFunction(vector<arma::mat> &GlMd);
 
-        BatchLearningSZFunction(vector<arma::mat> &GlMd, size_t thr);
+        BatchLearningSZFunction(arma::mat GlMd, size_t thr);
 
         ~BatchLearningSZFunction();
 
@@ -233,10 +205,9 @@ namespace gm_protocol {
 
         Safezone();
 
-        ~Safezone();
-
-        // Valid safezone
         explicit Safezone(SafezoneFunction *sz);
+
+        ~Safezone();
 
         // Movable
         Safezone(Safezone &&) noexcept;
@@ -252,15 +223,11 @@ namespace gm_protocol {
 
         SafezoneFunction *Szone();
 
-        void operator()(vector<arma::mat> &drift, vector<arma::mat *> &vars, float mul);
+        void operator()(arma::mat drift, arma::mat vars, float mul);
 
         size_t operator()(size_t counter);
 
-        float operator()(const vector<arma::mat> &mdl);
-
-        float operator()(const vector<arma::mat *> &mdl);
-
-        float operator()(const vector<arma::mat *> &par1, const vector<arma::mat> &par2);
+        float operator()(const arma::mat mdl);
 
         size_t ByteSize() const;
 
@@ -274,9 +241,9 @@ namespace gm_protocol {
      * accuracy of the current global model.
      * **/
     struct QueryState {
-        vector<arma::mat> globalModel;  // The global model.
 
-        float accuracy; // The accuracy of the current global model.
+        arma::mat globalModel;      // The global model
+        double accuracy;            // The accuracy of the current global model
 
         /** Constructor and Destructor */
         QueryState();
@@ -293,13 +260,7 @@ namespace gm_protocol {
          * After this function, the query estimate, accuracy and
          * safezone should adjust to the new global model.
          */
-        void UpdateEstimate(vector<arma::mat> &mdl);
-
-        void UpdateEstimate(vector<arma::mat *> &mdl);
-
-        void UpdateEstimateV2(vector<arma::mat> &mdl);
-
-        void UpdateEstimateV2(vector<arma::mat *> &mdl);
+        void UpdateEstimate(arma::mat mdl);
 
         /**
          * Return a SafezoneFunction object for the safe zone function.

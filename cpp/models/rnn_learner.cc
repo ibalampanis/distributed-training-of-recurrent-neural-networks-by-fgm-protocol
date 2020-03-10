@@ -62,11 +62,11 @@ arma::mat RNNLearner::ModelParameters() const {
     return model.Parameters();
 }
 
-double RNNLearner::ModelAccuracy() const { return modelAccuracy; }
-
-int RNNLearner::NumberOfUpdates() const {
-    return numberOfUpdates;
+void RNNLearner::UpdateModel(arma::mat params) {
+    model.Parameters() = params;
 }
+
+double RNNLearner::ModelAccuracy() const { return modelAccuracy; }
 
 void RNNLearner::CentralizedDataPreparation() {
 
@@ -190,5 +190,6 @@ void RNNLearner::MakePrediction() {
     cout << "Prediction Accuracy: " << setprecision(2) << fixed << (100 - testMSEPred) << " %" << endl;
 
 }
+
 
 

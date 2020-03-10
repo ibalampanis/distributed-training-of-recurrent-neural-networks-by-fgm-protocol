@@ -54,7 +54,6 @@ namespace rnn_learner {
         double beta2;                                       // Optimizer beta2
 
         double modelAccuracy;                               // Current accuracy of model
-        size_t numberOfUpdates;                             // A counter for parameters updates
         Json::Value root;                                   // JSON file to read the hyperparameters
 
     public:
@@ -70,9 +69,9 @@ namespace rnn_learner {
 
         arma::mat ModelParameters() const;
 
-        double ModelAccuracy() const;
+        void UpdateModel(arma::mat params);
 
-        int NumberOfUpdates() const;
+        double ModelAccuracy() const;
 
         void CentralizedDataPreparation();
 

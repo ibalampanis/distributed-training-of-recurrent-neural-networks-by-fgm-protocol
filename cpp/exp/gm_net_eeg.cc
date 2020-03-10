@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
     std::string cfg = std::string(argv[1]);
 
     Controller<GmNet> sim(cfg);
-    sim.InitializeSimulation(); // TODO
+    sim.InitializeSimulation();
     sim.PrintStarNets();
     sim.TrainNetworks();
 

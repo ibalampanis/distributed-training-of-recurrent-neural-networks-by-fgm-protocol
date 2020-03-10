@@ -8,7 +8,7 @@ using std::vector;
 using std::string;
 
 /*********************************************
-	NetContainer
+	Net Container
 *********************************************/
 template<typename distrNetType>
 void NetContainer<distrNetType>::Join(distrNetType *net) { this->push_back(net); }
@@ -18,7 +18,7 @@ void NetContainer<distrNetType>::Leave(int i) { this->erase(this->begin() + i); 
 
 
 /*********************************************
-	QueryContainer
+	Query Container
 *********************************************/
 void QueryContainer::Join(Query *qry) { this->push_back(qry); }
 

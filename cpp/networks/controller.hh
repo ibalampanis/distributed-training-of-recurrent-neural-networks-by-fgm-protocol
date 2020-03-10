@@ -54,6 +54,7 @@ namespace controller {
      */
     template<typename distrNetType>
     class Controller {
+
     protected:
         std::string configFile;                     // JSON file to read the hyperparameters.
         time_t seed;                                // The seed for the random generator.

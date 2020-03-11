@@ -82,25 +82,6 @@ namespace gm_protocol {
         size_t ByteSize() const;
     };
 
-    struct PModelState {
-        const vector<arma::mat *> &_model;
-        size_t updates;
-
-        PModelState(const vector<arma::mat *> &_mdl, size_t _updates);
-
-        size_t ByteSize() const;
-    };
-
-    struct IntNum {
-
-        const size_t number;
-
-        explicit IntNum(size_t nb);
-
-        size_t ByteSize() const;
-
-    };
-
     struct MatrixMessage {
         const arma::mat &sub_params;
 
@@ -239,7 +220,7 @@ namespace gm_protocol {
      *
      * A query state holds the current global estimate model. It also holds the
      * accuracy of the current global model.
-     * **/
+     **/
     struct QueryState {
 
         arma::mat globalModel;      // The global model

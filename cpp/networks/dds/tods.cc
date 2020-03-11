@@ -28,7 +28,6 @@ using namespace tods;
 	object is computed to be the minimum of the size of the
 	sketch and the size of all the updates.
 
-	TODO: currently the size of the updates is overestimated.
   */
 struct compressed_sketch {
     const agms::sketch &sk;

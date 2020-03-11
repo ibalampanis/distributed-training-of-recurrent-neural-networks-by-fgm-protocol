@@ -51,36 +51,7 @@ size_t Increment::ByteSize() const { return sizeof(int); }
 *********************************************/
 ModelState::ModelState(const arma::mat _mdl, size_t _updates) : _model(_mdl), updates(_updates) {}
 
-// TODO
-size_t ModelState::ByteSize() const {
-    size_t num_of_params = 0;
-    for (arma::mat param:_model) {
-        num_of_params += param.n_elem;
-    }
-    return num_of_params * sizeof(float);
-}
-
-
-/*********************************************
-	p ModelState (pointer)
-*********************************************/
-PModelState::PModelState(const vector<arma::mat *> &_mdl, size_t _updates) : _model(_mdl), updates(_updates) {}
-
-size_t PModelState::ByteSize() const {
-    size_t num_of_params = 0;
-    for (arma::mat *param:_model) {
-        num_of_params += param->n_elem;
-    }
-    return num_of_params * sizeof(float);
-}
-
-
-/*********************************************
-	IntNum
-*********************************************/
-IntNum::IntNum(size_t nb) : number(nb) {}
-
-size_t IntNum::ByteSize() const { return sizeof(size_t); }
+size_t ModelState::ByteSize() const { return _model.n_elem * sizeof(float); }
 
 
 /*********************************************
@@ -100,7 +71,7 @@ SafezoneFunction::~SafezoneFunction() = default;
 
 const arma::mat SafezoneFunction::GlobalModel() const { return globalModel; }
 
-// TODO
+// TODO: UpdateDrift
 void SafezoneFunction::UpdateDrift(arma::mat drift, arma::mat vars, float mul) const {
     drift.clear();
     for (size_t i = 0; i < globalModel.size(); i++) {
@@ -158,14 +129,7 @@ float VarianceSZFunction::CheckIfAdmissible(const arma::mat mdl) const {
     return threshold - var;
 }
 
-// TODO
-size_t VarianceSZFunction::ByteSize() const {
-    size_t num_of_params = 0;
-    for (const arma::mat param:globalModel) {
-        num_of_params += param.n_elem;
-    }
-    return (1 + num_of_params) * sizeof(float) + sizeof(size_t);
-}
+size_t VarianceSZFunction::ByteSize() const { return (1 + globalModel.n_elem) * sizeof(float) + sizeof(size_t); }
 
 
 /*********************************************
@@ -183,14 +147,7 @@ size_t BatchLearningSZFunction::CheckIfAdmissible(const size_t counter) const {
     return sz;
 }
 
-// TODO
-size_t BatchLearningSZFunction::ByteSize() const {
-    size_t num_of_params = 0;
-    for (arma::mat param:globalModel) {
-        num_of_params += param.n_elem;
-    }
-    return num_of_params * sizeof(float) + sizeof(size_t);
-}
+size_t BatchLearningSZFunction::ByteSize() const { return globalModel.n_elem * sizeof(float) + sizeof(size_t); }
 
 
 /*********************************************
@@ -247,16 +204,16 @@ size_t Safezone::ByteSize() const {
 *********************************************/
 QueryState::QueryState() { accuracy = 0.0; }
 
-// TODO
+// TODO: QueryState
 QueryState::QueryState(const vector<arma::SizeMat> &vsz) {
     for (auto sz:vsz)
         globalModel.push_back(sz, arma::fill::zeros);
-    accuracy = 0.0;
+    accuracy = .0;
 }
 
 QueryState::~QueryState() = default;
 
-// TODO
+// TODO: InitializeGlobalModel
 void QueryState::InitializeGlobalModel(const vector<arma::SizeMat> &vsz) {
     for (auto sz:vsz)
         globalModel.push_back(arma::mat(sz, arma::fill::zeros));
@@ -288,13 +245,7 @@ SafezoneFunction *QueryState::Safezone(const string &cfg, string algo) {
     }
 }
 
-// TODO
-size_t QueryState::ByteSize() const {
-    size_t num_of_params = 0;
-    for (const arma::mat &param:globalModel)
-        num_of_params += param.n_elem;
-    return (1 + num_of_params) * sizeof(float);
-}
+size_t QueryState::ByteSize() const { return (1 + globalModel.n_elem) * sizeof(float); }
 
 
 /*********************************************

@@ -35,7 +35,6 @@ namespace dds {
 /**
 	A main-memory store of stream records.
 	
-	TODO: spillover to disk
  */
     class buffered_dataset : public std::vector<dds::dds_record> {
     public:
@@ -663,7 +662,6 @@ namespace dds {
 	This is a data source that, given a dataset,
 	optionally collects metadata, and then replays the data.
 
-	TODO: make the data source rewindable multiple times,
 	to create a long stream
   */
     class buffered_data_source : public rewindable_data_source {

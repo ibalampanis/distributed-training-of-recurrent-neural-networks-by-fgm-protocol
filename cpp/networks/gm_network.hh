@@ -30,7 +30,6 @@ namespace gm_protocol {
         GmNet(const set<source_id> &_hids, const string &_name, Query *_Q);
     };
 
-
     /**
      * This is a hub/coordinator implementation for the classic Geometric Method protocol.
      */
@@ -106,7 +105,7 @@ namespace gm_protocol {
         /** Remote call on host violation */
         oneway LocalViolation(sender<node_t> ctx);
 
-        oneway Drift(sender<node_t> ctx, IntNum cols);
+        oneway Drift(sender<node_t> ctx, size_t cols);
 
     };
 
@@ -117,7 +116,6 @@ namespace gm_protocol {
 
         CoordinatorProxy(process *c) : remote_proxy<coordinator_t>(c) {}
     };
-
 
     /**
      * This is a site/learning node implementation for the classic Geometric Method protocol.

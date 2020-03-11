@@ -33,7 +33,6 @@ namespace rnn_learner {
         size_t inputSize;                                   // Number of neurons at the input layer
         size_t outputSize;                                  // Number of neurons at the output layer
         string datasetPath;                                 // Path for finding dataset file
-        string saveModelPath;                               // Path for saving object of rnn model
         double trainTestRatio;                              // Testing data is taken from the dataset in this ratio
 
         RNN<MeanSquaredError<>, HeInitialization> model;    // RNN model
@@ -53,6 +52,7 @@ namespace rnn_learner {
         double beta1;                                       // Optimizer beta1
         double beta2;                                       // Optimizer beta2
 
+        int numberOfUpdates;                                // Number of model updates
         double modelAccuracy;                               // Current accuracy of model
         Json::Value root;                                   // JSON file to read the hyperparameters
 
@@ -66,6 +66,8 @@ namespace rnn_learner {
         static void CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y, size_t rho);
 
         static double CalcMSE(arma::cube &pred, arma::cube &Y);
+
+        int NumberOfUpdates() const;
 
         arma::mat ModelParameters() const;
 

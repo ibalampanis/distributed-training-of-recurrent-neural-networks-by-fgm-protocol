@@ -1,11 +1,11 @@
 {
   "hyperparameters": {
-    "trainingEpochs": "100",
+    "trainingEpochs": "3000",
     "lstmCells": 10,
     "rho": 15,
     "stepSize": 5e-5,
     "batchSize": 16,
-    "iterationsPerEpoch": 3000,
+    "iterationsPerEpoch": 10,
     "tolerance": 1e-8,
     "bShuffle": true,
     "epsilon": 2e-8,

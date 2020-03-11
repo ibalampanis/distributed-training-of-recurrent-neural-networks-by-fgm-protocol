@@ -34,7 +34,6 @@ RNNLearner::RNNLearner(const string &cfg, const RNN<MeanSquaredError<>, HeInitia
     }
 
     maxRho = rho;
-    numberOfUpdates = 0;
     modelAccuracy = 0.0;
 }
 
@@ -129,7 +128,6 @@ void RNNLearner::TrainModel() {
     cout << "===========================================" << endl;
 
     auto begin_train_time = std::chrono::high_resolution_clock::now();
-    std::vector<double> epoch_mses;
 
     // Run EPOCH number of cycles for optimizing the solution
     for (int epoch = 1; epoch <= trainingEpochs; epoch++) {

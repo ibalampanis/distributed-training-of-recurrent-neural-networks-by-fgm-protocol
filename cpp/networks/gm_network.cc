@@ -190,7 +190,7 @@ vector<size_t> Coordinator::Statistics() const {
     return stats;
 }
 
-// TODO
+// TODO: FetchUpdates
 void Coordinator::FetchUpdates(node_t *node) {
     ModelState up = proxy[node].GetDrift();
     if (!arma::approx_equal(arma::mat(arma::size(up._model.at(0)), arma::fill::zeros), up._model.at(0), "absdiff",
@@ -224,8 +224,8 @@ oneway Coordinator::LocalViolation(sender<node_t> ctx) {
     }
 }
 
-// TODO
-oneway Coordinator::Drift(sender<node_t> ctx, IntNum cols) {
+// TODO: Drift
+oneway Coordinator::Drift(sender<node_t> ctx, size_t cols) {
     // Updating beta vector.
     node_t *n = ctx.value;
     globalLearner->handleRD(cols.number);
@@ -268,7 +268,7 @@ void LearningNode::SetupConnections() {
     num_sites = coord.proc()->k;
 }
 
-// TODO
+// TODO: UpdateStream
 void LearningNode::UpdateStream(arma::mat &batch, arma::mat &labels) {
 
 
@@ -331,7 +331,7 @@ void LearningNode::SetDrift(ModelState mdl) {
     _learner->UpdateModel(mdl._model);
 }
 
-// TODO
+// TODO SetGlobalParameters
 oneway LearningNode::SetGlobalParameters(const ModelState &SHParams) {
     _learner->restoreModel(SHParams._model);
 }

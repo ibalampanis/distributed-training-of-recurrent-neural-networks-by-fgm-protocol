@@ -28,11 +28,10 @@ RNNLearner::RNNLearner(const string &cfg, const RNN<MeanSquaredError<>, HeInitia
         inputSize = root["data"].get("input_size", 0).asInt();
         outputSize = root["data"].get("output_size", 0).asInt();
         datasetPath = root["data"].get("path", "").asString();
-        saveModelPath = root["data"].get("save_model_path", "").asString();
     } catch (...) {
         throw;
     }
-
+    numberOfUpdates = 0;
     maxRho = rho;
     modelAccuracy = 0.0;
 }
@@ -56,6 +55,8 @@ double RNNLearner::CalcMSE(arma::cube &pred, arma::cube &Y) {
     }
     return (err_sum / (diff.n_elem + 1e-50));
 }
+
+int RNNLearner::NumberOfUpdates() const { return numberOfUpdates; }
 
 arma::mat RNNLearner::ModelParameters() const {
     return model.Parameters();
@@ -131,9 +132,21 @@ void RNNLearner::TrainModel() {
 
     // Run EPOCH number of cycles for optimizing the solution
     for (int epoch = 1; epoch <= trainingEpochs; epoch++) {
+
+//Copies
+//        arma::mat tmp;
+//        tmp.copy_size(model.Parameters());
+//        if (epoch == 2)
+//            tmp = model.Parameters();
+//        if (epoch == 10)
+//            model.Parameters() = tmp;
+//        if (epoch == 25)
+//            model.Parameters() = tmp;
+
         // Train neural network. If this is the first iteration, weights are random,
         // using current values as starting point otherwise.
         model.Train(trainX, trainY, optimizer);
+
 
         optimizer.ResetPolicy() = false;
 
@@ -147,9 +160,9 @@ void RNNLearner::TrainModel() {
         modelAccuracy = 100 - testMSE;
 
         // Print stats during training
-        if (epoch % 10 == 0 || epoch == 1)
-            cout << "|=== [Epoch: " << epoch << "\t|\tAccuracy: " << setprecision(2) << fixed << (100 - testMSE)
-                 << " %] ===|" << endl;
+//        if (epoch % 10 == 0 || epoch == 1)
+        cout << "|=== [Epoch: " << epoch << "\t|\tAccuracy: " << setprecision(2) << fixed << (100 - testMSE)
+             << " %] ===|" << endl;
     }
 
     cout << "===========================================" << endl;
@@ -164,27 +177,17 @@ void RNNLearner::TrainModel() {
     else
         cout << "Training time: " << setprecision(1) << train_time.count() / 6e+10 << " minute(s)." << endl;
 
-    cout << "Saving Model ...";
-    data::Save(saveModelPath, "eyeState", model);
-    cout << " OK." << endl;
-
 }
 
 void RNNLearner::MakePrediction() {
 
-    // Load RNN model and use it for prediction.
-    RNN<MeanSquaredError<>, HeInitialization> modelP(rho);
-    cout << "Loading model ...";
-    data::Load(saveModelPath, "eyeState", modelP);
-    cout << " OK." << endl;
-    arma::cube predOutP;
-
+    arma::cube predOut;
     cout << "Predicting ...";
     // Get predictions on test data points.
-    modelP.Predict(testX, predOutP);
+    model.Predict(testX, predOut);
     cout << " OK." << endl;
     // Calculate MSE on prediction.
-    double testMSEPred = CalcMSE(predOutP, testY);
+    double testMSEPred = CalcMSE(predOut, testY);
     cout << "Prediction Accuracy: " << setprecision(2) << fixed << (100 - testMSEPred) << " %" << endl;
 
 }

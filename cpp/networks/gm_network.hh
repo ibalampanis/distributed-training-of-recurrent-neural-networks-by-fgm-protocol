@@ -7,10 +7,11 @@
 #include "gm_protocol.hh"
 #include "cpp/models/rnn_learner.hh"
 
-namespace gm_protocol {
+namespace gm_network {
 
     using namespace dds;
     using namespace rnn_learner;
+    using namespace gm_protocol;
     using std::map;
     using std::cout;
     using std::endl;
@@ -24,8 +25,9 @@ namespace gm_protocol {
     /**
      * This is a GM Network implementation for the classic Geometric Method protocol.
      */
-    struct GmNet : GmLearningNetwork<GmNet, Coordinator, LearningNode> {
-        typedef ::gm_protocol::GmLearningNetwork<network_t, coordinator_t, node_t> gm_learning_network_t;
+    struct GmNet : gm_protocol::GmLearningNetwork<GmNet, Coordinator, LearningNode> {
+
+        typedef gm_protocol::GmLearningNetwork<network_t, coordinator_t, node_t> gm_learning_network_t;
 
         GmNet(const set<source_id> &_hids, const string &_name, Query *_Q);
     };
@@ -170,14 +172,14 @@ namespace gm_protocol {
 
     };
 
-    struct LearningNodeProxy : remote_proxy<LearningNode> {
-        typedef LearningNode node_t;
+    struct LearningNodeProxy : remote_proxy<gm_network::LearningNode> {
+        typedef gm_network::LearningNode node_t;
         REMOTE_METHOD(node_t, Reset);
         REMOTE_METHOD(node_t, GetDrift);
         REMOTE_METHOD(node_t, SetDrift);
         REMOTE_METHOD(node_t, SetGlobalParameters);
 
-        LearningNodeProxy(process *p) : remote_proxy<node_t>(p) {}
+        explicit LearningNodeProxy(process *p) : remote_proxy<node_t>(p) {}
     };
 
 
@@ -185,8 +187,8 @@ namespace gm_protocol {
 
 namespace dds {
     template<>
-    inline size_t byte_size<gm_protocol::LearningNode *>(
-            gm_protocol::LearningNode *const &) { return 4; }
+    inline size_t byte_size<gm_network::LearningNode *>(
+            gm_network::LearningNode *const &) { return 4; }
 }
 
 #endif

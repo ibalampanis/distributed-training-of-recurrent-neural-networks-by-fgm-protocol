@@ -1,6 +1,7 @@
 #include "controller.hh"
 
 using namespace gm_protocol;
+using namespace gm_network;
 using namespace arma;
 using namespace dds;
 using namespace controller;
@@ -225,8 +226,8 @@ void Controller<distrNetType>::GatherDifferentialInfo() {
 
 template<typename distrNetType>
 void Controller<distrNetType>::TrainNetworks() {
-    size_t count = 0; // Count the number of processed elements.
 
+    size_t count = 0; // Count the number of processed elements.
 
     while (count < numOfPoints) {
 

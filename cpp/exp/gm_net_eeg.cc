@@ -1,17 +1,19 @@
 #include <string>
 #include "cpp/networks/controller.hh"
+#include "cpp/networks/gm_network.hh"
+
 
 using namespace controller;
-using namespace gm_protocol;
+using namespace gm_network;
 
 int main(int argc, char **argv) {
 
     std::string cfg = std::string(argv[1]);
 
-    Controller<GmNet> sim(cfg);
+    Controller<gm_network::GmNet> sim(cfg);
     sim.InitializeSimulation();
     sim.PrintStarNets();
-    sim.TrainNetworks();
+//    sim.TrainNetworks();
 
     return 0;
 }

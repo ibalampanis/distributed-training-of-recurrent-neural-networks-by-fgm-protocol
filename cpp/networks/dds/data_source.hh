@@ -9,10 +9,8 @@
 #include <type_traits>
 #include <random>
 #include <algorithm>
-
 #include <boost/shared_ptr.hpp>
 #include <boost/iterator/counting_iterator.hpp>
-
 #include "dds.hh"
 
 

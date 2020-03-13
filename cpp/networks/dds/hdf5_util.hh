@@ -30,7 +30,7 @@ inline T __H5_CHECK(T rc, const char *msg) {
 //
 inline bool hdf5_exists(hid_t locid, const string &name) {
     //return H5Lexists(locid, name.c_str(), H5P_DEFAULT);
-    return H5_CHECK(H5LTfind_dataset(locid, name.c_str()));
+    return true;
 }
 
 /*

@@ -3,9 +3,7 @@
 
 #include <vector>
 #include <map>
-
 #include <jsoncpp/json/json.h>
-
 #include "agms.hh"
 #include "method.hh"
 #include "query.hh"

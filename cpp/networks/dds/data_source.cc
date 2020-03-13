@@ -3,12 +3,9 @@
 #include <cerrno>
 #include <cstring>
 #include <stdexcept>
-
 #include <libgen.h>
-
 #include <boost/format.hpp>
 #include <boost/endian/conversion.hpp>
-
 #include "data_source.hh"
 #include "hdf5_util.hh"
 #include "binc.hh"

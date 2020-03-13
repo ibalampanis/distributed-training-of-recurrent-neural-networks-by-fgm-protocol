@@ -51,7 +51,7 @@ size_t Increment::ByteSize() const { return sizeof(int); }
 *********************************************/
 ModelState::ModelState(const arma::mat _mdl, size_t _updates) : _model(_mdl), updates(_updates) {}
 
-size_t ModelState::ByteSize() const { return _model.n_elem * sizeof(float); }
+size_t ModelState::byte_size() const { return _model.n_elem * sizeof(float); }
 
 
 /*********************************************
@@ -72,14 +72,14 @@ SafezoneFunction::~SafezoneFunction() = default;
 const arma::mat SafezoneFunction::GlobalModel() const { return globalModel; }
 
 // TODO: UpdateDrift
-void SafezoneFunction::UpdateDrift(arma::mat drift, arma::mat vars, float mul) const {
-    drift.clear();
-    for (size_t i = 0; i < globalModel.size(); i++) {
-        arma::mat dr;
-        dr = mul * (vars.at(i) - globalModel.at(i));
-        drift.push_back(dr); // (+= mallon)
-    }
-}
+//void SafezoneFunction::UpdateDrift(arma::mat drift, arma::mat vars, float mul) const {
+//    drift.clear();
+//    for (size_t i = 0; i < globalModel.size(); i++) {
+//        arma::mat dr;
+//        dr = mul * (vars.at(i) - globalModel.at(i));
+//        drift.push_back(dr); // (+= mallon)
+//    }
+//}
 
 vector<float> SafezoneFunction::Hyperparameters() const { return hyperparameters; }
 
@@ -194,29 +194,25 @@ float Safezone::operator()(const arma::mat mdl) {
     return (szone != nullptr) ? szone->CheckIfAdmissible(mdl) : NAN;
 }
 
-size_t Safezone::ByteSize() const {
-    return (szone != nullptr) ? szone->ByteSize() : 0;
-}
+size_t Safezone::byte_size() const { return (szone != nullptr) ? szone->ByteSize() : 0; }
 
 
 /*********************************************
 	Query State
 *********************************************/
-QueryState::QueryState() { accuracy = 0.0; }
+QueryState::QueryState() { accuracy = .0; }
 
-// TODO: QueryState
-QueryState::QueryState(const vector<arma::SizeMat> &vsz) {
-    for (auto sz:vsz)
-        globalModel.push_back(sz, arma::fill::zeros);
+QueryState::QueryState(const arma::SizeMat &vsz) {
+    globalModel.set_size(vsz);
+    globalModel.zeros();
     accuracy = .0;
 }
 
 QueryState::~QueryState() = default;
 
-// TODO: InitializeGlobalModel
-void QueryState::InitializeGlobalModel(const vector<arma::SizeMat> &vsz) {
-    for (auto sz:vsz)
-        globalModel.push_back(arma::mat(sz, arma::fill::zeros));
+void QueryState::InitializeGlobalModel(const arma::SizeMat &vsz) {
+    globalModel.set_size(vsz);
+    globalModel.zeros();
 }
 
 void QueryState::UpdateEstimate(arma::mat mdl) {
@@ -279,7 +275,7 @@ Query::~Query() = default;
 
 QueryState *Query::CreateQueryState() { return new QueryState(); }
 
-QueryState *Query::CreateQueryState(vector<arma::SizeMat> sz) { return new QueryState(sz); }
+QueryState *Query::CreateQueryState(arma::SizeMat sz) { return new QueryState(sz); }
 
 double Query::QueryAccuracy(RNNLearner *rnn) { return rnn->ModelAccuracy(); }
 
@@ -314,7 +310,7 @@ void GmLearningNetwork<Net, Coord, Node>::ProcessRecord(size_t randSite, arma::m
 }
 
 template<typename Net, typename Coord, typename Node>
-void GmLearningNetwork<Net, Coord, Node>::StartRound() { this->hub->start_round(); }
+void GmLearningNetwork<Net, Coord, Node>::StartRound() { this->hub->StartRound(); }
 
 template<typename Net, typename Coord, typename Node>
-void GmLearningNetwork<Net, Coord, Node>::FinishProcess() { this->hub->finish_rounds(); }
+void GmLearningNetwork<Net, Coord, Node>::FinishProcess() { this->hub->FinishRounds(); }

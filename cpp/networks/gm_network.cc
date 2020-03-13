@@ -1,12 +1,14 @@
 #include <random>
 #include "gm_network.hh"
+#include "gm_protocol.hh"
 
 using namespace gm_protocol;
+using namespace gm_network;
 
 /*********************************************
 	Network
 *********************************************/
-gm_protocol::GmNet::GmNet(const set<source_id> &_hids, const string &_name, Query *_Q)
+GmNet::GmNet(const set<source_id> &_hids, const string &_name, Query *_Q)
         : gm_learning_network_t(_hids, _name, _Q) {
     this->set_protocol_name("ML_GM");
 }
@@ -169,7 +171,7 @@ void Coordinator::Progress() {
 
 
     cout << "Global model of network " << net()->name() << "." << endl;
-    cout << "accuracy : " << std::setprecision(6) << query->accuracy << "%" << endl;
+    cout << "Accuracy : " << std::setprecision(2) << query->accuracy << "%" << endl;
     cout << "Number of rounds : " << numRounds << endl;
     cout << "Number of subrounds : " << numSubrounds << endl;
     cout << "Total updates : " << totalUpdates << endl;
@@ -190,10 +192,9 @@ vector<size_t> Coordinator::Statistics() const {
     return stats;
 }
 
-// TODO: FetchUpdates
 void Coordinator::FetchUpdates(node_t *node) {
     ModelState up = proxy[node].GetDrift();
-    if (!arma::approx_equal(arma::mat(arma::size(up._model.at(0)), arma::fill::zeros), up._model.at(0), "absdiff",
+    if (!arma::approx_equal(arma::mat(arma::size(up._model), arma::fill::zeros), up._model, "absdiff",
                             1e-6)) {
         cnt++;
         Mean += up._model;
@@ -225,19 +226,19 @@ oneway Coordinator::LocalViolation(sender<node_t> ctx) {
 }
 
 // TODO: Drift
-oneway Coordinator::Drift(sender<node_t> ctx, size_t cols) {
-    // Updating beta vector.
-    node_t *n = ctx.value;
-    globalLearner->handleRD(cols.number);
-    for (auto st : Net()->sites) {
-        if (st != n) {
-            proxy[st].augmentBetaMatrix(cols);
-        }
-    }
-    Mean.at(1).resize(Mean.at(1).n_rows, Mean.at(1).n_cols + cols.number);
-    query->globalModel.at(1) = arma::mat(arma::size(*globalLearner->ModelParameters().at(1)), arma::fill::zeros);
-    query->globalModel.at(1) += *globalLearner->ModelParameters().at(1);
-}
+//oneway Coordinator::Drift(sender<node_t> ctx, int cols) {
+//    // Updating beta vector.
+//    node_t *n = ctx.value;
+//    globalLearner->handleRD(cols);
+//    for (auto st : Net()->sites) {
+//        if (st != n) {
+//            proxy[st].augmentBetaMatrix(cols);
+//        }
+//    }
+//    Mean.at(1).resize(Mean.at(1).n_rows, Mean.at(1).n_cols + cols.number);
+//    query->globalModel.at(1) = arma::mat(arma::size(*globalLearner->ModelParameters().at(1)), arma::fill::zeros);
+//    query->globalModel.at(1) += *globalLearner->ModelParameters().at(1);
+//}
 
 
 /*********************************************
@@ -269,50 +270,50 @@ void LearningNode::SetupConnections() {
 }
 
 // TODO: UpdateStream
-void LearningNode::UpdateStream(arma::mat &batch, arma::mat &labels) {
-
-
-    size_t alpha_rows = batch.n_rows - _learner->getHModel().at(0)->n_rows;
-    size_t beta_cols = labels.n_rows - _learner->ModelParameters().at(1)->n_cols;
-
-    if (alpha_rows > 0 && beta_cols > 0) {
-        arma::mat newA = arma::zeros<arma::mat>(_learner->getHModel().at(0)->n_rows + alpha_rows,
-                                                _learner->getHModel().at(0)->n_cols);
-
-        newA.rows(0, _learner->getHModel().at(0)->n_rows - 1) += *_learner->getHModel().at(0);
-        newA.rows(_learner->getHModel().at(0)->n_rows, newA.n_rows - 1) +=
-                coord.HybridDrift(this, IntNum(alpha_rows), IntNum(beta_cols)).sub_params;
-
-        *_learner->getHModel().at(0) = newA;
-    } else if (alpha_rows > 0) {
-        arma::mat newA = arma::zeros<arma::mat>(_learner->getHModel().at(0)->n_rows + alpha_rows,
-                                                _learner->getHModel().at(0)->n_cols);
-
-        newA.rows(0, _learner->getHModel().at(0)->n_rows - 1) += *_learner->getHModel().at(0);
-        newA.rows(_learner->getHModel().at(0)->n_rows, newA.n_rows - 1) +=
-                coord.VirtualDrift(this, IntNum(alpha_rows)).sub_params;
-
-        *_learner->getHModel().at(0) = newA;
-    } else if (beta_cols > 0) {
-        coord.RealDrift(this, IntNum(beta_cols));
-    }
-
-
-    _learner->fit(batch, labels);
-    datapoints_seen += batch.n_cols;
-
-    if (SafezoneFunction *entity = dynamic_cast<VarianceSZFunction *>(szone.Szone())) {
-        if (szone(datapoints_seen) <= 0) {
-            datapoints_seen = 0;
-            szone(drift, _learner->ModelParameters(), 1.);
-            if (szone.Szone()->CheckIfAdmissible(drift) < 0.)
-                coord.LocalViolation(this);
-        }
-    } else {
-        if (szone(datapoints_seen) <= 0.)
-            coord.LocalViolation(this);
-    }
-}
+//void LearningNode::UpdateStream(arma::mat &batch, arma::mat &labels) {
+//
+//
+//    size_t alpha_rows = batch.n_rows - _learner->getHModel().at(0)->n_rows;
+//    size_t beta_cols = labels.n_rows - _learner->ModelParameters().at(1)->n_cols;
+//
+//    if (alpha_rows > 0 && beta_cols > 0) {
+//        arma::mat newA = arma::zeros<arma::mat>(_learner->getHModel().at(0)->n_rows + alpha_rows,
+//                                                _learner->getHModel().at(0)->n_cols);
+//
+//        newA.rows(0, _learner->getHModel().at(0)->n_rows - 1) += *_learner->getHModel().at(0);
+//        newA.rows(_learner->getHModel().at(0)->n_rows, newA.n_rows - 1) +=
+//                coord.HybridDrift(this, IntNum(alpha_rows), IntNum(beta_cols)).sub_params;
+//
+//        *_learner->getHModel().at(0) = newA;
+//    } else if (alpha_rows > 0) {
+//        arma::mat newA = arma::zeros<arma::mat>(_learner->getHModel().at(0)->n_rows + alpha_rows,
+//                                                _learner->getHModel().at(0)->n_cols);
+//
+//        newA.rows(0, _learner->getHModel().at(0)->n_rows - 1) += *_learner->getHModel().at(0);
+//        newA.rows(_learner->getHModel().at(0)->n_rows, newA.n_rows - 1) +=
+//                coord.VirtualDrift(this, IntNum(alpha_rows)).sub_params;
+//
+//        *_learner->getHModel().at(0) = newA;
+//    } else if (beta_cols > 0) {
+//        coord.RealDrift(this, IntNum(beta_cols));
+//    }
+//
+//
+//    _learner->fit(batch, labels);
+//    datapoints_seen += batch.n_cols;
+//
+//    if (SafezoneFunction *entity = dynamic_cast<VarianceSZFunction *>(szone.Szone())) {
+//        if (szone(datapoints_seen) <= 0) {
+//            datapoints_seen = 0;
+//            szone(drift, _learner->ModelParameters(), 1.);
+//            if (szone.Szone()->CheckIfAdmissible(drift) < 0.)
+//                coord.LocalViolation(this);
+//        }
+//    } else {
+//        if (szone(datapoints_seen) <= 0.)
+//            coord.LocalViolation(this);
+//    }
+//}
 
 oneway LearningNode::Reset(const Safezone &newsz) {
     szone = newsz;       // Reset the safezone object
@@ -332,6 +333,6 @@ void LearningNode::SetDrift(ModelState mdl) {
 }
 
 // TODO SetGlobalParameters
-oneway LearningNode::SetGlobalParameters(const ModelState &SHParams) {
-    _learner->restoreModel(SHParams._model);
-}
+//oneway LearningNode::SetGlobalParameters(const ModelState &SHParams) {
+//    _learner->restoreModel(SHParams._model);
+//}

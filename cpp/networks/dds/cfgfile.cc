@@ -9,7 +9,6 @@
 
 #include <boost/core/demangle.hpp>
 
-#include "data_source.hh"
 #include "accurate.hh"
 #include "cfgfile.hh"
 #include "method.hh"

@@ -10,7 +10,7 @@ sudo apt-get -y autoremove   # Comment in order not to remove packages that are 
 # OS libraries
 sudo apt-get install -y build-essential cmake pkg-config
 sudo apt-get install -y libx11-dev libatlas-base-dev
-sudo apt-get install -y libgtk-3-dev libboost-python-dev
+sudo apt-get install -y libgtk-3-dev libboost-python-dev python-lxml
 
 # dsarch
 sudo apt-get install -y cxxtest libboost-all-dev doxygen autoconf-archive dvips-fontdata-n2bk texlive-latex-recommended gawk graphviz

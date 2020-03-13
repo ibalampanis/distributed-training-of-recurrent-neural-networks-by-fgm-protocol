@@ -14,6 +14,7 @@
 namespace controller {
 
     using namespace gm_protocol;
+    using namespace gm_network;
     using namespace arma;
     using namespace dds;
     using std::vector;
@@ -58,8 +59,6 @@ namespace controller {
     protected:
         std::string configFile;                     // JSON file to read the hyperparameters.
         time_t seed;                                // The seed for the random generator.
-        size_t batchSize{};                         // The batch learning size.
-        size_t warmupSize{};                        // The size of the warmup dataset.
         size_t testSize;                            // Starting test data point.
         size_t numberOfFeatures;                    // The number of features of each datapoint.
         arma::mat target;                           // The moving target disjunction of the stream.

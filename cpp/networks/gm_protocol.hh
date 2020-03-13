@@ -79,7 +79,7 @@ namespace gm_protocol {
 
         ModelState(const arma::mat _mdl, size_t _updates);
 
-        size_t ByteSize() const;
+        size_t byte_size() const;
     };
 
     struct MatrixMessage {
@@ -210,7 +210,7 @@ namespace gm_protocol {
 
         float operator()(const arma::mat mdl);
 
-        size_t ByteSize() const;
+        size_t byte_size() const;
 
     };
 
@@ -229,11 +229,11 @@ namespace gm_protocol {
         /** Constructor and Destructor */
         QueryState();
 
-        explicit QueryState(const vector<arma::SizeMat> &vsz);
+        explicit QueryState(const arma::SizeMat &vsz);
 
         ~QueryState();
 
-        void InitializeGlobalModel(const vector<arma::SizeMat> &vsz);
+        void InitializeGlobalModel(const arma::SizeMat &vsz);
 
         /**
          * Update the global model parameters.
@@ -287,7 +287,7 @@ namespace gm_protocol {
 
         static QueryState *CreateQueryState();
 
-        static QueryState *CreateQueryState(vector<arma::SizeMat> sz);
+        static QueryState *CreateQueryState(arma::SizeMat sz);
 
         double QueryAccuracy(RNNLearner *lnr);
     };
@@ -298,7 +298,7 @@ namespace gm_protocol {
      * for Distributed Machine Learning.
      */
     template<typename Net, typename Coord, typename Node>
-    struct GmLearningNetwork : star_network<Net, Coord, Node> {
+    struct GmLearningNetwork : dds::star_network<Net, Coord, Node> {
         typedef Coord coordinator_t;
         typedef Node node_t;
         typedef Net network_t;

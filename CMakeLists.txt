@@ -3,23 +3,25 @@ project(Distributed_Training_of_Recurrent_Neural_Networks_by_FGM_protocol C CXX)
 
 # First, define all the compilation options.
 # We default to debugging mode for developers.
-option(FORCE_CXX11
-        "Don't check that the compiler supports C++11, just assume it.  Make sure to specify any necessary flag to enable C++11 as part of CXXFLAGS."
+option(FORCE_CXX14
+        "Don't check that the compiler supports C++11, just assume it.  Make sure to specify any necessary flag to enable C++14 as part of CXXFLAGS."
         OFF)
 option(DOWNLOAD_ENSMALLEN "If ensmallen is not found, download it." ON)
 option(USE_OPENMP "If available, use OpenMP for parallelization." OFF)
 
 # If we are not forcing C++11 support, check that the compiler supports C++11
 # and enable it.
-if (NOT FORCE_CXX11)
+if (NOT FORCE_CXX14)
     include(CMake/CXX14.cmake)
     check_cxx_compiler_flag(-std=c++14 has_std_14_flag)
 
     if (NOT has_std_14_flag)
-        message(FATAL_ERROR "No C++11 compiler available!")
+        message(FATAL_ERROR "No C++14 compiler available!")
     endif ()
     enable_cxx14()
 endif ()
+
+set(CMAKE_CXX_STANDARD 14)  # enable C++14 standard
 
 # Include modules in the CMake directory.
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMake")
@@ -157,8 +159,8 @@ endif ()
 # Unfortunately this configuration variable is necessary and will need to be
 # updated as time goes on and new versions are released.
 set(Boost_ADDITIONAL_VERSIONS
-        "1.49.0" "1.50.0" "1.51.0" "1.52.0" "1.53.0" "1.54.0" "1.55.0")
-find_package(Boost 1.49
+        "1.49.0" "1.50.0" "1.51.0" "1.52.0" "1.53.0" "1.54.0" "1.65.0")
+find_package(Boost 1.65
         COMPONENTS
         program_options
         unit_test_framework
@@ -176,7 +178,6 @@ if (OPENMP_FOUND)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif ()
 
-
 link_directories(${Boost_LIBRARY_DIRS})
 
 # Include directories for the previous dependencies.
@@ -188,15 +189,29 @@ set(MODELS_LIBRARIES ${MLPACK_LIBRARY}
         ${ARMADILLO_LIBRARIES}
         ${Boost_LIBRARIES})
 
+
 include_directories(${MODELS_INCLUDE_DIRS})
+
+option(ENABLE_HDF5 "Enable HDF5 support" ON)
+if (ENABLE_HDF5)
+    find_package(HDF5)
+    if (HDF5_FOUND)
+        include_directories(${HDF5_INCLUDE_DIR})
+        set(HDF5_LIBRARIES hdf5_hl_cpp hdf5_cpp hdf5_serial)
+    else ()
+        message(FATAL_ERROR
+                "Cannot find HDF5")
+    endif ()
+endif ()
+
+find_package(Boost COMPONENTS filesystem system date_time python REQUIRED)
+find_package(PythonLibs REQUIRED)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/)
 
 # Recurse into each model.
-set(DIRS
-        cpp/exp
-        )
+set(DIRS cpp/exp)
 
-foreach(dir ${DIRS})
-  add_subdirectory(${dir})
-endforeach()
+foreach (dir ${DIRS})
+    add_subdirectory(${dir})
+endforeach ()

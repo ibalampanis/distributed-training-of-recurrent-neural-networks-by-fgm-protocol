@@ -6,8 +6,8 @@
     "data": "data_section",
     "stream_distribution": "Stream_Distribution",
     "log_diff_acc": false,
-    "Communication_File": "/home/ibalampanis/CLionProjects/Distributed_Training_of_Recurrent_Neural_Networks_by_FGM_protocol/Networks/sim_files/eeg_comm.csv",
-    "Differential_Communication_File": "/home/ibalampanis/CLionProjects/Distributed_Training_of_Recurrent_Neural_Networks_by_FGM_protocol/Networks/sim_files/eeg_diff_comm.csv",
+    "Communication_File": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/Networks/sim_files/eeg_comm.csv",
+    "Differential_Communication_File": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/Networks/sim_files/eeg_diff_comm.csv",
     "seed": -1
   },
   "data_section": {
@@ -51,7 +51,7 @@
     "encoding": "UTF-8",
     "input_size": 15,
     "output_size": 1,
-    "path": "/home/ibalampanis/CLionProjects/Distributed_Training_of_Recurrent_Neural_Networks_by_FGM_protocol/datasets/EEG_Eye_State.csv",
+    "path": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/datasets/EEG_Eye_State.csv",
     "train_dset_name": "eegTrainSet",
     "test_dset_name": "eegTestSet"
   }

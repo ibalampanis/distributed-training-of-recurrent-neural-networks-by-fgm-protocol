@@ -23,16 +23,16 @@ namespace { // Avoid cluttering the global namespace.
     namespace py = boost::python;
 
     // template <typename DS>
-    // void __wrap_dataset_load(dds::dataset& D,
+    // void __wrap_dataset_load(ddsim::dataset& D,
     // 	std::auto_ptr<DS> p)
     // {
     // 	D.load(p.get());
     // 	p.release();
     // }
 
-    // inline dds::data_source* __wrap_time_window(std::auto_ptr<dds::data_source> ds, dds::timestamp ts)
+    // inline ddsim::data_source* __wrap_time_window(std::auto_ptr<ddsim::data_source> ds, ddsim::timestamp ts)
     // {
-    // 	dds::data_source* ret = dds::time_window(ds.get(), ts);
+    // 	ddsim::data_source* ret = ddsim::time_window(ds.get(), ts);
     // 	ds.release();
     // 	return ret;
     // }
@@ -225,7 +225,7 @@ namespace { // Avoid cluttering the global namespace.
     }
 
 
-    /// Wrappers for functions in dds::execute, which take a string as argument and turns it into a
+    /// Wrappers for functions in ddsim::execute, which take a string as argument and turns it into a
     /// javascript object.
 
     void __execute_wrapper(const std::string &str) {
@@ -298,7 +298,7 @@ BOOST_PYTHON_MODULE (_dds) {
 
     /**********************************************
      *
-     *  dds.hh
+     *  ddsim.hh
      *
      **********************************************/
 
@@ -333,10 +333,10 @@ BOOST_PYTHON_MODULE (_dds) {
                                                      init<dds::stream_id>())
             .add_property("param", &dds::self_join::param);
 
-    //std_pair_to_python_converter<dds::stream_id, dds::stream_id>();
+    //std_pair_to_python_converter<ddsim::stream_id, ddsim::stream_id>();
 
     // class_< id_pair >("id_pair",
-    // 	init<dds::stream_id, dds::stream_id>())
+    // 	init<ddsim::stream_id, ddsim::stream_id>())
     // 	.def_readwrite("first", &id_pair::first)
     // 	.def_readwrite("second", &id_pair::second)
     // 	;
@@ -345,7 +345,7 @@ BOOST_PYTHON_MODULE (_dds) {
 
     class_<dds::twoway_join, bases<dds::basic_query> >("twoway_join",
                                                        init<std::pair<dds::stream_id, dds::stream_id>>())
-            //.def_readonly("param", &dds::twoway_join::param )
+            //.def_readonly("param", &ddsim::twoway_join::param )
             .add_property("param", make_function(
                     [](dds::twoway_join &q) {
                         return py::make_tuple(q.param.first, q.param.second);
@@ -821,7 +821,7 @@ BOOST_PYTHON_MODULE (_dds) {
                  with_custodian_and_ward_postcall<1, 2>()
             )
             .def("run", &dds::basic_control::run)
-                    //.def("add_rule", &dds::basic_control::add_rule,
+                    //.def("add_rule", &ddsim::basic_control::add_rule,
                     //	return_value_policy<return_by_value>())
             .def("on", on_pyaction, return_value_policy<return_by_value>())
             .def("on", on_pycondaction, return_value_policy<return_by_value>())

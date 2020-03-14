@@ -538,7 +538,7 @@ public:
 
 
     void test_enum_repr() {
-        TS_ASSERT_EQUALS(open_mode_repr.name(), "dds::open_mode");
+        TS_ASSERT_EQUALS(open_mode_repr.name(), "ddsim::open_mode");
         TS_ASSERT_EQUALS(open_mode_repr["truncate"], open_mode::truncate);
         TS_ASSERT_EQUALS(open_mode_repr["append"], open_mode::append);
 
@@ -547,7 +547,7 @@ public:
         TS_ASSERT(!open_mode_repr.is_member(""));
 
 
-        TS_ASSERT_EQUALS(text_format_repr.name(), "dds::text_format");
+        TS_ASSERT_EQUALS(text_format_repr.name(), "ddsim::text_format");
         TS_ASSERT(!text_format_repr.is_member("truncate"));
         TS_ASSERT(text_format_repr.is_member("csvrel"));
         TS_ASSERT_THROWS(text_format_repr["goo"], std::out_of_range);

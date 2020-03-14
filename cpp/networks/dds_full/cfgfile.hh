@@ -88,6 +88,6 @@ namespace dds {
     void generate_schema(output_table *table);
 
 
-} // end namespace dds
+} // end namespace ddsim
 
 #endif

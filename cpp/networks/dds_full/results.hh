@@ -97,6 +97,6 @@ namespace dds {
 
     extern network_interfaces_t network_interfaces;
 
-} // end namespace dds
+} // end namespace ddsim
 
 #endif

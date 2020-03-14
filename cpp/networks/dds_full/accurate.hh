@@ -218,6 +218,6 @@ namespace dds {
     extern component_type<query_method> agms_query_comptype;
 
 
-} // end namespace dds
+} // end namespace ddsim
 
 #endif

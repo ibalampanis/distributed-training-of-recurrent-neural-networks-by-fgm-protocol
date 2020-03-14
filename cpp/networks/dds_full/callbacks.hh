@@ -219,7 +219,7 @@ namespace Simple {
         };
 
     } // Lib
-// namespace dds
+// namespace ddsim
 
 /**
  * Signal is a template type providing an interface for arbitrary callback lists.

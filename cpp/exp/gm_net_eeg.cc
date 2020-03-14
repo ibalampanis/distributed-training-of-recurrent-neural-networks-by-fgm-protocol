@@ -5,10 +5,11 @@
 
 using namespace controller;
 using namespace gm_network;
+using namespace std;
 
 int main(int argc, char **argv) {
 
-    std::string cfg = std::string(argv[1]);
+    string cfg = string(argv[1]);
 
     Controller<gm_network::GmNet> sim(cfg);
     sim.InitializeSimulation();

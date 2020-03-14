@@ -1,0 +1,10 @@
+This is the host folder for libdml.a custom library.
+
+The abbreviation dml came from "Distributed Machine Learning"
+
+This is a static library which has built from the below files:
+    -> models/rnn_learner.cc
+    -> networks/*.cc
+    -> networks/ddssim/*.cc
+
+The libdml.a file will be auto-generated after GMNet executable compilation.

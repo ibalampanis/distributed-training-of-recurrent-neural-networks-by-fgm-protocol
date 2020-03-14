@@ -322,6 +322,6 @@ namespace dds {
     };
 
 
-} // end namespace dds
+} // end namespace ddsim
 
 #endif

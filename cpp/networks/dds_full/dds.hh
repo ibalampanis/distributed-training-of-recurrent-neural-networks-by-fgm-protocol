@@ -385,7 +385,7 @@ inline size_t byte_size<type>(const type& i) { return sizeof(type); }
     };
 
 
-} // end namespace dds
+} // end namespace ddsim
 
 
 

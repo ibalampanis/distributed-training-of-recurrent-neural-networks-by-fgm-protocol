@@ -1296,7 +1296,7 @@ namespace dds {
     extern enum_repr<open_mode> open_mode_repr;
 
 
-} // end namespace dds
+} // end namespace ddsim
 
 
 #endif

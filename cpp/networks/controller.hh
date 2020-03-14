@@ -8,7 +8,7 @@
 #include <mlpack/core.hpp>
 #include "gm_protocol.hh"
 #include "gm_network.hh"
-#include "dds/dds.hh"
+#include "ddsim/dds.hh"
 
 
 namespace controller {

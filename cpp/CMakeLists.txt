@@ -42,35 +42,34 @@ include_directories(${PYTHON_INCLUDE_DIRS})
 set(MLSOURCES ../models/rnn_learner.cc)
 
 add_executable(CentrEEG centr_eeg.cc ${MLSOURCES})
-target_link_libraries(CentrEEG
+target_link_libraries(
+        CentrEEG
         jsoncpp
         ${MLPACK_LIBRARIES}
         ${ARMADILLO_LIBRARIES}
         ${Boost_LIBRARIES}
-        )
+)
 
 ############################################################################
 ############################## GMNetEEG ####################################
 ############################################################################
-add_executable(GMNetEEG gm_net_eeg.cc)
 
 file(GLOB DDSSIM_SOURCES ../networks/ddsim/*.cc)
 file(GLOB NET_SOURCES ../networks/*.cc)
 set(ML_SOURCES ../models/rnn_learner.cc)
-set(DML_SOURCES ${ML_SOURCES} ${DDSSIM_SOURCES} ${NET_SOURCES})
-add_library(dml ${DML_SOURCES})
+add_library(DML_LIBRARIES ${ML_SOURCES} ${DDSSIM_SOURCES} ${NET_SOURCES})
+install(TARGETS DML_LIBRARIES DESTINATION lib)
 
-include_directories("../lib")
 
-find_library(DML_LIBRARIES dml /lib)
+add_executable(GMNetEEG gm_net_eeg.cc ${DML_LIBRARIES})
 target_link_libraries(GMNetEEG
         jsoncpp
-        ${DML_LIBRARIES}
         ${HDF5_LIBRARIES}
         ${MLPACK_LIBRARIES}
         ${ARMADILLO_LIBRARIES}
         ${Boost_LIBRARIES}
         ${PYTHON_LIBRARIES}
+        ${DML_LIBRARIES}
         )
 
 

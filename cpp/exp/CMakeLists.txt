@@ -9,30 +9,6 @@ option(DEBUG "DEBUG" ON)
 set(CPP_SOURCE_DIR ..)
 include_directories("../..")
 include_directories(${PYTHON_INCLUDE_DIRS})
-#set(DDS_SOURCES
-#        "/home/ibalampanis/Documents/vsam/source-codes/ddssim/cpp/hdv.cc"
-#        /home/ibalampanis/Documents/vsam/source-codes/ddssim/cpp/ddsim.cc
-#        /home/ibalampanis/Documents/vsam/source-codes/ddssim/cpp/output.cc
-#        /home/ibalampanis/Documents/vsam/source-codes/ddssim/cpp/eca.cc
-#        /home/ibalampanis/Documents/vsam/source-codes/ddssim/cpp/agms.cc
-#        /home/ibalampanis/Documents/vsam/source-codes/ddssim/cpp/data_source.cc
-#        /home/ibalampanis/Documents/vsam/source-codes/ddssim/cpp/method.cc
-#        /home/ibalampanis/Documents/vsam/source-codes/ddssim/cpp/cfgfile.cc
-#        /home/ibalampanis/Documents/vsam/source-codes/ddssim/cpp/dsarch.cc
-#        /home/ibalampanis/Documents/vsam/source-codes/ddssim/cpp/accurate.cc
-#        /home/ibalampanis/Documents/vsam/source-codes/ddssim/cpp/query.cc
-#        /home/ibalampanis/Documents/vsam/source-codes/ddssim/cpp/results.cc
-#        /home/ibalampanis/Documents/vsam/source-codes/ddssim/cpp/sz_quorum.cc
-#        /home/ibalampanis/Documents/vsam/source-codes/ddssim/cpp/sz_bilinear.cc
-#        /home/ibalampanis/Documents/vsam/source-codes/ddssim/cpp/tods.cc
-#        /home/ibalampanis/Documents/vsam/source-codes/ddssim/cpp/safezone.cc
-#        /home/ibalampanis/Documents/vsam/source-codes/ddssim/cpp/gm_proto.cc
-#        /home/ibalampanis/Documents/vsam/source-codes/ddssim/cpp/gm_szone.cc
-#        /home/ibalampanis/Documents/vsam/source-codes/ddssim/cpp/gm_query.cc
-#        /home/ibalampanis/Documents/vsam/source-codes/ddssim/cpp/fgm.cc
-#        /home/ibalampanis/Documents/vsam/source-codes/ddssim/cpp/sgm.cc
-#        /home/ibalampanis/Documents/vsam/source-codes/ddssim/cpp/frgm.cc
-#        )
 
 
 ############################################################################
@@ -54,6 +30,7 @@ target_link_libraries(CentrEEG
 ############################################################################
 add_executable(GMNetEEG gm_net_eeg.cc)
 
+
 file(GLOB DDSSIM_SOURCES ../networks/ddsim/*.cc)
 file(GLOB NET_SOURCES ../networks/*.cc)
 set(ML_SOURCES ../models/rnn_learner.cc)
@@ -62,7 +39,10 @@ add_library(dml ${DML_SOURCES})
 
 include_directories("../lib")
 
-find_library(DML_LIBRARIES dml /lib)
+find_library(DML_LIBRARIES dml ../lib)
+
+message(STATUS "DML_LIB: [${DML_LIBRARIES}]")
+
 target_link_libraries(GMNetEEG
         jsoncpp
         ${DML_LIBRARIES}

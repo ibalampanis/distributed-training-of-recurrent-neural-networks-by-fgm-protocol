@@ -23,7 +23,7 @@ Coordinator::Coordinator(network_t *nw, Query *_Q) : process(nw), proxy(this),
                                                      numViolations(0), numRounds(0), numSubrounds(0),
                                                      szSent(0), totalUpdates(0) {
     InitializeGlobalLearner();
-    query = Q->CreateQueryState();
+    query = gm_protocol::Query::CreateQueryState();
     safezone = query->Safezone(Cfg().cfgfile, Cfg().distributedLearningAlgorithm);
 }
 

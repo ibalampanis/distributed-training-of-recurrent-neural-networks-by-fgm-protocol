@@ -71,7 +71,7 @@ SafezoneFunction::~SafezoneFunction() = default;
 
 const arma::mat SafezoneFunction::GlobalModel() const { return globalModel; }
 
-// TODO: UpdateDrift
+// FIXME: safe zone UpdateDrift
 //void SafezoneFunction::UpdateDrift(arma::mat drift, arma::mat vars, float mul) const {
 //    drift.clear();
 //    for (size_t i = 0; i < globalModel.size(); i++) {
@@ -182,9 +182,9 @@ void Safezone::Swap(Safezone &other) { std::swap(szone, other.szone); }
 
 SafezoneFunction *Safezone::Szone() { return (szone != nullptr) ? szone : nullptr; }
 
-void Safezone::operator()(arma::mat drift, arma::mat vars, float mul) {
-    szone->UpdateDrift(drift, vars, mul);
-}
+//void Safezone::operator()(arma::mat drift, arma::mat vars, float mul) {
+//    szone->UpdateDrift(drift, vars, mul);
+//}
 
 size_t Safezone::operator()(size_t counter) {
     return (szone != nullptr) ? szone->CheckIfAdmissible(counter) : NAN;

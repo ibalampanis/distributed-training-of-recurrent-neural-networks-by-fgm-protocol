@@ -181,7 +181,7 @@ Safezone &Safezone::operator=(const Safezone &other) {
 void Safezone::Swap(Safezone &other) { std::swap(szone, other.szone); }
 
 SafezoneFunction *Safezone::Szone() { return (szone != nullptr) ? szone : nullptr; }
-
+// TODO: uncomment
 //void Safezone::operator()(arma::mat drift, arma::mat vars, float mul) {
 //    szone->UpdateDrift(drift, vars, mul);
 //}

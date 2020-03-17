@@ -11,10 +11,10 @@ int main(int argc, char **argv) {
 
     string cfg = string(argv[1]);
 
-    Controller<gm_network::GmNet> sim(cfg);
-    sim.InitializeSimulation();
-    sim.PrintStarNets();
-//    sim.TrainNetworks();
+    controller::Controller<gm_network::GmNet> ctrl(cfg);
+    ctrl.InitializeSimulation();
+    ctrl.PrintStarNets();
+//    ctrl.TrainNetworks();
 
     return 0;
 }

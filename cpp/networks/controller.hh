@@ -87,7 +87,7 @@ namespace controller {
     public:
 
         /** Constructor */
-        explicit Controller(const string &cfg);
+        explicit Controller<distrNetType>(const string &cfg);
 
         /** This method puts a network in the network container */
         void AddNet(distrNetType *net);

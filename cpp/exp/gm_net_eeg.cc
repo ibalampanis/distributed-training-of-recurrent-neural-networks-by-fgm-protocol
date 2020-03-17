@@ -1,6 +1,6 @@
 #include <string>
-#include "cpp/networks/controller.hh"
-#include "cpp/networks/gm_network.hh"
+#include "cpp/networks/controller.cc"
+#include "cpp/networks/gm_network.cc"
 
 
 using namespace controller;

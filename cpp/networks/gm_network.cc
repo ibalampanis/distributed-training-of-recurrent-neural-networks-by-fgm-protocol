@@ -1,6 +1,6 @@
 #include <random>
 #include "gm_network.hh"
-#include "gm_protocol.hh"
+#include "gm_protocol.cc"
 
 using namespace gm_protocol;
 using namespace gm_network;
@@ -61,8 +61,9 @@ void Coordinator::SetupConnections() {
 void Coordinator::StartRound() {
     // Send new safezone.
     for (auto n : Net()->sites) {
+        // TODO: uncomment
         if (numRounds == 0) {
-            proxy[n].SetGlobalParameters(ModelState(globalLearner->ModelParameters(), 0));
+//            proxy[n].SetGlobalParameters(ModelState(globalLearner->ModelParameters(), 0));
         }
         szSent++;
         proxy[n].Reset(Safezone(safezone));
@@ -97,7 +98,8 @@ void Coordinator::FinishRound() {
 
     // Collect all data
     for (auto n : nodePtr) {
-        FetchUpdates(n);
+        // TODO: uncomment
+//        FetchUpdates(n);
     }
     for (size_t i = 0; i < Mean.size(); i++)
         Mean.at(i) /= cnt;
@@ -134,10 +136,10 @@ void Coordinator::KampRebalance(node_t *lvnode) {
         Bcompl.insert(n);
     }
     assert(B.size() + Bcompl.size() == k);
-
-    FetchUpdates(lvnode);
+    // TODO: uncomment fetch
+//    FetchUpdates(lvnode);
     for (auto n:Bcompl) {
-        FetchUpdates(n);
+//        FetchUpdates(n);
         B.insert(n);
         for (size_t i = 0; i < Mean.size(); i++)
             Mean.at(i) /= cnt;
@@ -191,16 +193,17 @@ vector<size_t> Coordinator::Statistics() const {
     stats.push_back(0);
     return stats;
 }
-
-void Coordinator::FetchUpdates(node_t *node) {
-    ModelState up = proxy[node].GetDrift();
-    if (!arma::approx_equal(arma::mat(arma::size(up._model), arma::fill::zeros), up._model, "absdiff",
-                            1e-6)) {
-        cnt++;
-        Mean += up._model;
-    }
-    totalUpdates += up.updates;
-}
+// TODO: uncomment
+//void Coordinator::FetchUpdates(node_t *node) {
+//
+//    ModelState up = proxy[node].GetDrift();
+//    if (!arma::approx_equal(arma::mat(arma::size(up._model), arma::fill::zeros), up._model, "absdiff",
+//                            1e-6)) {
+//        cnt++;
+//        Mean += up._model;
+//    }
+//    totalUpdates += up.updates;
+//}
 
 oneway Coordinator::LocalViolation(sender<node_t> ctx) {
 
@@ -225,20 +228,8 @@ oneway Coordinator::LocalViolation(sender<node_t> ctx) {
     }
 }
 
-// TODO: Drift
-//oneway Coordinator::Drift(sender<node_t> ctx, int cols) {
-//    // Updating beta vector.
-//    node_t *n = ctx.value;
-//    globalLearner->handleRD(cols);
-//    for (auto st : Net()->sites) {
-//        if (st != n) {
-//            proxy[st].augmentBetaMatrix(cols);
-//        }
-//    }
-//    Mean.at(1).resize(Mean.at(1).n_rows, Mean.at(1).n_cols + cols.number);
-//    query->globalModel.at(1) = arma::mat(arma::size(*globalLearner->ModelParameters().at(1)), arma::fill::zeros);
-//    query->globalModel.at(1) += *globalLearner->ModelParameters().at(1);
-//}
+// FIXME: coord Drift
+//oneway Coordinator::Drift(sender<node_t> ctx, int cols) {}
 
 
 /*********************************************
@@ -269,51 +260,8 @@ void LearningNode::SetupConnections() {
     num_sites = coord.proc()->k;
 }
 
-// TODO: UpdateStream
-//void LearningNode::UpdateStream(arma::mat &batch, arma::mat &labels) {
-//
-//
-//    size_t alpha_rows = batch.n_rows - _learner->getHModel().at(0)->n_rows;
-//    size_t beta_cols = labels.n_rows - _learner->ModelParameters().at(1)->n_cols;
-//
-//    if (alpha_rows > 0 && beta_cols > 0) {
-//        arma::mat newA = arma::zeros<arma::mat>(_learner->getHModel().at(0)->n_rows + alpha_rows,
-//                                                _learner->getHModel().at(0)->n_cols);
-//
-//        newA.rows(0, _learner->getHModel().at(0)->n_rows - 1) += *_learner->getHModel().at(0);
-//        newA.rows(_learner->getHModel().at(0)->n_rows, newA.n_rows - 1) +=
-//                coord.HybridDrift(this, IntNum(alpha_rows), IntNum(beta_cols)).sub_params;
-//
-//        *_learner->getHModel().at(0) = newA;
-//    } else if (alpha_rows > 0) {
-//        arma::mat newA = arma::zeros<arma::mat>(_learner->getHModel().at(0)->n_rows + alpha_rows,
-//                                                _learner->getHModel().at(0)->n_cols);
-//
-//        newA.rows(0, _learner->getHModel().at(0)->n_rows - 1) += *_learner->getHModel().at(0);
-//        newA.rows(_learner->getHModel().at(0)->n_rows, newA.n_rows - 1) +=
-//                coord.VirtualDrift(this, IntNum(alpha_rows)).sub_params;
-//
-//        *_learner->getHModel().at(0) = newA;
-//    } else if (beta_cols > 0) {
-//        coord.RealDrift(this, IntNum(beta_cols));
-//    }
-//
-//
-//    _learner->fit(batch, labels);
-//    datapoints_seen += batch.n_cols;
-//
-//    if (SafezoneFunction *entity = dynamic_cast<VarianceSZFunction *>(szone.Szone())) {
-//        if (szone(datapoints_seen) <= 0) {
-//            datapoints_seen = 0;
-//            szone(drift, _learner->ModelParameters(), 1.);
-//            if (szone.Szone()->CheckIfAdmissible(drift) < 0.)
-//                coord.LocalViolation(this);
-//        }
-//    } else {
-//        if (szone(datapoints_seen) <= 0.)
-//            coord.LocalViolation(this);
-//    }
-//}
+// FIXME: node UpdateStream
+//void LearningNode::UpdateStream(arma::mat &batch, arma::mat &labels) {}
 
 oneway LearningNode::Reset(const Safezone &newsz) {
     szone = newsz;       // Reset the safezone object
@@ -321,18 +269,17 @@ oneway LearningNode::Reset(const Safezone &newsz) {
     _learner->UpdateModel(szone.Szone()->GlobalModel()); // Updates the parameters of the local learner
 }
 
-ModelState LearningNode::GetDrift() {
-    // Getting the drift vector is done as getting the local statistic
-    szone(drift, _learner->ModelParameters(), 1.);
-    return ModelState(drift, _learner->NumberOfUpdates());
-}
+// TODO: uncomment
+//ModelState LearningNode::GetDrift() {
+//    // Getting the drift vector is done as getting the local statistic
+//    szone(drift, _learner->ModelParameters(), 1.);
+//    return ModelState(drift, _learner->NumberOfUpdates());
+//}
 
 void LearningNode::SetDrift(ModelState mdl) {
     // Update the local learner with the model sent by the coordinator
     _learner->UpdateModel(mdl._model);
 }
 
-// TODO SetGlobalParameters
-//oneway LearningNode::SetGlobalParameters(const ModelState &SHParams) {
-//    _learner->restoreModel(SHParams._model);
-//}
+// FIXME: node SetGlobalParameters
+//oneway LearningNode::SetGlobalParameters(const ModelState &SHParams) {}

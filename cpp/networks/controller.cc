@@ -69,8 +69,6 @@ Controller<distrNetType>::Controller(const string &cfg) : configFile(std::move(c
         std::ifstream cfgfile(this->configFile); // Parse from JSON file.
         cfgfile >> root;
 
-        this->batchSize = root["tests_Generated_Data"].get("batch_size", 1).asInt64();
-
         numberOfFeatures = root["tests_Generated_Data"].get("number_of_features", 20).asInt64();
         if (numberOfFeatures <= 0) {
             cout << endl << "Incorrect parameter number_of_features" << endl;

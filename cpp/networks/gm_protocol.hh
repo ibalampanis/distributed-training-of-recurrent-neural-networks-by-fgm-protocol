@@ -77,7 +77,7 @@ namespace gm_protocol {
         const arma::mat _model;
         size_t updates;
 
-        ModelState(const arma::mat _mdl, size_t _updates);
+        ModelState(arma::mat _mdl, size_t _updates);
 
         size_t byte_size() const;
     };
@@ -141,10 +141,10 @@ namespace gm_protocol {
 
         float Zeta(const vector<arma::mat> &pars) const override;
 
-        float CheckIfAdmissible(const arma::mat mdl) const override;
+        float CheckIfAdmissible(arma::mat mdl) const override;
 
         float CheckIfAdmissibleReb(const vector<arma::mat *> &par1, const vector<arma::mat> &par2,
-                                   float coef) const;
+                                   float coef) const override;
 
         size_t ByteSize() const override;
     };
@@ -160,8 +160,6 @@ namespace gm_protocol {
         size_t threshold; // The maximum number of points fitted by each node before requesting synch from the Hub.
 
         /** Constructors and Destructor */
-        explicit BatchLearningSZFunction(vector<arma::mat> &GlMd);
-
         BatchLearningSZFunction(arma::mat GlMd, size_t thr);
 
         ~BatchLearningSZFunction();

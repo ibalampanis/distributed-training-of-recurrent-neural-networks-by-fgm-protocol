@@ -12,11 +12,20 @@ sudo apt-get install -y build-essential cmake pkg-config
 sudo apt-get install -y libx11-dev libatlas-base-dev
 sudo apt-get install -y libgtk-3-dev libboost-python-dev python-lxml
 
+# Python libraries
+sudo apt-get install -y python-dev python-pip python3-dev python3-pip
+
 # dsarch
 sudo apt-get install -y cxxtest libboost-all-dev doxygen autoconf-archive dvips-fontdata-n2bk texlive-latex-recommended gawk graphviz
 
 # hdf5
 sudo apt-get install -y libhdf5-dev
+
+# blas and lapack
+sudo apt-get install -y libblas-dev liblapack-dev
+sudo apt-get install -y libblas-dev checkinstall
+sudo apt-get install -y liblapacke-dev checkinstall
+sudo apt-get install -y liblapack-doc checkinstall
 
 # armadillo
 sudo apt-get install -y cmake libopenblas-dev liblapack-dev libarpack2-dev
@@ -28,14 +37,6 @@ make -j4
 sudo make install
 cd
 
-# Python libraries
-sudo apt-get install -y python-dev python-pip python3-dev python3-pip
-
-# blas and lapack
-sudo apt-get install -y libblas-dev liblapack-dev
-sudo apt-get install -y libblas-dev checkinstall
-sudo apt-get install -y liblapacke-dev checkinstall
-sudo apt-get install -y liblapack-doc checkinstall
 
 # mlpack
 sudo apt-get install -y libmlpack-dev

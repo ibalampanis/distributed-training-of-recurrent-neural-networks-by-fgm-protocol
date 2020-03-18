@@ -61,7 +61,7 @@ void Coordinator::SetupConnections() {
 void Coordinator::StartRound() {
     // Send new safezone.
     for (auto n : Net()->sites) {
-        // TODO: uncomment
+        // TODO: uncomment SetGlobalParameters
         if (numRounds == 0) {
 //            proxy[n].SetGlobalParameters(ModelState(globalLearner->ModelParameters(), 0));
         }
@@ -98,7 +98,7 @@ void Coordinator::FinishRound() {
 
     // Collect all data
     for (auto n : nodePtr) {
-        // TODO: uncomment
+        // TODO: uncomment FetchUpdates
 //        FetchUpdates(n);
     }
     for (size_t i = 0; i < Mean.size(); i++)
@@ -136,7 +136,7 @@ void Coordinator::KampRebalance(node_t *lvnode) {
         Bcompl.insert(n);
     }
     assert(B.size() + Bcompl.size() == k);
-    // TODO: uncomment fetch
+    // TODO: uncomment FetchUpdates
 //    FetchUpdates(lvnode);
     for (auto n:Bcompl) {
 //        FetchUpdates(n);
@@ -193,7 +193,7 @@ vector<size_t> Coordinator::Statistics() const {
     stats.push_back(0);
     return stats;
 }
-// TODO: uncomment
+// TODO: uncomment FetchUpdates
 //void Coordinator::FetchUpdates(node_t *node) {
 //
 //    ModelState up = proxy[node].GetDrift();
@@ -227,8 +227,7 @@ oneway Coordinator::LocalViolation(sender<node_t> ctx) {
         }
     }
 }
-
-// FIXME: coord Drift
+// FIXME: Coordinator::Drift
 //oneway Coordinator::Drift(sender<node_t> ctx, int cols) {}
 
 
@@ -259,8 +258,7 @@ void LearningNode::InitializeLearner() {
 void LearningNode::SetupConnections() {
     num_sites = coord.proc()->k;
 }
-
-// FIXME: node UpdateStream
+// FIXME: LearningNode::UpdateStream
 //void LearningNode::UpdateStream(arma::mat &batch, arma::mat &labels) {}
 
 oneway LearningNode::Reset(const Safezone &newsz) {
@@ -268,8 +266,7 @@ oneway LearningNode::Reset(const Safezone &newsz) {
     datapoints_seen = 0; // Reset the drift vector
     _learner->UpdateModel(szone.Szone()->GlobalModel()); // Updates the parameters of the local learner
 }
-
-// TODO: uncomment
+// TODO: uncomment GetDrift
 //ModelState LearningNode::GetDrift() {
 //    // Getting the drift vector is done as getting the local statistic
 //    szone(drift, _learner->ModelParameters(), 1.);
@@ -280,6 +277,5 @@ void LearningNode::SetDrift(ModelState mdl) {
     // Update the local learner with the model sent by the coordinator
     _learner->UpdateModel(mdl._model);
 }
-
-// FIXME: node SetGlobalParameters
+// FIXME: LearningNode::SetGlobalParameters
 //oneway LearningNode::SetGlobalParameters(const ModelState &SHParams) {}

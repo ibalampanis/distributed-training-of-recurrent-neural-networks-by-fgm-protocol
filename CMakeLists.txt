@@ -210,8 +210,9 @@ find_package(PythonLibs REQUIRED)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/)
 
 # Recurse into each model.
-set(DIRS cpp/exp)
+set(DIRS cpp/experiments)
 
 foreach (dir ${DIRS})
     add_subdirectory(${dir})
 endforeach ()
+

@@ -6,8 +6,8 @@
     "data": "data_section",
     "stream_distribution": "Stream_Distribution",
     "log_diff_acc": false,
-    "Communication_File": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/Networks/sim_files/eeg_comm.csv",
-    "Differential_Communication_File": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/Networks/sim_files/eeg_diff_comm.csv",
+    "Communication_File": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/sim/eeg_comm.csv",
+    "Differential_Communication_File": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/sim/eeg_diff_comm.csv",
     "seed": -1
   },
   "data_section": {

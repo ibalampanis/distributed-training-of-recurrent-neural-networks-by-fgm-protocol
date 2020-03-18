@@ -19,10 +19,10 @@ using std::endl;
 TcpChannel::TcpChannel(host *src, host *dst, rpcc_t endp) : channel(src, dst, endp), tcpBytes(0) {}
 
 void TcpChannel::transmit(size_t msg_size) {
-    // update parent statistics
+    // Update parent statistics
     channel::transmit(msg_size);
 
-    // update tcp byte count
+    // Update tcp byte count
     size_t segno = (msg_size + tcpMsgSize - 1) / tcpMsgSize;
     tcpBytes += msg_size + segno * tcpHeaderBytes;
 }
@@ -49,7 +49,7 @@ size_t Increment::ByteSize() const { return sizeof(int); }
 /*********************************************
 	Model State
 *********************************************/
-ModelState::ModelState(const arma::mat _mdl, size_t _updates) : _model(_mdl), updates(_updates) {}
+ModelState::ModelState(arma::mat _mdl, size_t _updates) : _model(_mdl), updates(_updates) {}
 
 size_t ModelState::byte_size() const { return _model.n_elem * sizeof(float); }
 
@@ -71,7 +71,7 @@ SafezoneFunction::~SafezoneFunction() = default;
 
 const arma::mat SafezoneFunction::GlobalModel() const { return globalModel; }
 
-// FIXME: safe zone UpdateDrift
+// FIXME: SafezoneFunction::UpdateDrift
 //void SafezoneFunction::UpdateDrift(arma::mat drift, arma::mat vars, float mul) const {
 //    drift.clear();
 //    for (size_t i = 0; i < globalModel.size(); i++) {
@@ -120,7 +120,7 @@ float VarianceSZFunction::CheckIfAdmissibleReb(const vector<arma::mat *> &par1, 
     return coef * (std::sqrt(threshold) - std::sqrt(res));
 }
 
-float VarianceSZFunction::CheckIfAdmissible(const arma::mat mdl) const {
+float VarianceSZFunction::CheckIfAdmissible(arma::mat mdl) const {
     double var = 0.;
 
     arma::mat sub = mdl - globalModel;
@@ -181,7 +181,7 @@ Safezone &Safezone::operator=(const Safezone &other) {
 void Safezone::Swap(Safezone &other) { std::swap(szone, other.szone); }
 
 SafezoneFunction *Safezone::Szone() { return (szone != nullptr) ? szone : nullptr; }
-// TODO: uncomment
+// TODO: uncomment UpdateDrift
 //void Safezone::operator()(arma::mat drift, arma::mat vars, float mul) {
 //    szone->UpdateDrift(drift, vars, mul);
 //}

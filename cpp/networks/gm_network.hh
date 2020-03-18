@@ -102,12 +102,12 @@ namespace gm_network {
         vector<size_t> Statistics() const;
 
         /** Get a model of a node */
-        // TODO: uncomment
+        // TODO: uncomment FetchUpdates
 //        void FetchUpdates(node_t *n);
 
         /** Remote call on host violation */
         oneway LocalViolation(sender<node_t> ctx);
-        // TODO: uncomment
+        // TODO: uncomment Drift
 //        oneway Drift(sender<node_t> ctx, size_t cols);
 
     };
@@ -115,7 +115,7 @@ namespace gm_network {
     struct CoordinatorProxy : remote_proxy<Coordinator> {
         using coordinator_t = Coordinator;
         REMOTE_METHOD(coordinator_t, LocalViolation);
-        // TODO: uncomment
+        // TODO: uncomment Drift
 //        REMOTE_METHOD(coordinator_t, Drift);
 
         CoordinatorProxy(process *c) : remote_proxy<coordinator_t>(c) {}
@@ -152,9 +152,9 @@ namespace gm_network {
         void InitializeLearner();
 
         void SetupConnections();
-
+        // TODO: uncomment UpdateDrift
 //        void UpdateDrift(vector<arma::mat *> &params);
-
+        // TODO: uncomment UpdateStream
 //        void UpdateStream(arma::mat &batch, arma::mat &labels);
 
         /**
@@ -165,12 +165,12 @@ namespace gm_network {
         oneway Reset(const Safezone &newsz);
 
         /** Transfer data to the coordinator */
-        // TODO: (!)uncomment
+        // TODO: (!)uncomment GetDrift
 //        ModelState GetDrift();
 
         /** Set the drift vector (for rebalancing) */
         void SetDrift(ModelState mdl);
-        // TODO: uncomment
+        // TODO: uncomment SetGlobalParameters
 //        oneway SetGlobalParameters(const ModelState &SHParams);
 
     };
@@ -178,10 +178,10 @@ namespace gm_network {
     struct LearningNodeProxy : remote_proxy<gm_network::LearningNode> {
         typedef gm_network::LearningNode node_t;
         REMOTE_METHOD(node_t, Reset);
-        // TODO: uncomment
+        // TODO: uncomment GetDrift
 //        REMOTE_METHOD(node_t, GetDrift);
         REMOTE_METHOD(node_t, SetDrift);
-        // TODO: uncomment
+        // TODO: uncomment SetGlobalParameters
 //        REMOTE_METHOD(node_t, SetGlobalParameters);
 
         explicit LearningNodeProxy(process *p) : remote_proxy<node_t>(p) {}

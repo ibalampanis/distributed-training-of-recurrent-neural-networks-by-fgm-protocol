@@ -61,9 +61,8 @@ void Coordinator::SetupConnections() {
 void Coordinator::StartRound() {
     // Send new safezone.
     for (auto n : Net()->sites) {
-        // TODO: uncomment SetGlobalParameters
         if (numRounds == 0) {
-//            proxy[n].SetGlobalParameters(ModelState(globalLearner->ModelParameters(), 0));
+            proxy[n].SetGlobalParameters(ModelState(globalLearner->ModelParameters(), 0));
         }
         szSent++;
         proxy[n].Reset(Safezone(safezone));
@@ -273,9 +272,12 @@ oneway LearningNode::Reset(const Safezone &newsz) {
 //    return ModelState(drift, _learner->NumberOfUpdates());
 //}
 
-void LearningNode::SetDrift(ModelState mdl) {
+void LearningNode::SetDrift(const ModelState &mdl) {
     // Update the local learner with the model sent by the coordinator
     _learner->UpdateModel(mdl._model);
 }
-// FIXME: LearningNode::SetGlobalParameters
-//oneway LearningNode::SetGlobalParameters(const ModelState &SHParams) {}
+
+oneway LearningNode::SetGlobalParameters(const ModelState &params) {
+    _learner->UpdateModel(params._model);
+}
+

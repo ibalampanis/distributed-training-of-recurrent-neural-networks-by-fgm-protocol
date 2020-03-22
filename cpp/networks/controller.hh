@@ -99,7 +99,7 @@ namespace controller {
         void InitializeSimulation();
 
         /** This method prints the star learning network for debbuging purposes */
-        void PrintStarNets() const;
+        void PrintNetInfo() const;
 
         /** This method gathers communication info after each streaming batch */
         void GatherDifferentialInfo();

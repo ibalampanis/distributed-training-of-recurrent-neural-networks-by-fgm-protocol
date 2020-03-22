@@ -227,7 +227,6 @@ SafezoneFunction *QueryState::Safezone(const string &cfg, string algo) {
     cfgfl >> root;
 
     string algorithm = root[algo].get("algorithm", "Variance_Monitoring").asString();
-    cout << algorithm << endl;
     if (algorithm == "Batch_Learning") {
         auto safe_zone = new BatchLearningSZFunction(globalModel, root[algo].get("batch_size", 32).asInt64());
         return safe_zone;
@@ -266,9 +265,7 @@ Query::Query(const string &cfg, string nm) {
 
     config.cfgfile = cfg;
 
-    cout << "Query initialized : ";
-    cout << config.networkName << ", ";
-    cout << config.cfgfile << endl;
+    cout << "Query has been initialized for the " << config.networkName << " network." << endl;
 }
 
 Query::~Query() = default;

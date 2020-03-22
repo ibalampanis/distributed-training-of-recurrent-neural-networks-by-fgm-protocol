@@ -169,9 +169,9 @@ namespace gm_network {
 //        ModelState GetDrift();
 
         /** Set the drift vector (for rebalancing) */
-        void SetDrift(ModelState mdl);
-        // TODO: uncomment SetGlobalParameters
-//        oneway SetGlobalParameters(const ModelState &SHParams);
+        void SetDrift(const ModelState &mdl);
+
+        oneway SetGlobalParameters(const ModelState &params);
 
     };
 
@@ -181,8 +181,7 @@ namespace gm_network {
         // TODO: uncomment GetDrift
 //        REMOTE_METHOD(node_t, GetDrift);
         REMOTE_METHOD(node_t, SetDrift);
-        // TODO: uncomment SetGlobalParameters
-//        REMOTE_METHOD(node_t, SetGlobalParameters);
+        REMOTE_METHOD(node_t, SetGlobalParameters);
 
         explicit LearningNodeProxy(process *p) : remote_proxy<node_t>(p) {}
     };

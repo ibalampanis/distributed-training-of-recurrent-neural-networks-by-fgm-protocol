@@ -76,16 +76,7 @@ Controller<distrNetType>::Controller(const string &cfg) : configFile(std::move(c
             throw;
         }
 
-        testSize = root["tests_Generated_Data"].get("test_size", 100000).asDouble();
-        if (testSize < 0) {
-            cout << endl << "Incorrect parameter test_size." << endl;
-            cout << "Acceptable test_size parameters are all the positive integers." << endl;
-            throw;
-        }
-
         std::srand(this->seed);
-
-        cout << "test size : " << testSize << endl << endl;
 
         targets = 1;
 
@@ -105,39 +96,38 @@ void Controller<distrNetType>::AddQuery(Query *qry) { _queryContainer.Join(qry);
 template<typename distrNetType>
 void Controller<distrNetType>::InitializeSimulation() {
 
-    cout << "Initializing the star nets..." << endl << endl << endl;
+    cout << "Initializing the star network..." << endl;
     Json::Value root;
     std::ifstream cfgfile(configFile); // Parse from JSON file.
     cfgfile >> root;
 
     source_id count = 0;
-    size_t numberOfNets = root["simulations"].get("number_of_networks", 0).asInt();
-    for (size_t i = 1; i <= numberOfNets; i++) {
 
-        string netName = root["simulations"].get("net_name_" + std::to_string(i), "NoNet").asString();
-        string learningAlgorithm = root["gm_network_" + netName].get("learning_algorithm",
-                                                                     "NoAlgo").asString();
+    string netName = root["simulations"].get("net_name", "NoNet").asString();
+    string learningAlgorithm = root["gm_net"].get("learning_algorithm",
+                                                  "NoAlgo").asString();
 
-        cout << "Initializing the network " << netName << " with " << learningAlgorithm << " learner."
-             << endl;
+    cout << "Initializing the network " << netName << " with " << learningAlgorithm << " learner."
+         << endl;
 
-        auto query = new gm_protocol::Query(configFile, netName);
-        AddQuery(query);
-        cout << "Query added." << endl;
+    auto query = new gm_protocol::Query(configFile, netName);
+    AddQuery(query);
+    cout << "Query has been added." << endl;
 
 
-        source_id numOfNodes = (source_id) root["gm_network_" + netName].get("number_of_local_nodes",
-                                                                             1).asInt64();
-        set<source_id> nodeIDs;
-        for (source_id j = 1; j <= numOfNodes; j++) {
-            nodeIDs.insert(count + j);
-        }
-        count += numOfNodes + 1; // We add one because of the coordinator.
-
-        auto net = new GmNet(nodeIDs, netName, _queryContainer.at(i - 1));
-        AddNet(net);
-        cout << "Net " << netName << " initialized." << endl << endl;
+    source_id numOfNodes = (source_id) root["gm_net"].get("number_of_local_nodes",
+                                                          1).asInt64();
+    set<source_id> nodeIDs;
+    for (source_id j = 1; j <= numOfNodes; j++) {
+        nodeIDs.insert(count + j);
     }
+    // We add one more because of the coordinator.
+    count += numOfNodes + 1;
+
+    auto net = new GmNet(nodeIDs, netName, query);
+    AddNet(net);
+
+
     for (auto net:_netContainer) {
         // Initializing the differential communication statistics.
         stats.push_back(chan_frame(net));
@@ -177,20 +167,19 @@ void Controller<distrNetType>::InitializeSimulation() {
     }
     msgs = 0;
     bts = 0;
-    cout << endl << "networks initialized." << endl;
+    cout << "Network " << netName << " has been initialized." << endl;
 }
 
 template<typename distrNetType>
-void Controller<distrNetType>::PrintStarNets() const {
-    cout << endl << "Printing the nets." << endl;
+void Controller<distrNetType>::PrintNetInfo() const {
+    cout << "Printing information about network." << endl;
     cout << "Number of networks : " << _netContainer.size() << endl;
     for (auto net:_netContainer) {
-        cout << endl;
         cout << "Network Name : " << net->name() << endl;
         cout << "Number of nodes : " << net->sites.size() << endl;
-        cout << "Coordinator " << net->hub->name() << " with address ";//<< net->hub->addr() << endl;
+        cout << "Coordinator " << net->hub->name() << " with address " << net->hub->addr() << endl;
         for (size_t j = 0; j < net->sites.size(); j++) {
-            cout << "Site " << net->sites.at(j)->name() << " with address " << net->sites.at(j)->site_id()
+            cout << "Node " << net->sites.at(j)->name() << " with address " << net->sites.at(j)->site_id()
                  << endl;
         }
     }

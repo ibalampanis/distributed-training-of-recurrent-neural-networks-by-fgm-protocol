@@ -26,10 +26,10 @@ target_link_libraries(CentrEEG
         )
 
 ############################################################################
-############################## GMNetEEG ####################################
+######################## GMNetEEG / FGMNetEEG ##############################
 ############################################################################
 add_executable(GMNetEEG gm_net_eeg.cc)
-
+add_executable(FGMNetEEG fgm_net_eeg.cc)
 
 file(GLOB DDSSIM_SOURCES ../networks/ddsim/*.cc)
 file(GLOB NET_SOURCES ../networks/*.cc)
@@ -52,7 +52,6 @@ target_link_libraries(GMNetEEG
         ${Boost_LIBRARIES}
         ${PYTHON_LIBRARIES}
         )
-
 
 ############################################################################
 ########################## Other Settings ##################################

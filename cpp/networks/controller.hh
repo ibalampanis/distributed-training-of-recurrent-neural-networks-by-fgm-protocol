@@ -21,7 +21,7 @@ namespace controller {
     using std::string;
 
     /**
-     * Vector container for the networks.
+     * A Vector container for the networks.
      */
     template<typename distrNetType>
     class NetContainer : public std::vector<distrNetType *> {
@@ -36,7 +36,7 @@ namespace controller {
     };
 
     /**
-     * Vector container for the queries.
+     * A Vector container for the queries.
      */
     class QueryContainer : public vector<Query *> {
 
@@ -114,6 +114,6 @@ namespace controller {
 
     };
 
-}
+} // end namespace controller
 
 #endif //DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_CONTROLLER_HH

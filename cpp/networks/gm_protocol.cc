@@ -71,15 +71,14 @@ SafezoneFunction::~SafezoneFunction() = default;
 
 const arma::mat SafezoneFunction::GlobalModel() const { return globalModel; }
 
-// FIXME: SafezoneFunction::UpdateDrift
-//void SafezoneFunction::UpdateDrift(arma::mat drift, arma::mat vars, float mul) const {
-//    drift.clear();
-//    for (size_t i = 0; i < globalModel.size(); i++) {
-//        arma::mat dr;
-//        dr = mul * (vars.at(i) - globalModel.at(i));
-//        drift.push_back(dr); // (+= mallon)
-//    }
-//}
+void SafezoneFunction::UpdateDrift(arma::mat drift, arma::mat params, float mul) const {
+    drift.clear();
+    for (size_t i = 0; i < globalModel.size(); i++) {
+        arma::mat dr;
+        dr = mul * (params.at(i) - globalModel.at(i));
+        drift += dr; // (+= mallon, gia na doume)
+    }
+}
 
 vector<float> SafezoneFunction::Hyperparameters() const { return hyperparameters; }
 
@@ -98,24 +97,23 @@ VarianceSZFunction::VarianceSZFunction(arma::mat GlMd, float thr, size_t batch_s
 
 VarianceSZFunction::~VarianceSZFunction() = default;
 
-float VarianceSZFunction::Zeta(const vector<arma::mat> &mdl) const {
+float VarianceSZFunction::Zeta(const arma::mat &params) const {
     float res = 0.;
-    for (size_t i = 0; i < mdl.size(); i++) {
-        arma::mat subtr = globalModel.at(i) - mdl.at(i);
-        res += arma::dot(subtr, subtr);
-    }
+
+    arma::mat subtr = globalModel - params;
+    res += arma::dot(subtr, subtr);
+
     return std::sqrt(threshold) - std::sqrt(res);
 }
 
-float VarianceSZFunction::CheckIfAdmissibleReb(const vector<arma::mat *> &par1, const vector<arma::mat> &par2,
-                                               float coef) const {
+float VarianceSZFunction::CheckIfAdmissibleReb(const arma::mat &par1, const arma::mat &par2,
+                                               double coef) const {
     float res = 0.;
-    for (size_t i = 0; i < par1.size(); i++) {
-        arma::mat subtr = *par1.at(i) - par2.at(i);
-        ////subtr *= 2.;
-        subtr *= coef;
-        res += arma::dot(subtr, subtr);
-    }
+    arma::mat subtr = par1 - par2;
+    ////subtr *= 2.;
+    subtr *= coef;
+    res += arma::dot(subtr, subtr);
+
     ////return 0.5*(std::sqrt(threshold)-std::sqrt(res));
     return coef * (std::sqrt(threshold) - std::sqrt(res));
 }
@@ -180,11 +178,11 @@ Safezone &Safezone::operator=(const Safezone &other) {
 
 void Safezone::Swap(Safezone &other) { std::swap(szone, other.szone); }
 
-SafezoneFunction *Safezone::Szone() { return (szone != nullptr) ? szone : nullptr; }
-// TODO: uncomment UpdateDrift
-//void Safezone::operator()(arma::mat drift, arma::mat vars, float mul) {
-//    szone->UpdateDrift(drift, vars, mul);
-//}
+SafezoneFunction *Safezone::GetSzone() { return (szone != nullptr) ? szone : nullptr; }
+
+void Safezone::operator()(arma::mat drift, arma::mat params, float mul) {
+    szone->UpdateDrift(drift, params, mul);
+}
 
 size_t Safezone::operator()(size_t counter) {
     return (szone != nullptr) ? szone->CheckIfAdmissible(counter) : NAN;
@@ -274,7 +272,7 @@ QueryState *Query::CreateQueryState() { return new QueryState(); }
 
 QueryState *Query::CreateQueryState(arma::SizeMat sz) { return new QueryState(sz); }
 
-double Query::QueryAccuracy(RNNLearner *rnn) { return rnn->ModelAccuracy(); }
+double Query::QueryAccuracy(RnnLearner *rnn) { return rnn->ModelAccuracy(); }
 
 
 /*********************************************

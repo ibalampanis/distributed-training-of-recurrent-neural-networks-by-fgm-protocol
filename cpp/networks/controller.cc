@@ -5,6 +5,7 @@ using namespace gm_network;
 using namespace arma;
 using namespace dds;
 using namespace controller;
+
 using std::vector;
 using std::string;
 

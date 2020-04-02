@@ -6,7 +6,7 @@
 using namespace rnn_learner;
 using namespace arma;
 
-RNNLearner::RNNLearner(const string &cfg, const RNN<MeanSquaredError<>, HeInitialization> &model) : model(model) {
+RnnLearner::RnnLearner(const string &cfg, const RNN<MeanSquaredError<>, HeInitialization> &model) : model(model) {
 
     // Take values from JSON file and initialize parameters
     try {
@@ -36,9 +36,9 @@ RNNLearner::RNNLearner(const string &cfg, const RNN<MeanSquaredError<>, HeInitia
     modelAccuracy = 0.0;
 }
 
-RNNLearner::~RNNLearner() = default;
+RnnLearner::~RnnLearner() = default;
 
-void RNNLearner::CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y, const size_t rho) {
+void RnnLearner::CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y, const size_t rho) {
     for (size_t i = 0; i < dataset.n_cols - rho; i++) {
         X.subcube(arma::span(), arma::span(i), arma::span()) = dataset.submat(arma::span(), arma::span(i, i + rho - 1));
         y.subcube(arma::span(), arma::span(i), arma::span()) = dataset.submat(
@@ -46,7 +46,7 @@ void RNNLearner::CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cu
     }
 }
 
-double RNNLearner::CalcMSE(arma::cube &pred, arma::cube &Y) {
+double RnnLearner::CalcMSE(arma::cube &pred, arma::cube &Y) {
     double err_sum = 0.0;
     arma::cube diff = pred - Y;
     for (size_t i = 0; i < diff.n_slices; i++) {
@@ -56,19 +56,19 @@ double RNNLearner::CalcMSE(arma::cube &pred, arma::cube &Y) {
     return (err_sum / (diff.n_elem + 1e-50));
 }
 
-int RNNLearner::NumberOfUpdates() const { return numberOfUpdates; }
+int RnnLearner::NumberOfUpdates() const { return numberOfUpdates; }
 
-arma::mat RNNLearner::ModelParameters() const {
+arma::mat RnnLearner::ModelParameters() const {
     return model.Parameters();
 }
 
-void RNNLearner::UpdateModel(arma::mat params) {
+void RnnLearner::UpdateModel(arma::mat params) {
     model.Parameters() = params;
 }
 
-double RNNLearner::ModelAccuracy() const { return modelAccuracy; }
+double RnnLearner::ModelAccuracy() const { return modelAccuracy; }
 
-void RNNLearner::CentralizedDataPreparation() {
+void RnnLearner::CentralizedDataPreparation() {
 
     arma::mat dataset;
     // In Armadillo rows represent features, columns represent data points.
@@ -100,7 +100,7 @@ void RNNLearner::CentralizedDataPreparation() {
 
 }
 
-void RNNLearner::BuildModel() {
+void RnnLearner::BuildModel() {
 
     /** Model definition */
     model = RNN<MeanSquaredError<>, HeInitialization>(rho);
@@ -123,7 +123,7 @@ void RNNLearner::BuildModel() {
 
 }
 
-void RNNLearner::TrainModel() {
+void RnnLearner::TrainModel() {
 
     cout << "Training ..." << endl;
     cout << "===========================================" << endl;
@@ -179,7 +179,7 @@ void RNNLearner::TrainModel() {
 
 }
 
-void RNNLearner::MakePrediction() {
+void RnnLearner::MakePrediction() {
 
     arma::cube predOut;
     cout << "Predicting ...";

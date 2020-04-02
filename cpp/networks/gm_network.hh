@@ -23,7 +23,7 @@ namespace gm_network {
     struct LearningNodeProxy;
 
     /**
-     * This is a GM Network implementation for the classic Geometric Method protocol.
+     * This is the GM Network implementation for the classic Geometric Method protocol.
      */
     struct GmNet : gm_protocol::GmLearningNetwork<GmNet, Coordinator, LearningNode> {
 
@@ -33,7 +33,7 @@ namespace gm_network {
     };
 
     /**
-     * This is a hub/coordinator implementation for the classic Geometric Method protocol.
+     * This is the hub/coordinator implementation for the classic Geometric Method protocol.
      */
     struct Coordinator : process {
         typedef Coordinator coordinator_t;
@@ -44,29 +44,24 @@ namespace gm_network {
         proxy_map<node_proxy_t, node_t> proxy;
 
         /** Protocol Stuff */
-        RNNLearner *globalLearner;         // ML model
+        RnnLearner *globalLearner;          // ML model
         Query *Q;                           // query
         QueryState *query;                  // current query state
         SafezoneFunction *safezone;         // the safe zone wrapper
         size_t k;                           // number of sites
-
-
         map<node_t *, size_t> nodeIndex;    // index the nodes
         vector<node_t *> nodePtr;
-
         set<node_t *> B;                    // initialized by local_violation(), updated by rebalancing algorithm
         set<node_t *> Bcompl;               // Complement of B, updated by rebalancing algo
-
         arma::mat Mean;                     // Used to compute the mean model
-        size_t numViolations;              // Number of violations in the same round (for rebalancing)
-
+        size_t numViolations;               // Number of violations in the same round (for rebalancing)
         int cnt;                            // Helping counter.
 
         /** Statistics */
-        size_t numRounds;                  // Total number of rounds
-        size_t numSubrounds;               // Total number of subrounds
-        size_t szSent;                     // Total safe zones sent
-        size_t totalUpdates;               // Number of stream updates received
+        size_t numRounds;                   // Total number of rounds
+        size_t numSubrounds;                // Total number of subrounds
+        size_t szSent;                      // Total safe zones sent
+        size_t totalUpdates;                // Number of stream updates received
 
         /** Constructor and Destructor */
         Coordinator(network_t *nw, Query *_Q);
@@ -102,27 +97,27 @@ namespace gm_network {
         vector<size_t> Statistics() const;
 
         /** Get a model of a node */
-        // TODO: uncomment FetchUpdates
-//        void FetchUpdates(node_t *n);
+        void FetchUpdates(node_t *n);
 
         /** Remote call on host violation */
         oneway LocalViolation(sender<node_t> ctx);
-        // TODO: uncomment Drift
+        // todo uncomment
 //        oneway Drift(sender<node_t> ctx, size_t cols);
 
     };
 
     struct CoordinatorProxy : remote_proxy<Coordinator> {
         using coordinator_t = Coordinator;
+
         REMOTE_METHOD(coordinator_t, LocalViolation);
-        // TODO: uncomment Drift
+        // todo uncomment
 //        REMOTE_METHOD(coordinator_t, Drift);
 
         CoordinatorProxy(process *c) : remote_proxy<coordinator_t>(c) {}
     };
 
     /**
-     * This is a site/learning node implementation for the classic Geometric Method protocol.
+     * This is the site/learning node implementation for the classic Geometric Method protocol.
      */
     struct LearningNode : local_site {
 
@@ -135,11 +130,11 @@ namespace gm_network {
 
         query_t *Q;                         // The query management object
         Safezone szone;                     // The safezone object
-        RNNLearner *_learner;               // The learning algorithm
+        RnnLearner *_learner;               // The learning algorithm
 
         arma::mat drift;                    // The drift of the node
 
-        int num_sites;                      // Number of sites
+        int numSites;                      // Number of sites
 
         size_t datapoints_seen;             // Number of points the node has seen since the last synchronization
         coord_proxy_t coord;                // The proxy of the coordinator/hub
@@ -152,10 +147,10 @@ namespace gm_network {
         void InitializeLearner();
 
         void SetupConnections();
-        // TODO: uncomment UpdateDrift
-//        void UpdateDrift(vector<arma::mat *> &params);
-        // TODO: uncomment UpdateStream
-//        void UpdateStream(arma::mat &batch, arma::mat &labels);
+
+        void UpdateDrift(arma::mat &params);
+
+        void UpdateStream(arma::mat &batch, arma::mat &labels);
 
         /**
          * Remote Methods
@@ -165,8 +160,7 @@ namespace gm_network {
         oneway Reset(const Safezone &newsz);
 
         /** Transfer data to the coordinator */
-        // TODO: (!)uncomment GetDrift
-//        ModelState GetDrift();
+        ModelState GetDrift();
 
         /** Set the drift vector (for rebalancing) */
         void SetDrift(const ModelState &mdl);
@@ -178,8 +172,7 @@ namespace gm_network {
     struct LearningNodeProxy : remote_proxy<gm_network::LearningNode> {
         typedef gm_network::LearningNode node_t;
         REMOTE_METHOD(node_t, Reset);
-        // TODO: uncomment GetDrift
-//        REMOTE_METHOD(node_t, GetDrift);
+        REMOTE_METHOD(node_t, GetDrift);
         REMOTE_METHOD(node_t, SetDrift);
         REMOTE_METHOD(node_t, SetGlobalParameters);
 
@@ -187,7 +180,7 @@ namespace gm_network {
     };
 
 
-} // gm_protocol
+} // end namespace gm_network
 
 namespace dds {
     template<>

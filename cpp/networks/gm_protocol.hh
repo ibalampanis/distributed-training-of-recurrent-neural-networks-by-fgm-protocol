@@ -18,6 +18,7 @@ namespace gm_protocol {
     using namespace dds;
     using namespace arma;
     using namespace rnn_learner;
+
     using std::map;
     using std::string;
     using std::vector;
@@ -104,17 +105,17 @@ namespace gm_protocol {
 
         const arma::mat GlobalModel() const;
 
-        void UpdateDrift(arma::mat drift, arma::mat vars, float mul) const;
+        void UpdateDrift(arma::mat drift, arma::mat params, float mul) const;
 
-        virtual float Zeta(const vector<arma::mat> &pars) const { return 0.; }
+        virtual float Zeta(const arma::mat &params) const { return 0.; }
 
         virtual size_t CheckIfAdmissible(const size_t counter) const { return 0.; }
 
         virtual float CheckIfAdmissible(const arma::mat mdl) const { return 0.; }
 
 
-        virtual float CheckIfAdmissibleReb(const vector<arma::mat *> &par1, const vector<arma::mat> &par2,
-                                           float coef) const { return 0.; }
+        virtual float CheckIfAdmissibleReb(const arma::mat &par1, const arma::mat &par2,
+                                           double coef) const { return 0.; }
 
         virtual size_t ByteSize() const { return 0; }
 
@@ -139,12 +140,12 @@ namespace gm_protocol {
 
         ~VarianceSZFunction();
 
-        float Zeta(const vector<arma::mat> &pars) const override;
+        float Zeta(const arma::mat &params) const override;
 
         float CheckIfAdmissible(arma::mat mdl) const override;
 
-        float CheckIfAdmissibleReb(const vector<arma::mat *> &par1, const vector<arma::mat> &par2,
-                                   float coef) const override;
+        float CheckIfAdmissibleReb(const arma::mat &par1, const arma::mat &par2,
+                                   double coef) const override;
 
         size_t ByteSize() const override;
     };
@@ -200,9 +201,9 @@ namespace gm_protocol {
 
         void Swap(Safezone &other);
 
-        SafezoneFunction *Szone();
+        SafezoneFunction *GetSzone();
 
-        void operator()(arma::mat drift, arma::mat vars, float mul);
+        void operator()(arma::mat drift, arma::mat params, float mul);
 
         size_t operator()(size_t counter);
 
@@ -287,7 +288,7 @@ namespace gm_protocol {
 
         static QueryState *CreateQueryState(arma::SizeMat sz);
 
-        double QueryAccuracy(RNNLearner *lnr);
+        double QueryAccuracy(RnnLearner *lnr);
     };
 
 

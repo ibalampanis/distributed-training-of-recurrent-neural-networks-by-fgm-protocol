@@ -23,7 +23,7 @@ namespace rnn_learner {
     using namespace ens;
     using namespace arma;
 
-    class RNNLearner {
+    class RnnLearner {
 
     protected:
 
@@ -59,9 +59,9 @@ namespace rnn_learner {
     public:
 
         /** Constructor and Destructor */
-        explicit RNNLearner(const string &cfg, const RNN<MeanSquaredError<>, HeInitialization> &model);
+        explicit RnnLearner(const string &cfg, const RNN<MeanSquaredError<>, HeInitialization> &model);
 
-        ~RNNLearner();
+        ~RnnLearner();
 
         static void CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y, size_t rho);
 
@@ -84,6 +84,7 @@ namespace rnn_learner {
         void MakePrediction();
 
     };
-}
+
+} // end namespace rnn_learner
 
 #endif //DISTRIBUTEDRNNS_RNNPREDICTOR_HH

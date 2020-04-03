@@ -88,16 +88,16 @@ void SafezoneFunction::Print() { cout << endl << "Simple safezone function." << 
 /*********************************************
 	Variance Safezone Function
 *********************************************/
-VarianceSZFunction::VarianceSZFunction(arma::mat GlMd, float thr, size_t batch_sz) : SafezoneFunction(GlMd),
-                                                                                     threshold(thr),
-                                                                                     batchSize(batch_sz) {
+VarianceFunction::VarianceFunction(arma::mat GlMd, float thr, size_t batch_sz) : SafezoneFunction(GlMd),
+                                                                                 threshold(thr),
+                                                                                 batchSize(batch_sz) {
     hyperparameters.push_back(thr);
     hyperparameters.push_back(batch_sz);
 }
 
-VarianceSZFunction::~VarianceSZFunction() = default;
+VarianceFunction::~VarianceFunction() = default;
 
-float VarianceSZFunction::Zeta(const arma::mat &params) const {
+float VarianceFunction::Zeta(const arma::mat &params) const {
     float res = 0.;
 
     arma::mat subtr = globalModel - params;
@@ -106,8 +106,8 @@ float VarianceSZFunction::Zeta(const arma::mat &params) const {
     return std::sqrt(threshold) - std::sqrt(res);
 }
 
-float VarianceSZFunction::CheckIfAdmissibleReb(const arma::mat &par1, const arma::mat &par2,
-                                               double coef) const {
+float VarianceFunction::CheckIfAdmissibleReb(const arma::mat &par1, const arma::mat &par2,
+                                             double coef) const {
     float res = 0.;
     arma::mat subtr = par1 - par2;
     ////subtr *= 2.;
@@ -118,7 +118,7 @@ float VarianceSZFunction::CheckIfAdmissibleReb(const arma::mat &par1, const arma
     return coef * (std::sqrt(threshold) - std::sqrt(res));
 }
 
-float VarianceSZFunction::CheckIfAdmissible(arma::mat mdl) const {
+float VarianceFunction::CheckIfAdmissible(arma::mat mdl) const {
     double var = 0.;
 
     arma::mat sub = mdl - globalModel;
@@ -127,25 +127,25 @@ float VarianceSZFunction::CheckIfAdmissible(arma::mat mdl) const {
     return threshold - var;
 }
 
-size_t VarianceSZFunction::ByteSize() const { return (1 + globalModel.n_elem) * sizeof(float) + sizeof(size_t); }
+size_t VarianceFunction::ByteSize() const { return (1 + globalModel.n_elem) * sizeof(float) + sizeof(size_t); }
 
 
 /*********************************************
 	Batch Learning Safezone Function
 *********************************************/
-BatchLearningSZFunction::BatchLearningSZFunction(arma::mat GlMd, size_t thr) : SafezoneFunction(GlMd),
-                                                                               threshold(thr) {
+BatchLearningFunction::BatchLearningFunction(arma::mat GlMd, size_t thr) : SafezoneFunction(GlMd),
+                                                                           threshold(thr) {
     hyperparameters.push_back(thr);
 }
 
-BatchLearningSZFunction::~BatchLearningSZFunction() = default;
+BatchLearningFunction::~BatchLearningFunction() = default;
 
-size_t BatchLearningSZFunction::CheckIfAdmissible(const size_t counter) const {
+size_t BatchLearningFunction::CheckIfAdmissible(const size_t counter) const {
     size_t sz = threshold - counter;
     return sz;
 }
 
-size_t BatchLearningSZFunction::ByteSize() const { return globalModel.n_elem * sizeof(float) + sizeof(size_t); }
+size_t BatchLearningFunction::ByteSize() const { return globalModel.n_elem * sizeof(float) + sizeof(size_t); }
 
 
 /*********************************************
@@ -170,6 +170,7 @@ Safezone &Safezone::operator=(Safezone &&other) noexcept {
 Safezone::Safezone(const Safezone &other) { szone = other.szone; }
 
 Safezone &Safezone::operator=(const Safezone &other) {
+
     if (szone != other.szone) {
         szone = other.szone;
     }
@@ -180,17 +181,11 @@ void Safezone::Swap(Safezone &other) { std::swap(szone, other.szone); }
 
 SafezoneFunction *Safezone::GetSzone() { return (szone != nullptr) ? szone : nullptr; }
 
-void Safezone::operator()(arma::mat drift, arma::mat params, float mul) {
-    szone->UpdateDrift(drift, params, mul);
-}
+void Safezone::operator()(arma::mat drift, arma::mat params, float mul) { szone->UpdateDrift(drift, params, mul); }
 
-size_t Safezone::operator()(size_t counter) {
-    return (szone != nullptr) ? szone->CheckIfAdmissible(counter) : NAN;
-}
+size_t Safezone::operator()(size_t counter) { return (szone != nullptr) ? szone->CheckIfAdmissible(counter) : NAN; }
 
-float Safezone::operator()(const arma::mat mdl) {
-    return (szone != nullptr) ? szone->CheckIfAdmissible(mdl) : NAN;
-}
+float Safezone::operator()(const arma::mat mdl) { return (szone != nullptr) ? szone->CheckIfAdmissible(mdl) : NAN; }
 
 size_t Safezone::byte_size() const { return (szone != nullptr) ? szone->ByteSize() : 0; }
 
@@ -226,12 +221,12 @@ SafezoneFunction *QueryState::Safezone(const string &cfg, string algo) {
 
     string algorithm = root[algo].get("algorithm", "Variance_Monitoring").asString();
     if (algorithm == "Batch_Learning") {
-        auto safe_zone = new BatchLearningSZFunction(globalModel, root[algo].get("batch_size", 32).asInt64());
+        auto safe_zone = new BatchLearningFunction(globalModel, root[algo].get("batch_size", 32).asInt64());
         return safe_zone;
     } else if (algorithm == "Variance_Monitoring") {
-        auto safe_zone = new VarianceSZFunction(globalModel,
-                                                root[algo].get("threshold", 1.).asFloat(),
-                                                root[algo].get("batch_size", 32).asInt64());
+        auto safe_zone = new VarianceFunction(globalModel,
+                                              root[algo].get("threshold", 1.).asFloat(),
+                                              root[algo].get("batch_size", 32).asInt64());
         return safe_zone;
     } else {
         return nullptr;
@@ -245,25 +240,30 @@ size_t QueryState::ByteSize() const { return (1 + globalModel.n_elem) * sizeof(f
 	Query
 *********************************************/
 Query::Query(const string &cfg, string nm) {
-    cout << "Initializing the query..." << endl;
-    Json::Value root;
-    std::ifstream cfgfl(cfg);
-    cfgfl >> root;
+    cout << "\t[+]Initializing the query ...";
+    try {
+        Json::Value root;
+        std::ifstream cfgfl(cfg);
+        cfgfl >> root;
 
-    config.learningAlgorithm = root["gm_network_" + nm]
-            .get("learning_algorithm", "Trash").asString();
-    config.distributedLearningAlgorithm = root["gm_network_" + nm]
-            .get("distributed_learning_algorithm", "Trash").asString();
-    config.networkName = nm;
-    config.precision = root[config.distributedLearningAlgorithm].get("precision", 0.01).asFloat();
-    config.rebalancing = root[config.distributedLearningAlgorithm].get("rebalancing", false).asBool();
-    config.reb_mult = root[config.distributedLearningAlgorithm].get("reb_mult", -1.).asFloat();
-    config.betaMu = root[config.distributedLearningAlgorithm].get("beta_mu", 0.5).asFloat();
-    config.maxRebs = root[config.distributedLearningAlgorithm].get("max_rebs", 2).asInt64();
+        config.learningAlgorithm = root["gm_network_" + nm]
+                .get("learning_algorithm", "Trash").asString();
+        config.distributedLearningAlgorithm = root["gm_network_" + nm]
+                .get("distributed_learning_algorithm", "Trash").asString();
+        config.networkName = nm;
+        config.precision = root[config.distributedLearningAlgorithm].get("precision", 0.01).asFloat();
+        config.rebalancing = root[config.distributedLearningAlgorithm].get("rebalancing", false).asBool();
+        config.reb_mult = root[config.distributedLearningAlgorithm].get("reb_mult", -1.).asFloat();
+        config.betaMu = root[config.distributedLearningAlgorithm].get("beta_mu", 0.5).asFloat();
+        config.maxRebs = root[config.distributedLearningAlgorithm].get("max_rebs", 2).asInt64();
 
-    config.cfgfile = cfg;
+        config.cfgfile = cfg;
 
-    cout << "Query has been initialized for the " << config.networkName << " network." << endl;
+        cout << " OK." << endl;
+    } catch (...) {
+        cout << " ERROR." << endl;
+    }
+
 }
 
 Query::~Query() = default;

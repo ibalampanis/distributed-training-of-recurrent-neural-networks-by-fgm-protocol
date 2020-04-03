@@ -80,9 +80,12 @@ namespace gm_network {
         /** Initialize a new round */
         void StartRound();
 
+        /** Start the 1st round of training */
+        void StartDistrTraining();
+
         void FinishRound();
 
-        void FinishRounds();
+        void ShowOverallStats();
 
         /** Rebalance algorithm by Kamp */
         void KampRebalance(node_t *n);
@@ -94,14 +97,14 @@ namespace gm_network {
         double Accuracy();
 
         /** Get the communication statistics of experiment */
-        vector<size_t> Statistics() const;
+        vector<size_t> UpdateStats() const;
 
         /** Get a model of a node */
         void FetchUpdates(node_t *n);
 
         /** Remote call on host violation */
         oneway LocalViolation(sender<node_t> ctx);
-        // todo uncomment
+        // TODO: uncomment Drift()
 //        oneway Drift(sender<node_t> ctx, size_t cols);
 
     };
@@ -110,7 +113,7 @@ namespace gm_network {
         using coordinator_t = Coordinator;
 
         REMOTE_METHOD(coordinator_t, LocalViolation);
-        // todo uncomment
+        // TODO: uncomment Drift()
 //        REMOTE_METHOD(coordinator_t, Drift);
 
         CoordinatorProxy(process *c) : remote_proxy<coordinator_t>(c) {}
@@ -131,12 +134,8 @@ namespace gm_network {
         query_t *Q;                         // The query management object
         Safezone szone;                     // The safezone object
         RnnLearner *_learner;               // The learning algorithm
-
         arma::mat drift;                    // The drift of the node
-
         int numSites;                      // Number of sites
-
-        size_t datapoints_seen;             // Number of points the node has seen since the last synchronization
         coord_proxy_t coord;                // The proxy of the coordinator/hub
 
         /** Constructor */

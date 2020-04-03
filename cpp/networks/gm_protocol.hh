@@ -130,15 +130,15 @@ namespace gm_protocol {
      * by Dynamic Model Synchronization"
      * by Michael Kamp, Mario Boley, Assaf Schuster and Izchak Sharfman.
      */
-    struct VarianceSZFunction : SafezoneFunction {
+    struct VarianceFunction : SafezoneFunction {
 
         double threshold; // The threshold of the variance between the models of the network.
         size_t batchSize; // The number of points seen by the node since the last synchronization.
 
         /** Constructors and Destructor */
-        VarianceSZFunction(arma::mat GlMd, float thr, size_t batch_sz);
+        VarianceFunction(arma::mat GlMd, float thr, size_t batch_sz);
 
-        ~VarianceSZFunction();
+        ~VarianceFunction();
 
         float Zeta(const arma::mat &params) const override;
 
@@ -156,14 +156,14 @@ namespace gm_protocol {
      * variable basically indicates the batch size. If the proccesed points reach
      * the batch size, then the function returns an inadmissible region.
      */
-    struct BatchLearningSZFunction : SafezoneFunction {
+    struct BatchLearningFunction : SafezoneFunction {
 
         size_t threshold; // The maximum number of points fitted by each node before requesting synch from the Hub.
 
         /** Constructors and Destructor */
-        BatchLearningSZFunction(arma::mat GlMd, size_t thr);
+        BatchLearningFunction(arma::mat GlMd, size_t thr);
 
-        ~BatchLearningSZFunction();
+        ~BatchLearningFunction();
 
         size_t CheckIfAdmissible(size_t counter) const override;
 

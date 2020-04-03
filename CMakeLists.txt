@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.3.2)
 project(Distributed_Training_of_Recurrent_Neural_Networks_by_FGM_protocol C CXX)
 
 # First, define all the compilation options.

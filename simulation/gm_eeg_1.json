@@ -1,9 +1,9 @@
 {
   "simulations": {
     "encoding": "UTF-8",
-    "net_name": "gm_net",
+    "net_name": "GM_Net",
     "number_of_networks": 1,
-    "data": "data_section",
+    "data": "data",
     "stream_distribution": "Stream_Distribution",
     "log_diff_acc": false,
     "Communication_File": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/sim/eeg_comm.csv",
@@ -14,20 +14,14 @@
     "encoding": "UTF-8",
     "warmup_size": 1000
   },
-  "Stream_Distribution": {
-    "encoding": "UTF-8",
-    "uniform": true,
-    "B_prob": 0.75,
-    "site_ratio": 0.5
-  },
   "gm_net": {
     "encoding": "UTF-8",
     "number_of_local_nodes": 4,
-    "learning_algorithm": "LSTM",
+    "learning_algorithm": "RNN",
     "number_of_channels": 1,
-    "distributed_learning_algorithm": "gm_lstm"
+    "distributed_learning_algorithm": "GM_RNN"
   },
-  "gm_lstm": {
+  "GM_RNN": {
     "algorithm": "Variance_Learning",
     "precision": 0.01,
     "threshold": 0.0008,

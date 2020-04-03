@@ -1,5 +1,5 @@
 #include <random>
-#include "fgm_network.hh"
+#include "fgm_network.hh.txt"
 #include "gm_protocol.cc"
 
 using namespace gm_protocol;
@@ -58,7 +58,7 @@ void Coordinator::SetupConnections() {
     k = nodePtr.size();
 }
 
-// fixme Coordinator::StartRound()
+// FIXME: Coordinator::StartRound()
 void Coordinator::StartRound() {
 
     // Resets.
@@ -86,7 +86,7 @@ void Coordinator::StartRound() {
     numSubrounds++;
 }
 
-// fixme Coordinator::FetchUpdates()
+// FIXME: Coordinator::FetchUpdates()
 void Coordinator::FetchUpdates(node_t *node) {
     ModelState up = proxy[node].GetDrift();
     if (!arma::approx_equal(arma::mat(arma::size(up._model), arma::fill::zeros), up._model, "absdiff",
@@ -108,9 +108,9 @@ void Coordinator::FetchUpdates(node_t *node) {
     totalUpdates += up.updates;
 }
 
-// todo implement Coordinator::Drift()
+// PENDING: implement Coordinator::Drift()
 //oneway Coordinator::Drift(sender<node_t> ctx, size_t cols){}
-// fixme Coordinator::SendIncrement()
+// FIXME: Coordinator::SendIncrement()
 oneway Coordinator::SendIncrement(Increment inc) {
     counter += inc.increase;
     if (counter > k) {
@@ -151,7 +151,7 @@ oneway Coordinator::SendIncrement(Increment inc) {
     }
 }
 
-// fixme Coordinator::FinishRound()
+// FIXME: Coordinator::FinishRound()
 void Coordinator::FinishRound() {
 
     for (size_t i = 0; i < Beta.size(); i++)
@@ -165,7 +165,7 @@ void Coordinator::FinishRound() {
 
 }
 
-// todo check it again later
+// TODO: check it again later
 void Coordinator::FinishRounds() {
 
     cout << endl;
@@ -186,7 +186,7 @@ void Coordinator::FinishRounds() {
     cout << "Total updates : " << totalUpdates << endl;
 
 }
-// todo implement Rebalance() if is needed
+// PENDING: implement Rebalance() if is needed
 //void Coordinator::Rebalance() {}
 
 void Coordinator::Progress() {
@@ -244,10 +244,10 @@ void LearningNode::InitializeLearner() {
 
 void LearningNode::SetupConnections() { numSites = coord.proc()->k; }
 
-// todo implement LearningNode::UpdateStream() if is needed
+// PENDING: implement LearningNode::UpdateStream() if is needed
 //void LearningNode::UpdateStream(arma::mat &batch, arma::mat &labels) {}
 
-// todo implement LearningNode::UpdateDrift()
+// PENDING: implement LearningNode::UpdateDrift()
 //void UpdateDrift(arma::mat &params) {}
 
 oneway LearningNode::Reset(const Safezone &newsz, const FloatValue qntm) {
@@ -274,13 +274,13 @@ oneway LearningNode::Reset(const Safezone &newsz, const FloatValue qntm) {
 
 }
 
-// fixme LearningNode::TakeQuantum() - NOTE: args in szone()
+// FIXME: LearningNode::TakeQuantum() - NOTE: args in szone()
 oneway LearningNode::TakeQuantum(const FloatValue qntm) {
     counter = 0;    // Reset counter
     quantum = 1. * qntm.value;  // Update the quantum
     zeta = szone(_learner->ModelParameters(), eDelta);  // Update zeta
 }
-// todo implement LearningNode::Rebalance() if needed
+// PENDING: implement LearningNode::Rebalance() if needed
 //oneway LearningNode::Rebalance(const FloatValue qntm){}
 
 ModelState LearningNode::GetDrift() {
@@ -293,7 +293,7 @@ ModelState LearningNode::GetDrift() {
     return ModelState(deltaVector, _learner->NumberOfUpdates());
 }
 
-// fixme LearningNode::GetZetaValue() - NOTE: args in szone()
+// FIXME: LearningNode::GetZetaValue() - NOTE: args in szone()
 FloatValue LearningNode::GetZetaValue() {
     if (rebalanced && arma::approx_equal(arma::mat(arma::size(eDelta), arma::fill::zeros), eDelta, "absdiff", 1e-6)) {
         return FloatValue(szone.GetSzone()->CheckIfAdmissibleReb(_learner->ModelParameters(), eDelta, 1.));

@@ -1,6 +1,6 @@
 #include <string>
 #include "cpp/networks/controller.cc"
-#include "cpp/networks/fgm_network.cc"
+#include "cpp/networks/fgm_network.cc.txt"
 
 
 using namespace controller;

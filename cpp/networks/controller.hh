@@ -13,6 +13,7 @@
 
 namespace controller {
 
+    using namespace std;
     using namespace gm_protocol;
     using namespace gm_network;
     using namespace arma;
@@ -20,14 +21,12 @@ namespace controller {
     using std::vector;
     using std::string;
 
-    /**
-     * A Vector container for the networks.
-     */
+    /** A Vector container for the networks. */
     template<typename distrNetType>
-    class NetContainer : public std::vector<distrNetType *> {
+    class NetContainer : public vector<distrNetType *> {
 
     public:
-        using std::vector<distrNetType *>::vector;
+        using vector<distrNetType *>::vector;
 
         void Join(distrNetType *net);
 
@@ -35,9 +34,7 @@ namespace controller {
 
     };
 
-    /**
-     * A Vector container for the queries.
-     */
+    /** A Vector container for the queries. */
     class QueryContainer : public vector<Query *> {
 
     public:
@@ -50,8 +47,8 @@ namespace controller {
     };
 
     /**
-     * The purpose of Controller class is to synchronize the testing of the networks
-     * by providing the appropriate data points to the nodes of each net.
+     * The purpose of Controller class is to synchronize the training of the
+     * network nodes by providing the appropriate data points to these.
      */
     template<typename distrNetType>
     class Controller {
@@ -59,24 +56,11 @@ namespace controller {
     protected:
         std::string configFile;                     // JSON file to read the hyperparameters.
         time_t seed;                                // The seed for the random generator.
-        size_t testSize;                            // Starting test data point.
         size_t numberOfFeatures;                    // The number of features of each datapoint.
-        arma::mat target;                           // The moving target disjunction of the stream.
-        size_t targets;                             // The total number of changed targets.
-        size_t numOfPoints = 12800000;              // Total number of datapoints.
-        size_t numOfMaxRounds = 100000;             // Maximum number of monitored rounds.
-
-
         NetContainer<distrNetType> _netContainer;   // A container for networks.
         QueryContainer _queryContainer;             // A container for queries.
 
-        // Stream Distribution
-        bool uniformDistr;
-        vector<vector<set<size_t>>> net_dists;
-        float Bprob;
-        float siteRatio;
-
-        // Statistics collection
+        // Stats
         vector<chan_frame> stats;
         vector<vector<vector<size_t>>> differentialCommunication;
         size_t msgs{};
@@ -87,26 +71,24 @@ namespace controller {
     public:
 
         /** Constructor */
-        explicit Controller<distrNetType>(const string &cfg);
+        explicit Controller<distrNetType>(string cfg);
 
-        /** This method puts a network in the network container */
-        void AddNet(distrNetType *net);
-
-        /** This method puts a query in the query container */
-        void AddQuery(Query *qry);
-
-        /** This method initializes all the networks */
+        /** This method initializes all the networks. */
         void InitializeSimulation();
 
-        /** This method prints the star learning network for debbuging purposes */
-        void PrintNetInfo() const;
+        /** This method prints the star learning network for debbuging purposes. */
+        void ShowNetworkInfo() const;
 
-        /** This method gathers communication info after each streaming batch */
-        void GatherDifferentialInfo();
+        /** This method handles communication information after each batch. */
+        void HandleDifferentialInfo();
 
-        void TrainNetworks();
+        void TrainOverNetwork();
 
-        void Train(arma::mat &batch, arma::mat &labels);
+        /** This method appends a network in the network container. */
+        void AddNet(distrNetType *net);
+
+        /** This method appends a query in the query container. */
+        void AddQuery(Query *qry);
 
         size_t RandomInt(size_t maxValue);
 

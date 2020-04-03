@@ -2,10 +2,9 @@
 #include "cpp/networks/controller.cc"
 #include "cpp/networks/gm_network.cc"
 
-
+using namespace std;
 using namespace controller;
 using namespace gm_network;
-using namespace std;
 
 int main(int argc, char **argv) {
 
@@ -13,7 +12,7 @@ int main(int argc, char **argv) {
 
     controller::Controller<gm_network::GmNet> ctrl(cfg);
     ctrl.InitializeSimulation();
-    ctrl.PrintNetInfo();
+    ctrl.ShowNetworkInfo();
 //    ctrl.TrainNetworks();
 
     return 0;

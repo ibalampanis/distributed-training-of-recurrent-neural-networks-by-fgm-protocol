@@ -38,12 +38,23 @@ const ProtocolConfig &Coordinator::Cfg() const { return Q->config; }
 
 void Coordinator::InitializeGlobalLearner() {
 
-    Json::Value root;
-    std::ifstream cfgfile(Cfg().cfgfile);
-    cfgfile >> root;
-    string temp = root["hyperparameters"].get("rho", 0).asString();
-    int rho = std::stoi(temp);
-    globalLearner = new RnnLearner(Cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(rho));
+    cout << "\n\t\t[+]Coordinator's neural net ...";
+    try {
+        Json::Value root;
+        std::ifstream cfgfile(Cfg().cfgfile);
+        cfgfile >> root;
+        string temp = root["hyperparameters"].get("rho", 0).asString();
+        int rho = std::stoi(temp);
+        globalLearner = new RnnLearner(Cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(rho));
+
+        cout << " OK." << endl;
+
+    } catch (...) {
+        cout << " OK." << endl;
+        throw;
+    }
+
+
 }
 
 void Coordinator::SetupConnections() {
@@ -58,6 +69,8 @@ void Coordinator::SetupConnections() {
     k = nodePtr.size();
 }
 
+void Coordinator::StartDistrTraining() { StartRound(); }
+
 void Coordinator::StartRound() {
     // Send new safezone.
     for (auto n : Net()->sites) {
@@ -70,9 +83,8 @@ void Coordinator::StartRound() {
     numRounds++;
 }
 
-void Coordinator::FinishRounds() {
+void Coordinator::ShowOverallStats() {
 
-    cout << endl;
     cout << "Global model of network " << net()->name() << "." << endl;
 
     // Query thr accuracy of the global model.
@@ -182,7 +194,7 @@ double Coordinator::Accuracy() {
     return query->accuracy;
 }
 
-vector<size_t> Coordinator::Statistics() const {
+vector<size_t> Coordinator::UpdateStats() const {
     vector<size_t> stats;
     stats.push_back(numRounds);
     stats.push_back(numSubrounds);
@@ -212,7 +224,7 @@ oneway Coordinator::LocalViolation(sender<node_t> ctx) {
     Mean.zeros();
     cnt = 0;
 
-    if (SafezoneFunction *entity = (VarianceSZFunction *) safezone) {
+    if (SafezoneFunction *entity = (VarianceFunction *) safezone) {
         numViolations = 0;
         FinishRound();
     } else {
@@ -224,7 +236,7 @@ oneway Coordinator::LocalViolation(sender<node_t> ctx) {
         }
     }
 }
-// todo implement Coordinator::Drift()
+// PENDING: implement Coordinator::Drift()
 //oneway Coordinator::Drift(sender<node_t> ctx, int cols) {}
 
 
@@ -243,27 +255,33 @@ const ProtocolConfig &LearningNode::Cfg() const { return Q->config; }
 
 void LearningNode::InitializeLearner() {
 
-    Json::Value root;
-    std::ifstream cfgfile(Cfg().cfgfile);
-    cfgfile >> root;
-    string temp = root["hyperparameters"].get("rho", 0).asString();
-    int rho = std::stoi(temp);
-    _learner = new RnnLearner(Cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(rho));
+    cout << "\t\t[+]Local node's neural net ...";
+    try {
+        Json::Value root;
+        std::ifstream cfgfile(Cfg().cfgfile);
+        cfgfile >> root;
+        string temp = root["hyperparameters"].get("rho", 0).asString();
+        int rho = std::stoi(temp);
+        _learner = new RnnLearner(Cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(rho));
 
-    cout << "Local site " << this->name() << " initialized its network." << endl;
+        cout << " OK." << endl;
+    }
+    catch (...) {
+        cout << " ERROR." << endl;
+        throw;
+    }
 }
 
 void LearningNode::SetupConnections() { numSites = coord.proc()->k; }
 
-// todo implement LearningNode::UpdateStream() if is needed
+// PENDING: implement LearningNode::UpdateStream() if is needed
 void LearningNode::UpdateStream(arma::mat &batch, arma::mat &labels) {}
 
-// todo implement LearningNode::UpdateDrift()
+// PENDING: implement LearningNode::UpdateDrift()
 void UpdateDrift(arma::mat &params) {}
 
 oneway LearningNode::Reset(const Safezone &newsz) {
     szone = newsz;       // Reset the safezone object
-    datapoints_seen = 0; // Reset the drift vector
     _learner->UpdateModel(szone.GetSzone()->GlobalModel()); // Updates the parameters of the local learner
 }
 

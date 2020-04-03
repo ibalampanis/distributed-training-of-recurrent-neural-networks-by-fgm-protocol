@@ -15,7 +15,7 @@ $ cmake --build cmake-build-debug --target GMNetEEG
 ```
 and to run this type,
 ```
-$ ./cmake-build-debug/bin/GMNetEEG /simulation/gm_eeg_1.json
+$ ./cmake-build-debug/bin/GMNetEEG absolyte/path/to/simulation/gm_eeg_1.json
 ```
 
 

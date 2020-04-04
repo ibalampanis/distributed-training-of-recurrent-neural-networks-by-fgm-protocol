@@ -1,19 +1,20 @@
 # Distributed Training of Recurrent Neural Networks by FGM protocol
 
-To resolve all project dependencies, in the root of the folder, type in a Linux terminal,
+To resolve all project dependencies, in the root of the folder, in a terminal type
 ```
-$ cd bash
+$ cd bash/
 $ sudo bash setup-project-dependencies.bash
 ```
-Initially, to run the targets, the 'dml' lib must be built. To build it, in the root of the folder, in a Linux terminal type,
+After that, in the same folder, to load cmake files and compile the custom library, type
 ```
-$ cmake --build cmake-build-debug --target dml
+$ cd bash/
+$ sudo bash setup-project.bash
 ```
-After that, to compile a target (eg. GMNetEEG) type,
+To compile a target (eg. GMNetEEG), in the root of the folder, type
 ```
 $ cmake --build cmake-build-debug --target GMNetEEG
 ```
-and to run this type,
+and to run this target, type
 ```
 $ ./cmake-build-debug/bin/GMNetEEG absolute/path/to/simulation/gm_eeg_1.json
 ```

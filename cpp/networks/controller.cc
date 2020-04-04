@@ -126,7 +126,6 @@ void Controller<distrNetType>::ShowNetworkInfo() const {
 // PENDING implement HandleDifferentialInfo() if is needed
 //template<typename distrNetType>
 //void Controller<distrNetType>::HandleDifferentialInfo() {}
-
 // PENDING: implement TrainOverNetwork()
 template<typename distrNetType>
 void Controller<distrNetType>::TrainOverNetwork() {}

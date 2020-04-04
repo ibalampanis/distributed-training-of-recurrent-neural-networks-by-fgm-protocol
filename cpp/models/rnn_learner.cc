@@ -58,13 +58,9 @@ double RnnLearner::CalcMSE(arma::cube &pred, arma::cube &Y) {
 
 int RnnLearner::NumberOfUpdates() const { return numberOfUpdates; }
 
-arma::mat RnnLearner::ModelParameters() const {
-    return model.Parameters();
-}
+arma::mat RnnLearner::ModelParameters() const { return model.Parameters(); }
 
-void RnnLearner::UpdateModel(arma::mat params) {
-    model.Parameters() = params;
-}
+void RnnLearner::UpdateModel(arma::mat params) { model.Parameters() = params; }
 
 double RnnLearner::ModelAccuracy() const { return modelAccuracy; }
 

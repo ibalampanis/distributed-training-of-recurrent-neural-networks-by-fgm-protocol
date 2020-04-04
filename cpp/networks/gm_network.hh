@@ -16,15 +16,12 @@ namespace gm_network {
     using std::cout;
     using std::endl;
 
-
     struct Coordinator;
     struct CoordinatorProxy;
     struct LearningNode;
     struct LearningNodeProxy;
 
-    /**
-     * This is the GM Network implementation for the classic Geometric Method protocol.
-     */
+    /** This is the GM Network implementation for the classic Geometric Method protocol. */
     struct GmNet : gm_protocol::GmLearningNetwork<GmNet, Coordinator, LearningNode> {
 
         typedef gm_protocol::GmLearningNetwork<network_t, coordinator_t, node_t> gm_learning_network_t;
@@ -32,9 +29,7 @@ namespace gm_network {
         GmNet(const set<source_id> &_hids, const string &_name, Query *_Q);
     };
 
-    /**
-     * This is the hub/coordinator implementation for the classic Geometric Method protocol.
-     */
+    /** This is the hub/coordinator implementation for the classic Geometric Method protocol. */
     struct Coordinator : process {
         typedef Coordinator coordinator_t;
         typedef LearningNode node_t;
@@ -119,9 +114,7 @@ namespace gm_network {
         CoordinatorProxy(process *c) : remote_proxy<coordinator_t>(c) {}
     };
 
-    /**
-     * This is the site/learning node implementation for the classic Geometric Method protocol.
-     */
+    /** This is the site/learning node implementation for the classic Geometric Method protocol. */
     struct LearningNode : local_site {
 
         typedef Coordinator coordinator_t;

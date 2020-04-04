@@ -7,7 +7,6 @@ $ sudo bash setup-project-dependencies.bash
 ```
 After that, in the same folder, to load cmake files and compile the custom library, type
 ```
-$ cd bash/
 $ sudo bash setup-project.bash
 ```
 To compile a target (eg. GMNetEEG), in the root of the folder, type

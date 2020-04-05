@@ -122,7 +122,7 @@ void Coordinator::FinishRound() {
 
 }
 
-void Coordinator::KampRebalance(node_t *lvnode) {
+void Coordinator::Rebalance(node_t *lvnode) {
 
     Bcompl.clear();
     B.insert(lvnode);
@@ -232,12 +232,12 @@ oneway Coordinator::LocalViolation(sender<node_t> ctx) {
             numViolations = 0;
             FinishRound();
         } else {
-            KampRebalance(n);
+            Rebalance(n);
         }
     }
 }
-// PENDING: implement Coordinator::Drift()
-//oneway Coordinator::Drift(sender<node_t> ctx, int cols) {}
+// PENDING: implement Coordinator::HandleNodeDrift()
+//oneway Coordinator::HandleNodeDrift(sender<node_t> ctx, IntValue cols) {}
 
 
 /*********************************************
@@ -255,14 +255,14 @@ const ProtocolConfig &LearningNode::Cfg() const { return Q->config; }
 
 void LearningNode::InitializeLearner() {
 
-    cout << "\t\t[+]Local node's neural net ...";
+    cout << "\t\t[+]Node's local neural net ...";
     try {
         Json::Value root;
         std::ifstream cfgfile(Cfg().cfgfile);
         cfgfile >> root;
         string temp = root["hyperparameters"].get("rho", 0).asString();
         int rho = std::stoi(temp);
-        _learner = new RnnLearner(Cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(rho));
+        learner = new RnnLearner(Cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(rho));
 
         cout << " OK." << endl;
     }
@@ -272,31 +272,26 @@ void LearningNode::InitializeLearner() {
     }
 }
 
-void LearningNode::SetupConnections() { numSites = coord.proc()->k; }
-
-// PENDING: implement LearningNode::UpdateStream() if is needed
-void LearningNode::UpdateStream(arma::mat &batch, arma::mat &labels) {}
-
-// PENDING: implement LearningNode::UpdateDrift()
-void UpdateDrift(arma::mat &params) {}
+// PENDING: implement LearningNode::UpdateState()
+void LearningNode::UpdateState(arma::mat &batch, arma::mat &labels) {}
 
 oneway LearningNode::Reset(const Safezone &newsz) {
     szone = newsz;       // Reset the safezone object
-    _learner->UpdateModel(szone.GetSzone()->GlobalModel()); // Updates the parameters of the local learner
+    learner->UpdateModel(szone.GetSzone()->GlobalModel()); // Updates the parameters of the local learner
 }
 
 ModelState LearningNode::GetDrift() {
     // Getting the drift vector is done as getting the local statistic
-    szone(drift, _learner->ModelParameters(), 1.);
-    return ModelState(drift, _learner->NumberOfUpdates());
+    szone(drift, learner->ModelParameters(), 1.);
+    return ModelState(drift, learner->NumberOfUpdates());
 }
 
 void LearningNode::SetDrift(const ModelState &mdl) {
     // Update the local learner with the model sent by the coordinator
-    _learner->UpdateModel(mdl._model);
+    learner->UpdateModel(mdl._model);
 }
 
 oneway LearningNode::SetGlobalParameters(const ModelState &params) {
-    _learner->UpdateModel(params._model);
+    learner->UpdateModel(params._model);
 }
 

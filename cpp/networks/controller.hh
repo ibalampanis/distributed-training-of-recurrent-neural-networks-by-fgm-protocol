@@ -21,7 +21,7 @@ namespace controller {
     using std::vector;
     using std::string;
 
-    /** A Vector container for the networks. */
+    // A Vector container for the networks. 
     template<typename distrNetType>
     class NetContainer : public vector<distrNetType *> {
 
@@ -34,7 +34,7 @@ namespace controller {
 
     };
 
-    /** A Vector container for the queries. */
+    // A Vector container for the queries. 
     class QueryContainer : public vector<Query *> {
 
     public:
@@ -46,54 +46,54 @@ namespace controller {
 
     };
 
-    /**
-     * The purpose of Controller class is to synchronize the training of the
-     * network nodes by providing the appropriate data points to these.
-     */
+    // The purpose of Controller class is to synchronize the training of the
+    // network nodes by providing the appropriate data points to these.
     template<typename distrNetType>
     class Controller {
 
     protected:
         std::string configFile;                     // JSON file to read the hyperparameters.
         time_t seed;                                // The seed for the random generator.
-        size_t numberOfFeatures;                    // The number of features of each datapoint.
         NetContainer<distrNetType> _netContainer;   // A container for networks.
         QueryContainer _queryContainer;             // A container for queries.
 
+        // Dataset and model parameters 
+        arma::cube trainX, trainY;                  // Trainset data points and labels
+        arma::cube testX, testY;                    // Testset data points and labels
+        size_t inputSize;                           // Number of neurons at the input layer
+        size_t outputSize;                          // Number of neurons at the output layer
+        string datasetPath;                         // Path for finding dataset file
+        double trainTestRatio;                      // Testing data is taken from the dataset in this ratio
+        size_t rho;                                 // Number of time steps to look backward for in the RNN
+
         // Stats
         vector<chan_frame> stats;
-        vector<vector<vector<size_t>>> differentialCommunication;
         size_t msgs{};
         size_t bts{};
-        vector<vector<double>> differentialAccuracy;
-        bool logDiffAcc;
+
 
     public:
 
-        /** Constructor */
+        // Constructor 
         explicit Controller<distrNetType>(string cfg);
 
-        /** This method initializes all the networks. */
+        // This method initializes all the networks. 
         void InitializeSimulation();
 
-        /** This method prints the star learning network for debbuging purposes. */
+        // This method prints the star learning network for debbuging purposes. 
         void ShowNetworkInfo() const;
-
-        /** This method handles communication information after each batch. */
-        void HandleDifferentialInfo();
 
         void TrainOverNetwork();
 
-        /** This method appends a network in the network container. */
+        // This method appends a network in the network container. 
         void AddNet(distrNetType *net);
 
-        /** This method appends a query in the query container. */
+        // This method appends a query in the query container. 
         void AddQuery(Query *qry);
 
-        size_t RandomInt(size_t maxValue);
+        void CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y);
 
-        size_t NumberOfFeatures();
-
+        void DataPreparation();
     };
 
 } // end namespace controller

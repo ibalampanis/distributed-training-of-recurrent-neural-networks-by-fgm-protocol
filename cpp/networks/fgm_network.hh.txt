@@ -22,18 +22,14 @@ namespace fgm_network {
     struct LearningNode;
     struct LearningNodeProxy;
 
-    /**
-     * This is the FGM Network implementation.
-     */
+    // This is the FGM Network implementation.
     struct FgmNet : GmLearningNetwork<FgmNet, Coordinator, LearningNode> {
         typedef GmLearningNetwork<network_t, coordinator_t, node_t> gm_learning_network_t;
 
         FgmNet(const set<source_id> &_hids, const string &_name, Query *_Q);
     };
 
-    /**
-    * This is the hub/coordinator implementation for the Functional Geometric Method protocol.
-    */
+    // This is the hub/coordinator implementation for the Functional Geometric Method protocol.
     struct Coordinator : process {
         typedef Coordinator coordinator_t;
         typedef LearningNode node_t;
@@ -42,14 +38,14 @@ namespace fgm_network {
 
         proxy_map<node_proxy_t, node_t> proxy;
 
-        /** Protocol Stuff */
+        // Protocol Stuff 
         RnnLearner *globalLearner;
         Query *Q;                 // continuous query
         QueryState *query;                      // current query state
         SafezoneFunction *safezone;          // the safe zone wrapper
         size_t k;                                  // number of sites
 
-        /** Nodes indexing */
+        // Nodes indexing 
         map<node_t *, size_t> nodeIndex;
         map<node_t *, size_t> nodeBoolDrift;
         vector<node_t *> nodePtr;
@@ -62,17 +58,17 @@ namespace fgm_network {
         bool rebalanced;                 // Flag to check if the current round has be rebalanced.
         size_t roundRebs;                // The number of rebalances ocuured in this round.
 
-        arma::mat params;        // A placeholder for the parameters send by the nodes.
+        arma::mat params;                // A placeholder for the parameters send by the nodes.
         vector<arma::mat> beta;          // The beta vector used by the protocol for the rebalancing process.
 
-        /** Statistics */
+        // Statistics 
         size_t numRounds;                   // Total number of rounds
         size_t numSubrounds;                // Total number of subrounds
         size_t szSent;                      // Total safe zones sent
         size_t totalUpdates;                // Number of stream updates received
         size_t numRebalances;               // Number of rebalances
 
-        /** Constructor and Destructor */
+        // Constructor and Destructor 
         Coordinator(network_t *nw, Query *_Q);
 
         ~Coordinator();
@@ -81,19 +77,19 @@ namespace fgm_network {
 
         const ProtocolConfig &Cfg() const;
 
-        /** Initialize the Learner and its' variables */
+        // Initialize the Learner and its' variables 
         void InitializeGlobalLearner();
 
-        /** Method used by the hub to establish the connections with the nodes of the star network */
+        // Method used by the hub to establish the connections with the nodes of the star network 
         void SetupConnections();
 
-        /** Initialize a new round */
+        // Initialize a new round 
         void StartRound();
 
-        /** Getting the model of a node */
+        // Getting the model of a node 
         void FetchUpdates(node_t *n);
 
-        /** Remote call on host violation */
+        // Remote call on host violation 
         oneway SendIncrement(Increment inc);
 
         oneway Drift(sender<node_t> ctx, size_t cols);
@@ -102,16 +98,16 @@ namespace fgm_network {
 
         void FinishRounds();
 
-        /** Rebalancing method */
+        // Rebalancing method 
         void Rebalance();
 
-        /** Printing and saving the accuracy */
+        // Printing and saving the accuracy 
         void Progress();
 
-        /** Getting the accuracy of the global learner */
+        // Getting the accuracy of the global learner 
         double Accuracy();
 
-        /** Get the communication statistics of experiment */
+        // Get the communication statistics of experiment 
         vector<size_t> Statistics() const;
 
     };
@@ -125,9 +121,7 @@ namespace fgm_network {
         CoordinatorProxy(process *c) : remote_proxy<coordinator_t>(c) {}
     };
 
-    /**
-    * This is the site/learning node implementation for the Functional Geometric Method protocol.
-    */
+    // This is the site/learning node implementation for the Functional Geometric Method protocol.
     struct LearningNode : local_site {
 
         typedef Coordinator coordinator_t;
@@ -159,13 +153,11 @@ namespace fgm_network {
 
         void SetupConnections();
 
-        void UpdateStream(arma::mat &batch, arma::mat &labels);
+        void UpdateState(arma::mat &batch, arma::mat &labels);
 
-        void UpdateDrift(vector<arma::mat *> &params);
-
-        /**
+        //
          * Remote Methods
-         */
+         
 
         // called at the start of a round
         oneway Reset(const Safezone &newsz, const FloatValue qntm);

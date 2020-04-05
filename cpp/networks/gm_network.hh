@@ -21,7 +21,7 @@ namespace gm_network {
     struct LearningNode;
     struct LearningNodeProxy;
 
-    /** This is the GM Network implementation for the classic Geometric Method protocol. */
+    // This is the GM Network implementation for the classic Geometric Method protocol. 
     struct GmNet : gm_protocol::GmLearningNetwork<GmNet, Coordinator, LearningNode> {
 
         typedef gm_protocol::GmLearningNetwork<network_t, coordinator_t, node_t> gm_learning_network_t;
@@ -29,7 +29,7 @@ namespace gm_network {
         GmNet(const set<source_id> &_hids, const string &_name, Query *_Q);
     };
 
-    /** This is the hub/coordinator implementation for the classic Geometric Method protocol. */
+    // This is the hub/coordinator implementation for the classic Geometric Method protocol. 
     struct Coordinator : process {
         typedef Coordinator coordinator_t;
         typedef LearningNode node_t;
@@ -38,7 +38,7 @@ namespace gm_network {
 
         proxy_map<node_proxy_t, node_t> proxy;
 
-        /** Protocol Stuff */
+        // Protocol Stuff 
         RnnLearner *globalLearner;          // ML model
         Query *Q;                           // query
         QueryState *query;                  // current query state
@@ -52,13 +52,13 @@ namespace gm_network {
         size_t numViolations;               // Number of violations in the same round (for rebalancing)
         int cnt;                            // Helping counter.
 
-        /** Statistics */
+        // Statistics 
         size_t numRounds;                   // Total number of rounds
         size_t numSubrounds;                // Total number of subrounds
         size_t szSent;                      // Total safe zones sent
         size_t totalUpdates;                // Number of stream updates received
 
-        /** Constructor and Destructor */
+        // Constructor and Destructor 
         Coordinator(network_t *nw, Query *_Q);
 
         ~Coordinator() override;
@@ -67,40 +67,40 @@ namespace gm_network {
 
         const ProtocolConfig &Cfg() const;
 
-        /** Initialize learner and  variables */
+        // Initialize learner and  variables 
         void InitializeGlobalLearner();
 
         void SetupConnections();
 
-        /** Initialize a new round */
+        // Initialize a new round 
         void StartRound();
 
-        /** Start the 1st round of training */
+        // Start the 1st round of training 
         void StartDistrTraining();
 
         void FinishRound();
 
         void ShowOverallStats();
 
-        /** Rebalance algorithm by Kamp */
-        void KampRebalance(node_t *n);
+        // Rebalance algorithm by Kamp 
+        void Rebalance(node_t *n);
 
-        /** Printing and saving the accuracy */
+        // Printing and saving the accuracy 
         void Progress();
 
-        /** Getting the accuracy of the global learner */
+        // Getting the accuracy of the global learner 
         double Accuracy();
 
-        /** Get the communication statistics of experiment */
+        // Get the communication statistics of experiment 
         vector<size_t> UpdateStats() const;
 
-        /** Get a model of a node */
+        // Get a model of a node 
         void FetchUpdates(node_t *n);
 
-        /** Remote call on host violation */
+        // Remote call on host violation 
         oneway LocalViolation(sender<node_t> ctx);
-        // TODO: uncomment Drift()
-//        oneway Drift(sender<node_t> ctx, size_t cols);
+
+        oneway HandleNodeDrift(sender<node_t> ctx, IntValue cols);
 
     };
 
@@ -111,10 +111,10 @@ namespace gm_network {
         // TODO: uncomment Drift()
 //        REMOTE_METHOD(coordinator_t, Drift);
 
-        CoordinatorProxy(process *c) : remote_proxy<coordinator_t>(c) {}
+        explicit CoordinatorProxy(process *c) : remote_proxy<coordinator_t>(c) {}
     };
 
-    /** This is the site/learning node implementation for the classic Geometric Method protocol. */
+    // This is the site/learning node implementation for the classic Geometric Method protocol. 
     struct LearningNode : local_site {
 
         typedef Coordinator coordinator_t;
@@ -126,35 +126,28 @@ namespace gm_network {
 
         query_t *Q;                         // The query management object
         Safezone szone;                     // The safezone object
-        RnnLearner *_learner;               // The learning algorithm
+        RnnLearner *learner;                // The learning algorithm
+        arma::cube trainX, trainY;          // Trainset data points and labels
+        arma::cube testX, testY;            // Testset data points and labels
         arma::mat drift;                    // The drift of the node
-        int numSites;                      // Number of sites
         coord_proxy_t coord;                // The proxy of the coordinator/hub
 
-        /** Constructor */
+        // Constructor 
         LearningNode(network_t *net, source_id hid, query_t *_Q);
 
         const ProtocolConfig &Cfg() const;
 
         void InitializeLearner();
 
-        void SetupConnections();
+        void UpdateState(arma::mat &batch, arma::mat &labels);
 
-        void UpdateDrift(arma::mat &params);
-
-        void UpdateStream(arma::mat &batch, arma::mat &labels);
-
-        /**
-         * Remote Methods
-         */
-
-        /** Call at the start of a round */
+        // Call at the start of a round 
         oneway Reset(const Safezone &newsz);
 
-        /** Transfer data to the coordinator */
+        // Transfer data to the coordinator 
         ModelState GetDrift();
 
-        /** Set the drift vector (for rebalancing) */
+        // Set the drift vector (for rebalancing) 
         void SetDrift(const ModelState &mdl);
 
         oneway SetGlobalParameters(const ModelState &params);

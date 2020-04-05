@@ -27,7 +27,7 @@ namespace rnn_learner {
 
     protected:
 
-        /** Dataset parameters */
+        //  Dataset parameters 
         arma::cube trainX, trainY;                          // Trainset data points and labels
         arma::cube testX, testY;                            // Testset data points and labels
         size_t inputSize;                                   // Number of neurons at the input layer
@@ -38,27 +38,27 @@ namespace rnn_learner {
         RNN<MeanSquaredError<>, HeInitialization> model;    // RNN model
         SGD<AdamUpdate> optimizer;                          // SGD optimizer
 
-        /** Model and Optimizer parameters */
-        int trainingEpochs;                                 // Number of optimization epochs
-        int lstmCells;                                      // Number of hidden layers
-        int rho;                                            // Number of time steps to look backward for in the RNN
-        int maxRho = rho;                                   // Max Rho for LSTM
+        //  Model and Optimizer parameters 
+        size_t trainingEpochs;                              // Number of optimization epochs
+        size_t lstmCells;                                   // Number of hidden layers
+        size_t rho;                                         // Number of time steps to look backward for in the RNN
+        size_t maxRho = rho;                                // Max Rho for LSTM
         double stepSize;                                    // Step size of an optimizer
-        int batchSize;                                      // Number of data points in each iteration of SGD
-        int iterationsPerEpoch;                             // Number of iterations per cycle
+        size_t batchSize;                                   // Number of data points in each iteration of SGD
+        size_t iterationsPerEpoch;                          // Number of iterations per cycle
         double tolerance;                                   // Optimizer tolerance
         bool bShuffle;                                      // Let optimizer shuffle batches
         double epsilon;                                     // Optimizer epsilon
         double beta1;                                       // Optimizer beta1
         double beta2;                                       // Optimizer beta2
 
-        int numberOfUpdates;                                // Number of model updates
+        size_t numberOfUpdates;                             // Number of model updates
         double modelAccuracy;                               // Current accuracy of model
         Json::Value root;                                   // JSON file to read the hyperparameters
 
     public:
 
-        /** Constructor and Destructor */
+        //  Constructor and Destructor 
         explicit RnnLearner(const string &cfg, const RNN<MeanSquaredError<>, HeInitialization> &model);
 
         ~RnnLearner();
@@ -67,7 +67,7 @@ namespace rnn_learner {
 
         static double CalcMSE(arma::cube &pred, arma::cube &Y);
 
-        int NumberOfUpdates() const;
+        size_t NumberOfUpdates() const;
 
         arma::mat ModelParameters() const;
 

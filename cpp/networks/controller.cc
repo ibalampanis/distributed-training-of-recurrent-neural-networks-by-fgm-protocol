@@ -1,5 +1,7 @@
 #include <utility>
-
+#include <mlpack/core.hpp>
+#include <jsoncpp/json/json.h>
+#include <iostream>
 #include "controller.hh"
 
 using namespace gm_protocol;
@@ -47,9 +49,11 @@ Controller<distrNetType>::Controller(string cfg) : configFile(move(cfg)) {
 
     srand(seed);
 
-    // Boolean flag to determine if the experiment will log the differential accuracies.
-    logDiffAcc = root["simulations"].get("log_diff_acc", false).asBool();
-
+    datasetPath = root["data"].get("path", "").asString();
+    trainTestRatio = root["hyperparameters"].get("trainTestRatio", -1).asDouble();
+    inputSize = root["data"].get("input_size", -1).asInt();
+    outputSize = root["data"].get("output_size", -1).asInt();
+    rho = root["hyperparameters"].get("rho", -1).asInt();
 }
 
 template<typename distrNetType>
@@ -80,55 +84,68 @@ void Controller<distrNetType>::InitializeSimulation() {
         count += numOfNodes + 1;
 
         cout << "\t[+]Initializing RNNs ...";
-
-        auto net = new GmNet(nodeIDs, netName, query);
-        AddNet(net);
-
-        cout << "\t[+]Initializing RNNs ... OK.";
+        try {
+            auto net = new GmNet(nodeIDs, netName, query);
+            AddNet(net);
+            cout << "\t[+]Initializing RNNs ... OK.";
+        } catch (...) {
+            cout << "\t[-]Initializing RNNs ... ERROR.";
+        }
 
         // Initializing the differential communication statistics.
-        stats.push_back(chan_frame(net));
-        vector<vector<size_t>> dif_com;
-        vector<size_t> dif_msgs;
-        vector<size_t> dif_bts;
-        dif_msgs.push_back(0);
-        dif_bts.push_back(0);
-        dif_com.push_back(dif_msgs);
-        dif_com.push_back(dif_bts);
-        differentialCommunication.push_back(dif_com);
-        vector<double> dif_acc;
-        dif_acc.push_back(0.);
-        differentialAccuracy.push_back(dif_acc);
+//        stats.push_back(chan_frame(net));
+//        vector<vector<size_t>> dif_com;
+//        vector<size_t> dif_msgs;
+//        vector<size_t> dif_bts;
+//        dif_msgs.push_back(0);
+//        dif_bts.push_back(0);
+//        dif_com.push_back(dif_msgs);
+//        dif_com.push_back(dif_bts);
+//        differentialCommunication.push_back(dif_com);
+//        vector<double> dif_acc;
+//        dif_acc.push_back(0.);
+//        differentialAccuracy.push_back(dif_acc);
 
         msgs = 0;
         bts = 0;
         cout << "\n[+]Initializing the star network ... OK." << endl;
     } catch (...) {
-        cout << "\n[+]Initializing the star network ... ERROR" << endl;
+        cout << "\n[-]Initializing the star network ... ERROR." << endl;
     }
-
 }
 
 template<typename distrNetType>
 void Controller<distrNetType>::ShowNetworkInfo() const {
-    cout << "\n[+]Printing information about network ..." << endl;
-    cout << "\t-- Number of networks: " << _netContainer.size() << endl;
-    for (auto net:_netContainer) {
-        cout << "\t-- Network Name: " << net->name() << endl;
-        cout << "\t-- Number of nodes: " << net->sites.size() << endl;
-        cout << "\t-- Coordinator " << net->hub->name() << " with local address: " << net->hub->addr() << endl;
-        for (size_t j = 0; j < net->sites.size(); j++) {
-            cout << "\t-- Node (" << j + 1 << "/" << net->sites.size() << ") " << net->sites.at(j)->name()
-                 << " with local address: " << net->sites.at(j)->site_id() << endl;
-        }
-    }
+
+    auto *net = _netContainer.front();
+
+    cout << "\n[+]Printing network information ..." << endl;
+    cout << "\t-- Network Name: " << net->name() << endl;
+    cout << "\t-- Coordinator: " << net->hub->name() << " with ID: " << net->hub->addr() << endl;
+    cout << "\t-- Number of nodes: " << net->sites.size() << endl;
+    for (size_t j = 0; j < net->sites.size(); j++)
+        cout << "\t\t-- Node: " << net->sites.at(j)->name() << " with ID: " << net->sites.at(j)->site_id() << endl;
 }
-// PENDING implement HandleDifferentialInfo() if is needed
-//template<typename distrNetType>
-//void Controller<distrNetType>::HandleDifferentialInfo() {}
+
 // PENDING: implement TrainOverNetwork()
 template<typename distrNetType>
-void Controller<distrNetType>::TrainOverNetwork() {}
+void Controller<distrNetType>::TrainOverNetwork() {
+    cout << "\n[+]Preparing data ...";
+    try {
+        DataPreparation();
+        cout << "[+]Preparing data ... OK." << endl;
+    } catch (...) {
+        cout << "[-]Preparing data ... ERROR." << endl;
+    }
+
+    cout << "[+]Training ...";
+    try {
+
+        cout << "\n[+]Training ... OK.";
+    } catch (...) {
+        cout << "\n[+]Training ... ERROR.";
+    }
+}
 
 template<typename distrNetType>
 void Controller<distrNetType>::AddNet(distrNetType *net) { _netContainer.Join(net); }
@@ -137,7 +154,81 @@ template<typename distrNetType>
 void Controller<distrNetType>::AddQuery(Query *qry) { _queryContainer.Join(qry); }
 
 template<typename distrNetType>
-size_t Controller<distrNetType>::RandomInt(size_t maxValue) { return std::rand() % maxValue; }
+void Controller<distrNetType>::CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y) {
+    for (size_t i = 0; i < dataset.n_cols - rho; i++) {
+        X.subcube(arma::span(), arma::span(i), arma::span()) = dataset.submat(arma::span(), arma::span(i, i + rho - 1));
+        y.subcube(arma::span(), arma::span(i), arma::span()) = dataset.submat(
+                arma::span(dataset.n_rows - 1, dataset.n_rows - 1), arma::span(i + 1, i + rho));
+    }
+}
 
 template<typename distrNetType>
-size_t Controller<distrNetType>::NumberOfFeatures() { return numberOfFeatures; }
+void Controller<distrNetType>::DataPreparation() {
+
+    arma::mat dataset;
+    // In Armadillo rows represent features, columns represent data points.
+    cout << "\n\t[+]Reading dataset ...";
+
+    try {
+        data::Load(datasetPath, dataset, true);
+        cout << " OK." << endl;
+    } catch (...) {
+        cout << " ERROR." << endl;
+    }
+
+    // Scale all data into the range (0, 1) for increased numerical stability.
+    data::MinMaxScaler scale;
+    scale.Fit(dataset);
+    scale.Transform(dataset, dataset);
+
+
+    // We need to represent the input data for RNN in an arma::cube (3D matrix).
+    // The 3rd dimension is rho, the number of past data records the RNN uses for learning.
+    arma::cube X, y;
+    X.set_size(inputSize, dataset.n_cols - rho + 1, rho);
+    y.set_size(outputSize, dataset.n_cols - rho + 1, rho);
+
+
+    CreateTimeSeriesData(dataset, X, y);
+
+    // Split the data into training and testing sets.
+    size_t trainingSize = (1 - trainTestRatio) * X.n_cols;
+    trainX = X.subcube(arma::span(), arma::span(0, trainingSize - 1), arma::span());
+    trainY = y.subcube(arma::span(), arma::span(0, trainingSize - 1), arma::span());
+    testX = X.subcube(arma::span(), arma::span(trainingSize, X.n_cols - 1), arma::span());
+    testY = y.subcube(arma::span(), arma::span(trainingSize, X.n_cols - 1), arma::span());
+
+    auto *net = _netContainer.front();
+
+    // Define sizes
+    size_t chunks = net->size() - 1; // The coordinator mustn't be taken into account
+    size_t trainXSize = trainX.n_cols;
+    size_t chunkSizeX = trainXSize / chunks;
+//    size_t moduloX = trainXSize % chunks;
+    size_t trainYSize = trainY.n_cols;
+    size_t chunkSizeY = trainYSize / chunks;
+//    size_t moduloY = trainYSize % chunks;
+
+    cout << "\t[+]Sliver dataset to " << chunks << " chunks ...";
+    try {
+        for (size_t i = 0; i < net->sites.size(); i++) {
+            // Deliver trainX to each node
+            size_t start = i * chunkSizeX;
+            size_t end = (i + 1) * chunkSizeX;
+            net->sites.at(i)->trainX = trainX.subcube(arma::span(), arma::span(start, end - 1), arma::span());
+
+            // Deliver trainY to each node
+            start = i * chunkSizeY;
+            end = (i + 1) * chunkSizeY;
+            net->sites.at(i)->trainY = trainY.subcube(arma::span(), arma::span(start, end - 1), arma::span());
+
+            // All nodes have the same testSet
+            net->sites.at(i)->testX = testX;
+            net->sites.at(i)->testY = testY;
+        }
+        cout << " OK." << endl;
+    } catch (...) {
+        cout << " ERROR." << endl;
+    }
+
+}

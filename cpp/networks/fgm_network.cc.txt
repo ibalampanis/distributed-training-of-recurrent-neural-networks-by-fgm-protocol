@@ -244,11 +244,8 @@ void LearningNode::InitializeLearner() {
 
 void LearningNode::SetupConnections() { numSites = coord.proc()->k; }
 
-// PENDING: implement LearningNode::UpdateStream() if is needed
-//void LearningNode::UpdateStream(arma::mat &batch, arma::mat &labels) {}
-
-// PENDING: implement LearningNode::UpdateDrift()
-//void UpdateDrift(arma::mat &params) {}
+// PENDING: implement LearningNode::UpdateState()
+//void LearningNode::UpdateState(arma::mat &batch, arma::mat &labels) {}
 
 oneway LearningNode::Reset(const Safezone &newsz, const FloatValue qntm) {
     counter = 0;

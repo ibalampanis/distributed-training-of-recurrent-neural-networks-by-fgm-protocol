@@ -37,6 +37,13 @@ FloatValue::FloatValue(float qntm) : value(qntm) {}
 
 size_t FloatValue::ByteSize() const { return sizeof(float); }
 
+/*********************************************
+	Int Value
+*********************************************/
+IntValue::IntValue(size_t val) : value(val) {}
+
+size_t IntValue::ByteSize() const { return sizeof(int); }
+
 
 /*********************************************
 	Increment
@@ -69,7 +76,7 @@ SafezoneFunction::SafezoneFunction(arma::mat mdl) : globalModel(mdl) {}
 
 SafezoneFunction::~SafezoneFunction() = default;
 
-const arma::mat SafezoneFunction::GlobalModel() const { return globalModel; }
+arma::mat SafezoneFunction::GlobalModel() const { return globalModel; }
 
 void SafezoneFunction::UpdateDrift(arma::mat drift, arma::mat params, float mul) const {
     drift.clear();
@@ -110,11 +117,11 @@ float VarianceFunction::CheckIfAdmissibleReb(const arma::mat &par1, const arma::
                                              double coef) const {
     float res = 0.;
     arma::mat subtr = par1 - par2;
-    ////subtr *= 2.;
+    //subtr *= 2.;
     subtr *= coef;
     res += arma::dot(subtr, subtr);
 
-    ////return 0.5*(std::sqrt(threshold)-std::sqrt(res));
+    //return 0.5*(std::sqrt(threshold)-std::sqrt(res));
     return coef * (std::sqrt(threshold) - std::sqrt(res));
 }
 
@@ -301,7 +308,7 @@ channel *GmLearningNetwork<Net, Coord, Node>::CreateChannel(host *src, host *dst
 
 template<typename Net, typename Coord, typename Node>
 void GmLearningNetwork<Net, Coord, Node>::ProcessRecord(size_t randSite, arma::mat &batch, arma::mat &labels) {
-    this->source_site(this->sites.at(randSite)->site_id())->update_stream(batch, labels);
+    this->source_site(this->sites.at(randSite)->site_id())->UpdateState(batch, labels);
 }
 
 template<typename Net, typename Coord, typename Node>

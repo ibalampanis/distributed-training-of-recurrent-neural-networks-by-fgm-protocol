@@ -38,7 +38,7 @@ RnnLearner::RnnLearner(const string &cfg, const RNN<MeanSquaredError<>, HeInitia
 
 RnnLearner::~RnnLearner() = default;
 
-void RnnLearner::CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y, const size_t rho) {
+void RnnLearner::CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y, size_t rho) {
     for (size_t i = 0; i < dataset.n_cols - rho; i++) {
         X.subcube(arma::span(), arma::span(i), arma::span()) = dataset.submat(arma::span(), arma::span(i, i + rho - 1));
         y.subcube(arma::span(), arma::span(i), arma::span()) = dataset.submat(
@@ -56,7 +56,7 @@ double RnnLearner::CalcMSE(arma::cube &pred, arma::cube &Y) {
     return (err_sum / (diff.n_elem + 1e-50));
 }
 
-int RnnLearner::NumberOfUpdates() const { return numberOfUpdates; }
+size_t RnnLearner::NumberOfUpdates() const { return numberOfUpdates; }
 
 arma::mat RnnLearner::ModelParameters() const { return model.Parameters(); }
 
@@ -83,7 +83,6 @@ void RnnLearner::CentralizedDataPreparation() {
     arma::cube X, y;
     X.set_size(inputSize, dataset.n_cols - rho + 1, rho);
     y.set_size(outputSize, dataset.n_cols - rho + 1, rho);
-
 
     CreateTimeSeriesData(dataset, X, y, rho);
 
@@ -127,7 +126,7 @@ void RnnLearner::TrainModel() {
     auto begin_train_time = std::chrono::high_resolution_clock::now();
 
     // Run EPOCH number of cycles for optimizing the solution
-    for (int epoch = 1; epoch <= trainingEpochs; epoch++) {
+    for (size_t epoch = 1; epoch <= trainingEpochs; epoch++) {
 
 //Copies
 //        arma::mat tmp;

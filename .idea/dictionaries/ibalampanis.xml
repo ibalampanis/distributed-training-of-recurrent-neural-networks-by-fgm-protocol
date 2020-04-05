@@ -2,10 +2,8 @@
   <dictionary name="ibalampanis">
     <words>
       <w>arma</w>
-      <w>arta</w>
       <w>backpropagation</w>
       <w>balampanis</w>
-      <w>ccna</w>
       <w>chania</w>
       <w>convolutional</w>
       <w>datasets</w>
@@ -13,18 +11,12 @@
       <w>ibalampanis</w>
       <w>ilias</w>
       <w>kamp</w>
-      <w>linkedin</w>
       <w>lstm</w>
-      <w>matlab</w>
-      <w>plesk</w>
       <w>rebalancing</w>
       <w>sfakianaki</w>
       <w>testset</w>
       <w>trainset</w>
       <w>univariate</w>
-      <w>vhdl</w>
-      <w>wordpress</w>
-      <w>xtreme</w>
     </words>
   </dictionary>
 </component>

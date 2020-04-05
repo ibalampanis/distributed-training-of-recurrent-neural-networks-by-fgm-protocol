@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
     controller::Controller<gm_network::GmNet> ctrl(cfg);
     ctrl.InitializeSimulation();
     ctrl.ShowNetworkInfo();
-//    ctrl.TrainNetworks();
+    ctrl.TrainOverNetwork();
 
     return 0;
 }

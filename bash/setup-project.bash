@@ -1,15 +1,9 @@
 #!/bin/bash
 
-# Create folders and the file of library to be found by cmake
+# Create build folder
 cd ../
 mkdir cmake-build-debug
-mkdir cmake-build-debug/cpp
-mkdir cmake-build-debug/cpp/experiments
-cd cmake-build-debug/cpp/experiments
-touch libdml.a
-
-# Generate cmake files
-cd ../../
+cd cmake-build-debug/
 cmake ../ -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles"
 
 # Compile dml library

@@ -47,6 +47,7 @@ add_library(dml STATIC ${DML_SOURCES})
 
 
 include_directories(${CMAKE_BINARY_DIR}/)
+file(TOUCH ${CMAKE_BINARY_DIR}/cpp/experiments/libdml.a)
 find_library(DML_LIBRARIES dml ${CMAKE_BINARY_DIR}/cpp/experiments)
 message(STATUS "Found DML_LIBRARIES: [${DML_LIBRARIES}]")
 target_link_libraries(GMNetEEG

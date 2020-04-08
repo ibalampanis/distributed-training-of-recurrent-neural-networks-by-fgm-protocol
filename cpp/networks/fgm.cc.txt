@@ -75,7 +75,7 @@ void Coordinator::StartRound() {
     // Send new safezone.
     for (auto n : Net()->sites) {
         if (numRounds == 0) {
-            proxy[n].SetGlobalParameters(ModelState(globalLearner->ModelParameters(), 0));
+            proxy[n].ReceiveGlobalParameters(ModelState(globalLearner->ModelParameters(), 0));
         }
         szSent++;
         proxy[n].Reset(Safezone(safezone), FloatValue(quantum));
@@ -88,7 +88,7 @@ void Coordinator::StartRound() {
 
 // FIXME: Coordinator::FetchUpdates()
 void Coordinator::FetchUpdates(node_t *node) {
-    ModelState up = proxy[node].GetDrift();
+    ModelState up = proxy[node].SendDrift();
     if (!arma::approx_equal(arma::mat(arma::size(up._model), arma::fill::zeros), up._model, "absdiff",
                             1e-6)) {
         if (nodeBoolDrift[node] == 0) {
@@ -299,7 +299,7 @@ FloatValue LearningNode::GetZetaValue() {
     }
 }
 
-oneway LearningNode::SetGlobalParameters(const ModelState &params) {
+oneway LearningNode::ReceiveGlobalParameters(const ModelState &params) {
     _learner->UpdateModel(params._model);
 }
 

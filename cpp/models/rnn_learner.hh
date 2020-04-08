@@ -81,6 +81,8 @@ namespace rnn_learner {
 
         void TrainModel();
 
+        void TrainModelByBatch(arma::cube &x, arma::cube &y);
+
         void MakePrediction();
 
     };

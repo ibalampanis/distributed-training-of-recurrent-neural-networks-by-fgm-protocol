@@ -91,21 +91,6 @@ void Controller<distrNetType>::InitializeSimulation() {
         } catch (...) {
             cout << "\t[-]Initializing RNNs ... ERROR.";
         }
-
-        // Initializing the differential communication statistics.
-//        stats.push_back(chan_frame(net));
-//        vector<vector<size_t>> dif_com;
-//        vector<size_t> dif_msgs;
-//        vector<size_t> dif_bts;
-//        dif_msgs.push_back(0);
-//        dif_bts.push_back(0);
-//        dif_com.push_back(dif_msgs);
-//        dif_com.push_back(dif_bts);
-//        differentialCommunication.push_back(dif_com);
-//        vector<double> dif_acc;
-//        dif_acc.push_back(0.);
-//        differentialAccuracy.push_back(dif_acc);
-
         msgs = 0;
         bts = 0;
         cout << "\n[+]Initializing the star network ... OK." << endl;
@@ -127,7 +112,6 @@ void Controller<distrNetType>::ShowNetworkInfo() const {
         cout << "\t\t-- Node: " << net->sites.at(j)->name() << " with ID: " << net->sites.at(j)->site_id() << endl;
 }
 
-// PENDING: implement TrainOverNetwork()
 template<typename distrNetType>
 void Controller<distrNetType>::TrainOverNetwork() {
     cout << "\n[+]Preparing data ...";
@@ -138,8 +122,23 @@ void Controller<distrNetType>::TrainOverNetwork() {
         cout << "[-]Preparing data ... ERROR." << endl;
     }
 
-    cout << "[+]Training ...";
+    cout << "\n[+]Training ...";
     try {
+        auto *net = _netContainer.front();
+
+        net->StartTraining();
+
+        // In this loop, whole dataset will get crossed as well as each
+        // time point, a random node will get fit by a new point of dataset.
+        for (size_t i = 0; i < trainX.n_cols; i++) {
+            size_t currentNode = rand() % (net->sites.size());
+            arma::cube x = trainX.subcube(arma::span(), arma::span(i, i), arma::span());
+            arma::cube y = trainY.subcube(arma::span(), arma::span(i, i), arma::span());
+
+            net->TrainNode(currentNode, x, y);
+        }
+
+        net->FinalizeTraining();
 
         cout << "\n[+]Training ... OK.";
     } catch (...) {

@@ -28,9 +28,7 @@ RnnLearner::RnnLearner(const string &cfg, const RNN<MeanSquaredError<>, HeInitia
         inputSize = root["data"].get("input_size", 0).asInt();
         outputSize = root["data"].get("output_size", 0).asInt();
         datasetPath = root["data"].get("path", "").asString();
-    } catch (...) {
-        throw;
-    }
+    } catch (...) {}
     numberOfUpdates = 0;
     maxRho = rho;
     modelAccuracy = 0.0;
@@ -172,6 +170,25 @@ void RnnLearner::TrainModel() {
     else
         cout << "Training time: " << setprecision(1) << train_time.count() / 6e+10 << " minute(s)." << endl;
 
+}
+
+void RnnLearner::TrainModelByBatch(arma::cube &x, arma::cube &y) {
+    // Train neural network. If this is the first iteration, weights are random,
+    // using current values as starting point otherwise.
+    model.Train(x, y, optimizer);
+
+    numberOfUpdates += x.n_cols;
+
+    optimizer.ResetPolicy() = false;
+
+    arma::cube predOut;
+
+//    // Getting predictions on test data points.
+//    model.Predict(testX, predOut);
+//
+//    // Calculating MSE and accuracy on test data points.
+//    double testMSE = CalcMSE(predOut, testY);
+//    modelAccuracy = 100 - testMSE;
 }
 
 void RnnLearner::MakePrediction() {

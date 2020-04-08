@@ -1,10 +1,10 @@
-#ifndef DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_GM_NETWORK_HH
-#define DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_GM_NETWORK_HH
+#ifndef DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_GM_HH
+#define DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_GM_HH
 
 #include <boost/range/adaptors.hpp>
 #include <boost/shared_ptr.hpp>
 #include <random>
-#include "gm_protocol.hh"
+#include "protocols.hh"
 #include "cpp/models/rnn_learner.hh"
 
 namespace gm_network {
@@ -12,9 +12,7 @@ namespace gm_network {
     using namespace dds;
     using namespace rnn_learner;
     using namespace gm_protocol;
-    using std::map;
-    using std::cout;
-    using std::endl;
+
 
     struct Coordinator;
     struct CoordinatorProxy;
@@ -70,13 +68,8 @@ namespace gm_network {
         // Initialize learner and  variables 
         void InitializeGlobalLearner();
 
-        void SetupConnections();
-
         // Initialize a new round 
         void StartRound();
-
-        // Start the 1st round of training 
-        void StartDistrTraining();
 
         void FinishRound();
 
@@ -86,7 +79,7 @@ namespace gm_network {
         void Rebalance(node_t *n);
 
         // Printing and saving the accuracy 
-        void Progress();
+        void ShowProgress();
 
         // Getting the accuracy of the global learner 
         double Accuracy();
@@ -100,16 +93,12 @@ namespace gm_network {
         // Remote call on host violation 
         oneway LocalViolation(sender<node_t> ctx);
 
-        oneway HandleNodeDrift(sender<node_t> ctx, IntValue cols);
-
     };
 
     struct CoordinatorProxy : remote_proxy<Coordinator> {
         using coordinator_t = Coordinator;
 
         REMOTE_METHOD(coordinator_t, LocalViolation);
-        // TODO: uncomment Drift()
-//        REMOTE_METHOD(coordinator_t, Drift);
 
         explicit CoordinatorProxy(process *c) : remote_proxy<coordinator_t>(c) {}
     };
@@ -131,6 +120,7 @@ namespace gm_network {
         arma::cube testX, testY;            // Testset data points and labels
         arma::mat drift;                    // The drift of the node
         coord_proxy_t coord;                // The proxy of the coordinator/hub
+        size_t datapointsPassed;
 
         // Constructor 
         LearningNode(network_t *net, source_id hid, query_t *_Q);
@@ -139,27 +129,27 @@ namespace gm_network {
 
         void InitializeLearner();
 
-        void UpdateState(arma::mat &batch, arma::mat &labels);
+        void UpdateState(arma::cube &x, arma::cube &y);
 
         // Call at the start of a round 
         oneway Reset(const Safezone &newsz);
 
         // Transfer data to the coordinator 
-        ModelState GetDrift();
+        ModelState SendDrift();
 
         // Set the drift vector (for rebalancing) 
-        void SetDrift(const ModelState &mdl);
+        void ReceiveDrift(const ModelState &mdl);
 
-        oneway SetGlobalParameters(const ModelState &params);
+        oneway ReceiveGlobalParameters(const ModelState &params);
 
     };
 
     struct LearningNodeProxy : remote_proxy<gm_network::LearningNode> {
         typedef gm_network::LearningNode node_t;
         REMOTE_METHOD(node_t, Reset);
-        REMOTE_METHOD(node_t, GetDrift);
-        REMOTE_METHOD(node_t, SetDrift);
-        REMOTE_METHOD(node_t, SetGlobalParameters);
+        REMOTE_METHOD(node_t, SendDrift);
+        REMOTE_METHOD(node_t, ReceiveDrift);
+        REMOTE_METHOD(node_t, ReceiveGlobalParameters);
 
         explicit LearningNodeProxy(process *p) : remote_proxy<node_t>(p) {}
     };

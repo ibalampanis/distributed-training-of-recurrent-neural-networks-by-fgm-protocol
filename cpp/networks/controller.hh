@@ -6,8 +6,8 @@
 #include <iostream>
 #include <jsoncpp/json/json.h>
 #include <mlpack/core.hpp>
-#include "gm_protocol.hh"
-#include "gm_network.hh"
+#include "protocols.hh"
+#include "gm.hh"
 #include "ddsim/dds.hh"
 
 
@@ -18,8 +18,6 @@ namespace controller {
     using namespace gm_network;
     using namespace arma;
     using namespace dds;
-    using std::vector;
-    using std::string;
 
     // A Vector container for the networks. 
     template<typename distrNetType>

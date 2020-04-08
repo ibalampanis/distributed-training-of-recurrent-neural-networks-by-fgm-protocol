@@ -1,5 +1,5 @@
-#ifndef DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_GM_PROTOCOL_HH
-#define DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_GM_PROTOCOL_HH
+#ifndef DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_PROTOCOLS_HH
+#define DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_PROTOCOLS_HH
 
 #include <cmath>
 #include <map>
@@ -19,12 +19,6 @@ namespace gm_protocol {
     using namespace arma;
     using namespace rnn_learner;
 
-    using std::map;
-    using std::string;
-    using std::vector;
-    using std::cout;
-    using std::endl;
-
 
     // A channel implementation which accounts a combined network cost.
     // The network cost is computed as follows:
@@ -42,16 +36,15 @@ namespace gm_protocol {
 
     protected:
         size_t tcpBytes;
-
     };
 
-    struct FloatValue {
+    struct DoubleValue {
 
-        const float value;
+        const double value;
 
-        explicit FloatValue(float qntm);
+        explicit DoubleValue(double val);
 
-        size_t ByteSize() const;
+        size_t byte_size() const;
 
     };
 
@@ -61,7 +54,7 @@ namespace gm_protocol {
 
         explicit IntValue(size_t val);
 
-        size_t ByteSize() const;
+        size_t byte_size() const;
 
     };
 
@@ -71,7 +64,7 @@ namespace gm_protocol {
 
         explicit Increment(int inc);
 
-        size_t ByteSize() const;
+        size_t byte_size() const;
     };
 
     // Wrapper for a state parameters.
@@ -91,14 +84,13 @@ namespace gm_protocol {
 
         explicit MatrixMessage(const arma::mat &sb_prms);
 
-        size_t ByteSize() const;
+        size_t byte_size() const;
     };
 
     // The base class of a safezone function for machine learning purposes.
     struct SafezoneFunction {
 
         arma::mat globalModel;          // The global model.
-        vector<float> hyperparameters; // A vector of hyperparameters.
 
         explicit SafezoneFunction(arma::mat mdl);
 
@@ -110,40 +102,39 @@ namespace gm_protocol {
 
         virtual float Zeta(const arma::mat &params) const { return 0.; }
 
-        virtual size_t CheckIfAdmissible(const size_t counter) const { return 0.; }
+        virtual size_t RegionAdmissibility(const size_t counter) const { return 0.; }
 
-        virtual float CheckIfAdmissible(const arma::mat mdl) const { return 0.; }
+        virtual float RegionAdmissibility(const arma::mat mdl) const { return 0.; }
 
-        virtual float CheckIfAdmissibleReb(const arma::mat &par1, const arma::mat &par2,
-                                           double coef) const { return 0.; }
+        virtual float RegionAdmissibilityReb(const arma::mat &par1, const arma::mat &par2,
+                                             double coef) const { return 0.; }
 
         virtual size_t ByteSize() const { return 0; }
 
-        vector<float> Hyperparameters() const;
 
-        static void Print();
     };
 
     // This safezone function implements the algorithm presented in
     // in the paper "Communication-Efficient Distributed Online Prediction
     // by Dynamic Model Synchronization"
     // by Michael Kamp, Mario Boley, Assaf Schuster and Izchak Sharfman.
-    struct VarianceFunction : SafezoneFunction {
+    struct Norm2ndDegree : SafezoneFunction {
 
-        double threshold; // The threshold of the variance between the models of the network.
-        size_t batchSize; // The number of points seen by the node since the last synchronization.
+
+        double threshold;               // The threshold of the variance between the models of the network.
+        size_t batchSize;               // The number of points seen by the node since the last synchronization.
 
         // Constructors and Destructor 
-        VarianceFunction(arma::mat GlMd, float thr, size_t batch_sz);
+        Norm2ndDegree(arma::mat GlMd, float thr, size_t batch_sz);
 
-        ~VarianceFunction();
+        ~Norm2ndDegree();
 
         float Zeta(const arma::mat &params) const override;
 
-        float CheckIfAdmissible(arma::mat mdl) const override;
+        float RegionAdmissibility(arma::mat mdl) const override;
 
-        float CheckIfAdmissibleReb(const arma::mat &par1, const arma::mat &par2,
-                                   double coef) const override;
+        float RegionAdmissibilityReb(const arma::mat &par1, const arma::mat &par2,
+                                     double coef) const override;
 
         size_t ByteSize() const override;
     };
@@ -152,16 +143,16 @@ namespace gm_protocol {
     // a local site has proccesed since the last synchronisation. The threshold
     // variable basically indicates the batch size. If the proccesed points reach
     // the batch size, then the function returns an inadmissible region.
-    struct BatchLearningFunction : SafezoneFunction {
+    struct BatchLearning : SafezoneFunction {
 
         size_t threshold; // The maximum number of points fitted by each node before requesting synch from the Hub.
 
         // Constructors and Destructor 
-        BatchLearningFunction(arma::mat GlMd, size_t thr);
+        BatchLearning(arma::mat GlMd, size_t thr);
 
-        ~BatchLearningFunction();
+        ~BatchLearning();
 
-        size_t CheckIfAdmissible(size_t counter) const override;
+        size_t RegionAdmissibility(size_t counter) const override;
 
         size_t ByteSize() const override;
     };
@@ -199,7 +190,7 @@ namespace gm_protocol {
 
         size_t operator()(size_t counter);
 
-        float operator()(const arma::mat mdl);
+        float operator()(const arma::mat &mdl);
 
         size_t byte_size() const;
 
@@ -286,13 +277,12 @@ namespace gm_protocol {
 
         channel *CreateChannel(host *src, host *dst, rpcc_t endp) const;
 
+        void StartTraining();
+
         // This is called to update a specific learning node in the network.
-        void ProcessRecord(size_t randSite, arma::mat &batch, arma::mat &labels);
+        void TrainNode(size_t node, arma::cube &x, arma::cube &y);
 
-        void StartRound();
-
-        void FinishProcess();
-
+        void FinalizeTraining();
     };
 
 

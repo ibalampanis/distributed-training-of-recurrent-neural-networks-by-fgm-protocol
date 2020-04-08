@@ -1,6 +1,6 @@
 #include <random>
-#include "gm_network.hh"
-#include "gm_protocol.cc"
+#include "gm.hh"
+#include "protocols.cc"
 
 using namespace gm_protocol;
 using namespace gm_network;
@@ -46,36 +46,20 @@ void Coordinator::InitializeGlobalLearner() {
         string temp = root["hyperparameters"].get("rho", 0).asString();
         int rho = std::stoi(temp);
         globalLearner = new RnnLearner(Cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(rho));
+        globalLearner->BuildModel();
 
         cout << " OK." << endl;
 
     } catch (...) {
         cout << " OK." << endl;
-        throw;
     }
-
-
 }
-
-void Coordinator::SetupConnections() {
-
-    using boost::adaptors::map_values;
-
-    proxy.add_sites(Net()->sites);
-    for (auto n : Net()->sites) {
-        nodeIndex[n] = nodePtr.size();
-        nodePtr.push_back(n);
-    }
-    k = nodePtr.size();
-}
-
-void Coordinator::StartDistrTraining() { StartRound(); }
 
 void Coordinator::StartRound() {
     // Send new safezone.
     for (auto n : Net()->sites) {
         if (numRounds == 0) {
-            proxy[n].SetGlobalParameters(ModelState(globalLearner->ModelParameters(), 0));
+            proxy[n].ReceiveGlobalParameters(ModelState(globalLearner->ModelParameters(), 0));
         }
         szSent++;
         proxy[n].Reset(Safezone(safezone));
@@ -92,7 +76,7 @@ void Coordinator::ShowOverallStats() {
 
     // See the total number of points received by all the nodes. For debugging.
     for (auto nd:nodePtr) {
-        totalUpdates += nd->_learner->NumberOfUpdates();
+        totalUpdates += nd->learner->NumberOfUpdates();
     }
 
     // Print the results.
@@ -137,7 +121,7 @@ void Coordinator::Rebalance(node_t *lvnode) {
     assert(nodes.size() == k - 1);
 
     // permute the order
-    std::shuffle(nodes.begin(), nodes.end(), std::mt19937(std::random_device()()));
+    shuffle(nodes.begin(), nodes.end(), mt19937(random_device()()));
     assert(nodes.size() == k - 1);
     assert(B.size() == 1);
     assert(Bcompl.empty());
@@ -152,7 +136,7 @@ void Coordinator::Rebalance(node_t *lvnode) {
         B.insert(n);
         for (size_t i = 0; i < Mean.size(); i++)
             Mean.at(i) /= cnt;
-        if (safezone->CheckIfAdmissible(Mean) > 0. || B.size() == k)
+        if (safezone->RegionAdmissibility(Mean) > 0. || B.size() == k)
             break;
         for (auto &i : Mean)
             i *= cnt;
@@ -163,7 +147,7 @@ void Coordinator::Rebalance(node_t *lvnode) {
         for (size_t i = 0; i < Mean.size(); i++)
             Mean.at(i) += query->globalModel.at(i);
         for (auto n : B) {
-            proxy[n].SetDrift(ModelState(Mean, 0));
+            proxy[n].ReceiveDrift(ModelState(Mean, 0));
         }
         numSubrounds++;
     } else {
@@ -176,10 +160,9 @@ void Coordinator::Rebalance(node_t *lvnode) {
 
 }
 
-void Coordinator::Progress() {
+void Coordinator::ShowProgress() {
     // Query thr accuracy of the global model.
     query->accuracy = Q->QueryAccuracy(globalLearner);
-
 
     cout << "Global model of network " << net()->name() << "." << endl;
     cout << "Accuracy : " << std::setprecision(2) << query->accuracy << "%" << endl;
@@ -205,7 +188,7 @@ vector<size_t> Coordinator::UpdateStats() const {
 
 void Coordinator::FetchUpdates(node_t *node) {
 
-    ModelState up = proxy[node].GetDrift();
+    ModelState up = proxy[node].SendDrift();
     if (!arma::approx_equal(arma::mat(arma::size(up._model), arma::fill::zeros), up._model, "absdiff",
                             1e-6)) {
         cnt++;
@@ -224,20 +207,16 @@ oneway Coordinator::LocalViolation(sender<node_t> ctx) {
     Mean.zeros();
     cnt = 0;
 
-    if (SafezoneFunction *entity = (VarianceFunction *) safezone) {
+//    if (SafezoneFunction *entity = (Norm2ndDegree *) safezone) {
+//        numViolations = 0;
+//        FinishRound();
+//    } else {
+    if (numViolations == k) {
         numViolations = 0;
         FinishRound();
-    } else {
-        if (numViolations == k) {
-            numViolations = 0;
-            FinishRound();
-        } else {
-            Rebalance(n);
-        }
-    }
+    } else
+        Rebalance(n);
 }
-// PENDING: implement Coordinator::HandleNodeDrift()
-//oneway Coordinator::HandleNodeDrift(sender<node_t> ctx, IntValue cols) {}
 
 
 /*********************************************
@@ -249,12 +228,12 @@ LearningNode::LearningNode(LearningNode::network_t *net, source_id hid, Learning
                                                                                                      coord(this) {
     coord <<= net->hub;
     InitializeLearner();
+    datapointsPassed = 0;
 };
 
 const ProtocolConfig &LearningNode::Cfg() const { return Q->config; }
 
 void LearningNode::InitializeLearner() {
-
     cout << "\t\t[+]Node's local neural net ...";
     try {
         Json::Value root;
@@ -263,7 +242,7 @@ void LearningNode::InitializeLearner() {
         string temp = root["hyperparameters"].get("rho", 0).asString();
         int rho = std::stoi(temp);
         learner = new RnnLearner(Cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(rho));
-
+        learner->BuildModel();
         cout << " OK." << endl;
     }
     catch (...) {
@@ -272,26 +251,33 @@ void LearningNode::InitializeLearner() {
     }
 }
 
-// PENDING: implement LearningNode::UpdateState()
-void LearningNode::UpdateState(arma::mat &batch, arma::mat &labels) {}
+void LearningNode::UpdateState(arma::cube &x, arma::cube &y) {
+    learner->TrainModelByBatch(x, y);
+    datapointsPassed += x.n_cols;
+
+    if (SafezoneFunction *funcType = dynamic_cast<Norm2ndDegree *>(szone.GetSzone())) {
+        if (szone(datapointsPassed) <= 0) {
+            datapointsPassed = 0;
+            if (szone(learner->ModelParameters()) <
+                0.) // FIXME: error: "subtraction: incompatible matrix dimensions: 2821x1 and 0x0"
+                coord.LocalViolation(this);
+        }
+    } else if (szone(datapointsPassed) <= 0.)
+        coord.LocalViolation(this);
+}
 
 oneway LearningNode::Reset(const Safezone &newsz) {
     szone = newsz;       // Reset the safezone object
     learner->UpdateModel(szone.GetSzone()->GlobalModel()); // Updates the parameters of the local learner
+    datapointsPassed = 0;
 }
 
-ModelState LearningNode::GetDrift() {
-    // Getting the drift vector is done as getting the local statistic
+ModelState LearningNode::SendDrift() {
     szone(drift, learner->ModelParameters(), 1.);
     return ModelState(drift, learner->NumberOfUpdates());
 }
 
-void LearningNode::SetDrift(const ModelState &mdl) {
-    // Update the local learner with the model sent by the coordinator
-    learner->UpdateModel(mdl._model);
-}
+void LearningNode::ReceiveDrift(const ModelState &mdl) { learner->UpdateModel(mdl._model); }
 
-oneway LearningNode::SetGlobalParameters(const ModelState &params) {
-    learner->UpdateModel(params._model);
-}
+oneway LearningNode::ReceiveGlobalParameters(const ModelState &params) { learner->UpdateModel(params._model); }
 

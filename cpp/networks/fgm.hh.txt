@@ -175,7 +175,7 @@ namespace fgm_network {
         FloatValue GetZetaValue();
 
         // Loading the parameters of the hub to the local model.
-        oneway SetGlobalParameters(const ModelState &params);
+        oneway ReceiveGlobalParameters(const ModelState &params);
 
     };
 

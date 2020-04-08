@@ -1,5 +1,5 @@
 #include <jsoncpp/json/json.h>
-#include "gm_protocol.hh"
+#include "protocols.hh"
 #include "cpp/models/rnn_learner.hh"
 #include "ddsim/dsarch.hh"
 
@@ -7,11 +7,6 @@ using namespace gm_protocol;
 using namespace dds;
 using namespace arma;
 using namespace rnn_learner;
-using std::map;
-using std::string;
-using std::vector;
-using std::cout;
-using std::endl;
 
 /*********************************************
 	TCP Channel
@@ -31,18 +26,18 @@ size_t TcpChannel::TcpBytes() const { return tcpBytes; }
 
 
 /*********************************************
-	Float Value
+	Double Value
 *********************************************/
-FloatValue::FloatValue(float qntm) : value(qntm) {}
+DoubleValue::DoubleValue(double val) : value(val) {}
 
-size_t FloatValue::ByteSize() const { return sizeof(float); }
+size_t DoubleValue::byte_size() const { return sizeof(double); }
 
 /*********************************************
 	Int Value
 *********************************************/
 IntValue::IntValue(size_t val) : value(val) {}
 
-size_t IntValue::ByteSize() const { return sizeof(int); }
+size_t IntValue::byte_size() const { return sizeof(int); }
 
 
 /*********************************************
@@ -50,7 +45,7 @@ size_t IntValue::ByteSize() const { return sizeof(int); }
 *********************************************/
 Increment::Increment(int inc) : increase(inc) {}
 
-size_t Increment::ByteSize() const { return sizeof(int); }
+size_t Increment::byte_size() const { return sizeof(int); }
 
 
 /*********************************************
@@ -66,93 +61,75 @@ size_t ModelState::byte_size() const { return _model.n_elem * sizeof(float); }
 *********************************************/
 MatrixMessage::MatrixMessage(const arma::mat &sb_prms) : sub_params(sb_prms) {}
 
-size_t MatrixMessage::ByteSize() const { return sizeof(float) * sub_params.n_elem; }
+size_t MatrixMessage::byte_size() const { return sizeof(float) * sub_params.n_elem; }
 
 
 /*********************************************
 	Safezone Function
 *********************************************/
-SafezoneFunction::SafezoneFunction(arma::mat mdl) : globalModel(mdl) {}
+SafezoneFunction::SafezoneFunction(arma::mat mdl) : globalModel(move(mdl)) {}
 
 SafezoneFunction::~SafezoneFunction() = default;
 
 arma::mat SafezoneFunction::GlobalModel() const { return globalModel; }
 
 void SafezoneFunction::UpdateDrift(arma::mat drift, arma::mat params, float mul) const {
-    drift.clear();
-    for (size_t i = 0; i < globalModel.size(); i++) {
-        arma::mat dr;
-        dr = mul * (params.at(i) - globalModel.at(i));
-        drift += dr; // (+= mallon, gia na doume)
-    }
+    arma::mat dr;
+    dr = mul * (params - globalModel);
+    drift += dr;
 }
-
-vector<float> SafezoneFunction::Hyperparameters() const { return hyperparameters; }
-
-void SafezoneFunction::Print() { cout << endl << "Simple safezone function." << endl; }
-
 
 /*********************************************
-	Variance Safezone Function
+	Norm2ndDegree Safezone Function
 *********************************************/
-VarianceFunction::VarianceFunction(arma::mat GlMd, float thr, size_t batch_sz) : SafezoneFunction(GlMd),
-                                                                                 threshold(thr),
-                                                                                 batchSize(batch_sz) {
-    hyperparameters.push_back(thr);
-    hyperparameters.push_back(batch_sz);
-}
+Norm2ndDegree::Norm2ndDegree(arma::mat GlMd, float thr, size_t batch_sz) : SafezoneFunction(GlMd),
+                                                                           threshold(thr),
+                                                                           batchSize(batch_sz) {}
 
-VarianceFunction::~VarianceFunction() = default;
+Norm2ndDegree::~Norm2ndDegree() = default;
 
-float VarianceFunction::Zeta(const arma::mat &params) const {
+float Norm2ndDegree::Zeta(const arma::mat &params) const {
     float res = 0.;
 
     arma::mat subtr = globalModel - params;
     res += arma::dot(subtr, subtr);
 
-    return std::sqrt(threshold) - std::sqrt(res);
+    return float(sqrt(threshold) - sqrt(res));
 }
 
-float VarianceFunction::CheckIfAdmissibleReb(const arma::mat &par1, const arma::mat &par2,
-                                             double coef) const {
+float Norm2ndDegree::RegionAdmissibilityReb(const arma::mat &par1, const arma::mat &par2,
+                                            double coef) const {
     float res = 0.;
     arma::mat subtr = par1 - par2;
-    //subtr *= 2.;
     subtr *= coef;
     res += arma::dot(subtr, subtr);
 
-    //return 0.5*(std::sqrt(threshold)-std::sqrt(res));
-    return coef * (std::sqrt(threshold) - std::sqrt(res));
+    return float(coef * (sqrt(threshold) - sqrt(res)));
 }
 
-float VarianceFunction::CheckIfAdmissible(arma::mat mdl) const {
-    double var = 0.;
+float Norm2ndDegree::RegionAdmissibility(arma::mat mdl) const {
+
+    double dotProduct = 0.;
 
     arma::mat sub = mdl - globalModel;
-    var += arma::dot(sub, sub);
+    dotProduct = arma::dot(sub, sub);
 
-    return threshold - var;
+    return float(sqrt(threshold) - sqrt(dotProduct));
 }
 
-size_t VarianceFunction::ByteSize() const { return (1 + globalModel.n_elem) * sizeof(float) + sizeof(size_t); }
+size_t Norm2ndDegree::ByteSize() const { return (1 + globalModel.n_elem) * sizeof(float) + sizeof(size_t); }
 
 
 /*********************************************
 	Batch Learning Safezone Function
 *********************************************/
-BatchLearningFunction::BatchLearningFunction(arma::mat GlMd, size_t thr) : SafezoneFunction(GlMd),
-                                                                           threshold(thr) {
-    hyperparameters.push_back(thr);
-}
+BatchLearning::BatchLearning(arma::mat GlMd, size_t thr) : SafezoneFunction(GlMd), threshold(thr) {}
 
-BatchLearningFunction::~BatchLearningFunction() = default;
+BatchLearning::~BatchLearning() = default;
 
-size_t BatchLearningFunction::CheckIfAdmissible(const size_t counter) const {
-    size_t sz = threshold - counter;
-    return sz;
-}
+size_t BatchLearning::RegionAdmissibility(const size_t counter) const { return threshold - counter; }
 
-size_t BatchLearningFunction::ByteSize() const { return globalModel.n_elem * sizeof(float) + sizeof(size_t); }
+size_t BatchLearning::ByteSize() const { return globalModel.n_elem * sizeof(float) + sizeof(size_t); }
 
 
 /*********************************************
@@ -188,11 +165,13 @@ void Safezone::Swap(Safezone &other) { std::swap(szone, other.szone); }
 
 SafezoneFunction *Safezone::GetSzone() { return (szone != nullptr) ? szone : nullptr; }
 
-void Safezone::operator()(arma::mat drift, arma::mat params, float mul) { szone->UpdateDrift(drift, params, mul); }
+void Safezone::operator()(arma::mat drift, arma::mat params, float mul) {
+    szone->UpdateDrift(move(drift), move(params), mul);
+}
 
-size_t Safezone::operator()(size_t counter) { return (szone != nullptr) ? szone->CheckIfAdmissible(counter) : NAN; }
+size_t Safezone::operator()(size_t counter) { return (szone != nullptr) ? szone->RegionAdmissibility(counter) : NAN; }
 
-float Safezone::operator()(const arma::mat mdl) { return (szone != nullptr) ? szone->CheckIfAdmissible(mdl) : NAN; }
+float Safezone::operator()(const arma::mat &mdl) { return (szone != nullptr) ? szone->RegionAdmissibility(mdl) : NAN; }
 
 size_t Safezone::byte_size() const { return (szone != nullptr) ? szone->ByteSize() : 0; }
 
@@ -228,12 +207,12 @@ SafezoneFunction *QueryState::Safezone(const string &cfg, string algo) {
 
     string algorithm = root[algo].get("algorithm", "Variance_Monitoring").asString();
     if (algorithm == "Batch_Learning") {
-        auto safe_zone = new BatchLearningFunction(globalModel, root[algo].get("batch_size", 32).asInt64());
+        auto safe_zone = new BatchLearning(globalModel, root[algo].get("batch_size", 32).asInt64());
         return safe_zone;
     } else if (algorithm == "Variance_Monitoring") {
-        auto safe_zone = new VarianceFunction(globalModel,
-                                              root[algo].get("threshold", 1.).asFloat(),
-                                              root[algo].get("batch_size", 32).asInt64());
+        auto safe_zone = new Norm2ndDegree(globalModel,
+                                           root[algo].get("threshold", 1.).asFloat(),
+                                           root[algo].get("batch_size", 32).asInt64());
         return safe_zone;
     } else {
         return nullptr;
@@ -307,12 +286,12 @@ channel *GmLearningNetwork<Net, Coord, Node>::CreateChannel(host *src, host *dst
 }
 
 template<typename Net, typename Coord, typename Node>
-void GmLearningNetwork<Net, Coord, Node>::ProcessRecord(size_t randSite, arma::mat &batch, arma::mat &labels) {
-    this->source_site(this->sites.at(randSite)->site_id())->UpdateState(batch, labels);
+void GmLearningNetwork<Net, Coord, Node>::StartTraining() { this->hub->StartRound(); }
+
+template<typename Net, typename Coord, typename Node>
+void GmLearningNetwork<Net, Coord, Node>::TrainNode(size_t node, arma::cube &x, arma::cube &y) {
+    this->source_site(this->sites.at(node)->site_id())->UpdateState(x, y);
 }
 
 template<typename Net, typename Coord, typename Node>
-void GmLearningNetwork<Net, Coord, Node>::StartRound() { this->hub->StartRound(); }
-
-template<typename Net, typename Coord, typename Node>
-void GmLearningNetwork<Net, Coord, Node>::FinishProcess() { this->hub->FinishRounds(); }
+void GmLearningNetwork<Net, Coord, Node>::FinalizeTraining() { this->hub->ShowOverallStats(); }

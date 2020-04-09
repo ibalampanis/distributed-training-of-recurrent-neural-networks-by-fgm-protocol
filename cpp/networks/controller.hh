@@ -20,13 +20,13 @@ namespace controller {
     using namespace dds;
 
     // A Vector container for the networks. 
-    template<typename distrNetType>
-    class NetContainer : public vector<distrNetType *> {
+    template<typename networkType>
+    class NetContainer : public vector<networkType *> {
 
     public:
-        using vector<distrNetType *>::vector;
+        using vector<networkType *>::vector;
 
-        void Join(distrNetType *net);
+        void Join(networkType *net);
 
         void Leave(int i);
 
@@ -46,13 +46,13 @@ namespace controller {
 
     // The purpose of Controller class is to synchronize the training of the
     // network nodes by providing the appropriate data points to these.
-    template<typename distrNetType>
+    template<typename networkType>
     class Controller {
 
     protected:
         std::string configFile;                     // JSON file to read the hyperparameters.
         time_t seed;                                // The seed for the random generator.
-        NetContainer<distrNetType> _netContainer;   // A container for networks.
+        NetContainer<networkType> _netContainer;   // A container for networks.
         QueryContainer _queryContainer;             // A container for queries.
 
         // Dataset and model parameters 
@@ -73,7 +73,7 @@ namespace controller {
     public:
 
         // Constructor 
-        explicit Controller<distrNetType>(string cfg);
+        explicit Controller<networkType>(string cfg);
 
         // This method initializes all the networks. 
         void InitializeSimulation();
@@ -84,7 +84,7 @@ namespace controller {
         void TrainOverNetwork();
 
         // This method appends a network in the network container. 
-        void AddNet(distrNetType *net);
+        void AddNet(networkType *net);
 
         // This method appends a query in the query container. 
         void AddQuery(Query *qry);

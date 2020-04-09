@@ -51,8 +51,20 @@ void Coordinator::InitializeGlobalLearner() {
         cout << " OK." << endl;
 
     } catch (...) {
-        cout << " OK." << endl;
+        cout << " ERROR." << endl;
     }
+}
+
+void Coordinator::SetupConnections() {
+
+    proxy.add_sites(Net()->sites);
+
+    for (auto n : Net()->sites) {
+        nodeIndex[n] = nodePtr.size();
+        nodePtr.push_back(n);
+    }
+
+    k = nodePtr.size();
 }
 
 void Coordinator::StartRound() {
@@ -67,45 +79,6 @@ void Coordinator::StartRound() {
     numRounds++;
 }
 
-void Coordinator::ShowOverallStats() {
-
-    cout << "Global model of network " << net()->name() << "." << endl;
-
-    // Query thr accuracy of the global model.
-    query->accuracy = Q->QueryAccuracy(globalLearner);
-
-    // See the total number of points received by all the nodes. For debugging.
-    for (auto nd:nodePtr) {
-        totalUpdates += nd->learner->NumberOfUpdates();
-    }
-
-    // Print the results.
-
-    cout << "Accuracy : " << std::setprecision(6) << query->accuracy << "%" << endl;
-
-    cout << "Number of rounds : " << numRounds << endl;
-    cout << "Number of subrounds : " << numSubrounds << endl;
-    cout << "Total updates : " << totalUpdates << endl;
-
-}
-
-void Coordinator::FinishRound() {
-
-    // Collect all data
-    for (auto n : nodePtr) {
-        FetchUpdates(n);
-    }
-    for (size_t i = 0; i < Mean.size(); i++)
-        Mean.at(i) /= cnt;
-
-    // New round
-    query->UpdateEstimate(Mean);
-    globalLearner->UpdateModel(query->globalModel);
-
-    StartRound();
-
-}
-
 void Coordinator::Rebalance(node_t *lvnode) {
 
     Bcompl.clear();
@@ -118,19 +91,23 @@ void Coordinator::Rebalance(node_t *lvnode) {
         if (B.find(n) == B.end())
             nodes.push_back(n);
     }
+
     assert(nodes.size() == k - 1);
 
     // permute the order
     shuffle(nodes.begin(), nodes.end(), mt19937(random_device()()));
+
     assert(nodes.size() == k - 1);
     assert(B.size() == 1);
     assert(Bcompl.empty());
 
-    for (auto n:nodes) {
+    for (auto n:nodes)
         Bcompl.insert(n);
-    }
+
     assert(B.size() + Bcompl.size() == k);
+
     FetchUpdates(lvnode);
+
     for (auto n:Bcompl) {
         FetchUpdates(n);
         B.insert(n);
@@ -155,35 +132,10 @@ void Coordinator::Rebalance(node_t *lvnode) {
         numViolations = 0;
         query->UpdateEstimate(Mean);
         globalLearner->UpdateModel(query->globalModel);
+//        ShowProgress();
         StartRound();
     }
 
-}
-
-void Coordinator::ShowProgress() {
-    // Query thr accuracy of the global model.
-    query->accuracy = Q->QueryAccuracy(globalLearner);
-
-    cout << "Global model of network " << net()->name() << "." << endl;
-    cout << "Accuracy : " << std::setprecision(2) << query->accuracy << "%" << endl;
-    cout << "Number of rounds : " << numRounds << endl;
-    cout << "Number of subrounds : " << numSubrounds << endl;
-    cout << "Total updates : " << totalUpdates << endl;
-    cout << endl;
-}
-
-double Coordinator::Accuracy() {
-    query->accuracy = Q->QueryAccuracy(globalLearner);
-    return query->accuracy;
-}
-
-vector<size_t> Coordinator::UpdateStats() const {
-    vector<size_t> stats;
-    stats.push_back(numRounds);
-    stats.push_back(numSubrounds);
-    stats.push_back(szSent);
-    stats.push_back(0);
-    return stats;
 }
 
 void Coordinator::FetchUpdates(node_t *node) {
@@ -207,15 +159,74 @@ oneway Coordinator::LocalViolation(sender<node_t> ctx) {
     Mean.zeros();
     cnt = 0;
 
-//    if (SafezoneFunction *entity = (Norm2ndDegree *) safezone) {
-//        numViolations = 0;
-//        FinishRound();
-//    } else {
-    if (numViolations == k) {
+    if (SafezoneFunction *entity = (Norm2ndDegree *) safezone) {
         numViolations = 0;
         FinishRound();
-    } else
-        Rebalance(n);
+    } else {
+        if (numViolations == k) {
+            numViolations = 0;
+            FinishRound();
+        } else
+            Rebalance(n);
+    }
+}
+
+void Coordinator::ShowProgress() {
+
+    // Query thr accuracy of the global model.
+    query->accuracy = Q->QueryAccuracy(globalLearner, testX, testY);
+
+    cout << "\n\t[+]Showing progress statistics of training ..." << endl;
+    cout << "\t\t-- Model: Global model" << endl;
+    cout << "\t\t-- Network name: " << net()->name() << endl;
+    cout << "\t\t-- Accuracy: " << std::setprecision(2) << query->accuracy << "%" << endl;
+    cout << "\t\t-- Number of rounds: " << numRounds << endl;
+    cout << "\t\t-- Total updates: " << totalUpdates << endl << endl;
+}
+
+vector<size_t> Coordinator::UpdateStats() const {
+    vector<size_t> stats;
+    stats.push_back(numRounds);
+    stats.push_back(numSubrounds);
+    stats.push_back(szSent);
+    stats.push_back(0);
+    return stats;
+}
+
+void Coordinator::FinishRound() {
+
+    // Collect all data
+    for (auto n : nodePtr) {
+        FetchUpdates(n);
+    }
+    for (size_t i = 0; i < Mean.size(); i++)
+        Mean.at(i) /= cnt;
+
+    // New round
+    query->UpdateEstimate(Mean);
+    globalLearner->UpdateModel(query->globalModel);
+
+//    ShowProgress();
+    StartRound();
+}
+
+double Coordinator::Accuracy() { return query->accuracy = Q->QueryAccuracy(globalLearner, testX, testY); }
+
+void Coordinator::ShowOverallStats() {
+
+    // Query thr accuracy of the global model.
+    query->accuracy = Q->QueryAccuracy(globalLearner, testX, testY);
+
+    // See the total number of points received by all the nodes. For debugging.
+    for (auto nd:nodePtr)
+        totalUpdates += nd->learner->NumberOfUpdates();
+
+    cout << "\n[+]Overall Training Statistics ..." << endl;
+    cout << "\t-- Model: Global model" << endl;
+    cout << "\t-- Network name: " << net()->name() << endl;
+    cout << "\t-- Accuracy: " << std::setprecision(6) << query->accuracy << "%" << endl;
+    cout << "\t-- Number of rounds: " << numRounds << endl;
+    cout << "\t-- Total updates: " << totalUpdates << endl;
 }
 
 
@@ -258,8 +269,7 @@ void LearningNode::UpdateState(arma::cube &x, arma::cube &y) {
     if (SafezoneFunction *funcType = dynamic_cast<Norm2ndDegree *>(szone.GetSzone())) {
         if (szone(datapointsPassed) <= 0) {
             datapointsPassed = 0;
-            if (szone(learner->ModelParameters()) <
-                0.) // FIXME: error: "subtraction: incompatible matrix dimensions: 2821x1 and 0x0"
+            if (szone(learner->ModelParameters()) < 0.)
                 coord.LocalViolation(this);
         }
     } else if (szone(datapointsPassed) <= 0.)

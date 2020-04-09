@@ -73,8 +73,38 @@ SafezoneFunction::~SafezoneFunction() = default;
 
 arma::mat SafezoneFunction::GlobalModel() const { return globalModel; }
 
-void SafezoneFunction::UpdateDrift(arma::mat drift, arma::mat params, float mul) const {
-    arma::mat dr;
+void SafezoneFunction::UpdateDrift(arma::mat &drift, arma::mat &params, float mul) {
+    using arma::mat;
+
+    if (globalModel.empty()) {
+        if (!params.empty())
+            globalModel = mat(size(params), arma::fill::zeros);
+        else if (!drift.empty())
+            globalModel = mat(size(params), arma::fill::zeros);
+        else
+            assert(false);
+    }
+
+    if (drift.empty()) {
+        if (!globalModel.empty())
+            drift = mat(size(globalModel), arma::fill::zeros);
+        else if (!params.empty())
+            drift = mat(size(params), arma::fill::zeros);
+        else
+            assert(false);
+    }
+
+    if (params.empty()) {
+        if (!globalModel.empty())
+            params = mat(size(globalModel), arma::fill::zeros);
+        else if (!drift.empty())
+            params = mat(size(drift), arma::fill::zeros);
+        else
+            assert(false);
+    }
+
+
+    mat dr;
     dr = mul * (params - globalModel);
     drift += dr;
 }
@@ -108,6 +138,9 @@ float Norm2ndDegree::RegionAdmissibilityReb(const arma::mat &par1, const arma::m
 }
 
 float Norm2ndDegree::RegionAdmissibility(arma::mat mdl) const {
+
+    if (globalModel.empty() || mdl.empty())
+        return -1;
 
     double dotProduct = 0.;
 
@@ -165,9 +198,7 @@ void Safezone::Swap(Safezone &other) { std::swap(szone, other.szone); }
 
 SafezoneFunction *Safezone::GetSzone() { return (szone != nullptr) ? szone : nullptr; }
 
-void Safezone::operator()(arma::mat drift, arma::mat params, float mul) {
-    szone->UpdateDrift(move(drift), move(params), mul);
-}
+void Safezone::operator()(arma::mat drift, arma::mat params, float mul) { szone->UpdateDrift(drift, params, mul); }
 
 size_t Safezone::operator()(size_t counter) { return (szone != nullptr) ? szone->RegionAdmissibility(counter) : NAN; }
 
@@ -194,10 +225,7 @@ void QueryState::InitializeGlobalModel(const arma::SizeMat &vsz) {
     globalModel.zeros();
 }
 
-void QueryState::UpdateEstimate(arma::mat mdl) {
-    for (size_t i = 0; i < mdl.size(); i++)
-        globalModel.at(i) += mdl.at(i);
-}
+void QueryState::UpdateEstimate(arma::mat mdl) { globalModel += mdl; }
 
 SafezoneFunction *QueryState::Safezone(const string &cfg, string algo) {
 
@@ -206,17 +234,12 @@ SafezoneFunction *QueryState::Safezone(const string &cfg, string algo) {
     cfgfl >> root;
 
     string algorithm = root[algo].get("algorithm", "Variance_Monitoring").asString();
-    if (algorithm == "Batch_Learning") {
-        auto safe_zone = new BatchLearning(globalModel, root[algo].get("batch_size", 32).asInt64());
-        return safe_zone;
-    } else if (algorithm == "Variance_Monitoring") {
-        auto safe_zone = new Norm2ndDegree(globalModel,
-                                           root[algo].get("threshold", 1.).asFloat(),
-                                           root[algo].get("batch_size", 32).asInt64());
-        return safe_zone;
-    } else {
-        return nullptr;
-    }
+
+    auto func = new Norm2ndDegree(globalModel,
+                                  root[algo].get("threshold", 1.).asFloat(),
+                                  root[algo].get("batch_size", 16).asInt64());
+    return func;
+
 }
 
 size_t QueryState::ByteSize() const { return (1 + globalModel.n_elem) * sizeof(float); }
@@ -258,7 +281,7 @@ QueryState *Query::CreateQueryState() { return new QueryState(); }
 
 QueryState *Query::CreateQueryState(arma::SizeMat sz) { return new QueryState(sz); }
 
-double Query::QueryAccuracy(RnnLearner *rnn) { return rnn->ModelAccuracy(); }
+double Query::QueryAccuracy(RnnLearner *rnn, arma::cube &tX, arma::cube &tY) { return rnn->MakePrediction(tX, tY); }
 
 
 /*********************************************
@@ -294,4 +317,4 @@ void GmLearningNetwork<Net, Coord, Node>::TrainNode(size_t node, arma::cube &x, 
 }
 
 template<typename Net, typename Coord, typename Node>
-void GmLearningNetwork<Net, Coord, Node>::FinalizeTraining() { this->hub->ShowOverallStats(); }
+void GmLearningNetwork<Net, Coord, Node>::ShowTrainingStats() { this->hub->ShowOverallStats(); }

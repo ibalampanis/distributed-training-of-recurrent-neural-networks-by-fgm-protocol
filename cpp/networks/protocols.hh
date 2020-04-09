@@ -98,7 +98,7 @@ namespace gm_protocol {
 
         arma::mat GlobalModel() const;
 
-        void UpdateDrift(arma::mat drift, arma::mat params, float mul) const;
+        void UpdateDrift(arma::mat &drift, arma::mat &params, float mul);
 
         virtual float Zeta(const arma::mat &params) const { return 0.; }
 
@@ -254,7 +254,7 @@ namespace gm_protocol {
 
         static QueryState *CreateQueryState(arma::SizeMat sz);
 
-        double QueryAccuracy(RnnLearner *lnr);
+        double QueryAccuracy(RnnLearner *rnn, arma::cube &tX, arma::cube &tY);
     };
 
 
@@ -282,7 +282,7 @@ namespace gm_protocol {
         // This is called to update a specific learning node in the network.
         void TrainNode(size_t node, arma::cube &x, arma::cube &y);
 
-        void FinalizeTraining();
+        void ShowTrainingStats();
     };
 
 

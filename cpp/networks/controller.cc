@@ -10,17 +10,14 @@ using namespace arma;
 using namespace dds;
 using namespace controller;
 
-using std::vector;
-using std::string;
-
 /*********************************************
 	Net Container
 *********************************************/
-template<typename distrNetType>
-void NetContainer<distrNetType>::Join(distrNetType *net) { this->push_back(net); }
+template<typename networkType>
+void NetContainer<networkType>::Join(networkType *net) { this->push_back(net); }
 
-template<typename distrNetType>
-void NetContainer<distrNetType>::Leave(int i) { this->erase(this->begin() + i); }
+template<typename networkType>
+void NetContainer<networkType>::Leave(int i) { this->erase(this->begin() + i); }
 
 
 /*********************************************
@@ -34,8 +31,8 @@ void QueryContainer::Leave(int i) { this->erase(this->begin() + i); }
 /*********************************************
 	Controller
 *********************************************/
-template<typename distrNetType>
-Controller<distrNetType>::Controller(string cfg) : configFile(move(cfg)) {
+template<typename networkType>
+Controller<networkType>::Controller(string cfg) : configFile(move(cfg)) {
 
     Json::Value root;
     ifstream cfgfile(configFile); // Parse from JSON file.
@@ -56,8 +53,8 @@ Controller<distrNetType>::Controller(string cfg) : configFile(move(cfg)) {
     rho = root["hyperparameters"].get("rho", -1).asInt();
 }
 
-template<typename distrNetType>
-void Controller<distrNetType>::InitializeSimulation() {
+template<typename networkType>
+void Controller<networkType>::InitializeSimulation() {
 
     cout << "\n[+]Initializing the star network ..." << endl;
     try {
@@ -87,6 +84,7 @@ void Controller<distrNetType>::InitializeSimulation() {
         try {
             auto net = new GmNet(nodeIDs, netName, query);
             AddNet(net);
+            net->hub->SetupConnections();
             cout << "\t[+]Initializing RNNs ... OK.";
         } catch (...) {
             cout << "\t[-]Initializing RNNs ... ERROR.";
@@ -99,8 +97,8 @@ void Controller<distrNetType>::InitializeSimulation() {
     }
 }
 
-template<typename distrNetType>
-void Controller<distrNetType>::ShowNetworkInfo() const {
+template<typename networkType>
+void Controller<networkType>::ShowNetworkInfo() const {
 
     auto *net = _netContainer.front();
 
@@ -112,8 +110,9 @@ void Controller<distrNetType>::ShowNetworkInfo() const {
         cout << "\t\t-- Node: " << net->sites.at(j)->name() << " with ID: " << net->sites.at(j)->site_id() << endl;
 }
 
-template<typename distrNetType>
-void Controller<distrNetType>::TrainOverNetwork() {
+template<typename networkType>
+void Controller<networkType>::TrainOverNetwork() {
+
     cout << "\n[+]Preparing data ...";
     try {
         DataPreparation();
@@ -122,6 +121,7 @@ void Controller<distrNetType>::TrainOverNetwork() {
         cout << "[-]Preparing data ... ERROR." << endl;
     }
 
+    auto beginTrainTime = std::chrono::high_resolution_clock::now();
     cout << "\n[+]Training ...";
     try {
         auto *net = _netContainer.front();
@@ -138,22 +138,27 @@ void Controller<distrNetType>::TrainOverNetwork() {
             net->TrainNode(currentNode, x, y);
         }
 
-        net->FinalizeTraining();
+        auto endTrainTime = std::chrono::high_resolution_clock::now();
+        auto trainTime = endTrainTime - beginTrainTime;
 
-        cout << "\n[+]Training ... OK.";
+//        cout << "\n[+]Training ... FINISHED in " << setprecision(2) << fixed << trainTime.count() / 1e+9
+//             << " second(s)." << endl;
+        cout << " FINISHED." << endl;
+
+        net->ShowTrainingStats();
     } catch (...) {
-        cout << "\n[+]Training ... ERROR.";
+        cout << " ERROR." << endl;
     }
 }
 
-template<typename distrNetType>
-void Controller<distrNetType>::AddNet(distrNetType *net) { _netContainer.Join(net); }
+template<typename networkType>
+void Controller<networkType>::AddNet(networkType *net) { _netContainer.Join(net); }
 
-template<typename distrNetType>
-void Controller<distrNetType>::AddQuery(Query *qry) { _queryContainer.Join(qry); }
+template<typename networkType>
+void Controller<networkType>::AddQuery(Query *qry) { _queryContainer.Join(qry); }
 
-template<typename distrNetType>
-void Controller<distrNetType>::CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y) {
+template<typename networkType>
+void Controller<networkType>::CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y) {
     for (size_t i = 0; i < dataset.n_cols - rho; i++) {
         X.subcube(arma::span(), arma::span(i), arma::span()) = dataset.submat(arma::span(), arma::span(i, i + rho - 1));
         y.subcube(arma::span(), arma::span(i), arma::span()) = dataset.submat(
@@ -161,8 +166,8 @@ void Controller<distrNetType>::CreateTimeSeriesData(arma::mat dataset, arma::cub
     }
 }
 
-template<typename distrNetType>
-void Controller<distrNetType>::DataPreparation() {
+template<typename networkType>
+void Controller<networkType>::DataPreparation() {
 
     arma::mat dataset;
     // In Armadillo rows represent features, columns represent data points.
@@ -225,6 +230,10 @@ void Controller<distrNetType>::DataPreparation() {
             net->sites.at(i)->testX = testX;
             net->sites.at(i)->testY = testY;
         }
+
+        net->hub->testX = testX;
+        net->hub->testY = testY;
+
         cout << " OK." << endl;
     } catch (...) {
         cout << " ERROR." << endl;

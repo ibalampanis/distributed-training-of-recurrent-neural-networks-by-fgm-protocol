@@ -153,9 +153,9 @@ void RnnLearner::TrainModel() {
         modelAccuracy = 100 - testMSE;
 
         // Print stats during training
-//        if (epoch % 10 == 0 || epoch == 1)
-        cout << "|=== [Epoch: " << epoch << "\t|\tAccuracy: " << setprecision(2) << fixed << (100 - testMSE)
-             << " %] ===|" << endl;
+        if (epoch % 10 == 0 || epoch == 1)
+            cout << "|=== [Epoch: " << epoch << "\t|\tAccuracy: " << setprecision(2) << fixed << (100 - testMSE)
+                 << " %] ===|" << endl;
     }
 
     cout << "===========================================" << endl;
@@ -181,14 +181,6 @@ void RnnLearner::TrainModelByBatch(arma::cube &x, arma::cube &y) {
 
     optimizer.ResetPolicy() = false;
 
-    arma::cube predOut;
-
-//    // Getting predictions on test data points.
-//    model.Predict(testX, predOut);
-//
-//    // Calculating MSE and accuracy on test data points.
-//    double testMSE = CalcMSE(predOut, testY);
-//    modelAccuracy = 100 - testMSE;
 }
 
 void RnnLearner::MakePrediction() {
@@ -202,6 +194,15 @@ void RnnLearner::MakePrediction() {
     double testMSEPred = CalcMSE(predOut, testY);
     cout << "Prediction Accuracy: " << setprecision(2) << fixed << (100 - testMSEPred) << " %" << endl;
 
+}
+
+double RnnLearner::MakePrediction(arma::cube &tX, arma::cube &tY) {
+
+    arma::cube predOut;
+
+    model.Predict(tX, predOut);
+
+    return (100 - CalcMSE(predOut, tY));
 }
 
 

@@ -85,6 +85,8 @@ namespace rnn_learner {
 
         void MakePrediction();
 
+        double MakePrediction(arma::cube &tX, arma::cube &tY);
+
     };
 
 } // end namespace rnn_learner

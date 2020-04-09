@@ -13,7 +13,6 @@ namespace gm_network {
     using namespace rnn_learner;
     using namespace gm_protocol;
 
-
     struct Coordinator;
     struct CoordinatorProxy;
     struct LearningNode;
@@ -38,6 +37,7 @@ namespace gm_network {
 
         // Protocol Stuff 
         RnnLearner *globalLearner;          // ML model
+        arma::cube testX, testY;            // Testset data points and labels
         Query *Q;                           // query
         QueryState *query;                  // current query state
         SafezoneFunction *safezone;         // the safe zone wrapper
@@ -68,31 +68,32 @@ namespace gm_network {
         // Initialize learner and  variables 
         void InitializeGlobalLearner();
 
+        void SetupConnections();
+
         // Initialize a new round 
         void StartRound();
 
-        void FinishRound();
-
-        void ShowOverallStats();
-
-        // Rebalance algorithm by Kamp 
+        // Rebalance algorithm by Kamp
         void Rebalance(node_t *n);
 
-        // Printing and saving the accuracy 
-        void ShowProgress();
-
-        // Getting the accuracy of the global learner 
-        double Accuracy();
-
-        // Get the communication statistics of experiment 
-        vector<size_t> UpdateStats() const;
-
-        // Get a model of a node 
+        // Get a model of a node
         void FetchUpdates(node_t *n);
 
-        // Remote call on host violation 
+        // Remote call on host violation
         oneway LocalViolation(sender<node_t> ctx);
 
+        // Printing and saving the accuracy
+        void ShowProgress();
+
+        // Get the communication statistics of experiment
+        vector<size_t> UpdateStats() const;
+
+        void FinishRound();
+
+        // Getting the accuracy of the global learner
+        double Accuracy();
+
+        void ShowOverallStats();
     };
 
     struct CoordinatorProxy : remote_proxy<Coordinator> {

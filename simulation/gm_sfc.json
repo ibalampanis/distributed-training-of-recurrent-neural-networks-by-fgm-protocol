@@ -3,7 +3,8 @@
     "encoding": "UTF-8",
     "net_name": "GM_Net",
     "net_type": "gm",
-    "number_of_networks": 1
+    "number_of_networks": 1,
+    "seed": -1
   },
   "net": {
     "encoding": "UTF-8",
@@ -23,9 +24,9 @@
     "encoding": "UTF-8",
     "lstmCells": 10,
     "rho": 15,
-    "stepSize": 5e-5,
-    "batchSize": 64,
-    "maxIterations": 3000,
+    "stepSize": 3e-4,
+    "batchSize": 16,
+    "maxIterations": 6000,
     "tolerance": 1e-8,
     "bShuffle": true,
     "epsilon": 2e-8,
@@ -35,8 +36,8 @@
   },
   "data": {
     "encoding": "UTF-8",
-    "input_size": 15,
+    "input_size": 19,
     "output_size": 1,
-    "path": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/datasets/EEG_Eye_State.csv"
+    "path": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/datasets/SFC_Edited.csv"
   }
 }

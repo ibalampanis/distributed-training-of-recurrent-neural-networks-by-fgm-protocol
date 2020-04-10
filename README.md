@@ -10,13 +10,13 @@ After that, in the same folder, to generate cmake files and compile the custom l
 ```
 $ bash setup-project.bash
 ```
-To compile a target (eg. GMNetEEG), back to the root of the folder, type:
+To compile a target (eg. GMLearn), back to the root of the folder, type:
 ```
-$ cmake --build cmake-build-debug --target GMNetEEG
+$ cmake --build cmake-build-debug --target GMLearn
 ```
 and to run this target, type:
 ```
-$ ./cmake-build-debug/bin/GMNetEEG absolute/path/to/simulation/gm_eeg.json
+$ ./cmake-build-debug/bin/GMLearn absolute/path/to/simulation/gm_eeg.json
 ```
 
 

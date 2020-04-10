@@ -12,8 +12,7 @@ RnnLearner::RnnLearner(const string &cfg, const RNN<MeanSquaredError<>, HeInitia
     try {
         std::ifstream cfgfile(cfg);
         cfgfile >> root;
-        string temp = root["hyperparameters"].get("trainingEpochs", 0).asString();
-        trainingEpochs = std::stoi(temp);
+        trainingEpochs = root["hyperparameters"].get("trainingEpochs", 0).asInt();
         lstmCells = root["hyperparameters"].get("lstmCells", 0).asInt();
         rho = root["hyperparameters"].get("rho", 0).asInt();
         stepSize = root["hyperparameters"].get("stepSize", 0).asDouble();

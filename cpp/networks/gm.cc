@@ -230,8 +230,8 @@ void Coordinator::ShowOverallStats() {
 
     for (auto nd:nodePtr)
         cout << "\t\t-- Node: " << nd->site_id() << setprecision(4) << " - Usage: "
-             << (((double) nd->learner->UsedTimes() / (double) totalUpdates) * 100.) << "%" <<
-             " (" << nd->learner->UsedTimes() << " of " << totalUpdates << ")" << endl;
+             << (((double) nd->learner->UsedTimes() / (double) trainPoints) * 100.) << "%" <<
+             " (" << nd->learner->UsedTimes() << " of " << trainPoints << ")" << endl;
 
 }
 

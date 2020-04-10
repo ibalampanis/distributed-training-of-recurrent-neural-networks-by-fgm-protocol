@@ -160,7 +160,7 @@ void Controller<networkType>::ShowNetworkInfo() const {
 template<typename networkType>
 void Controller<networkType>::TrainOverNetwork() {
 
-    cout << "\n[+]Preparing data ...";
+    cout << "\n[+]Preparing data ..." << endl;
     try {
         DataPreparation();
         cout << "[+]Preparing data ... OK." << endl;
@@ -224,7 +224,7 @@ void Controller<networkType>::DataPreparation() {
 
     arma::mat dataset;
     // In Armadillo rows represent features, columns represent data points.
-    cout << "\n\t[+]Reading dataset ...";
+    cout << "\t[+]Reading dataset ...";
 
     try {
         data::Load(datasetPath, dataset, true);
@@ -245,45 +245,30 @@ void Controller<networkType>::DataPreparation() {
     X.set_size(inputSize, dataset.n_cols - rho + 1, rho);
     y.set_size(outputSize, dataset.n_cols - rho + 1, rho);
 
-
-    CreateTimeSeriesData(dataset, X, y);
-
-    // Split the data into training and testing sets.
-    size_t trainingSize = (1 - trainTestRatio) * X.n_cols;
-    trainX = X.subcube(arma::span(), arma::span(0, trainingSize - 1), arma::span());
-    trainY = y.subcube(arma::span(), arma::span(0, trainingSize - 1), arma::span());
-    testX = X.subcube(arma::span(), arma::span(trainingSize, X.n_cols - 1), arma::span());
-    testY = y.subcube(arma::span(), arma::span(trainingSize, X.n_cols - 1), arma::span());
-
-    auto *net = _netContainer.front();
-
-    // Define sizes
-    size_t chunks = net->size() - 1; // The coordinator mustn't be taken into account
-    size_t trainXSize = trainX.n_cols;
-    size_t chunkSizeX = trainXSize / chunks;
-    size_t trainYSize = trainY.n_cols;
-    size_t chunkSizeY = trainYSize / chunks;
-
-    cout << "\t[+]Sliver dataset to " << chunks << " chunks ...";
+    cout << "\t[+]Creating time-series data ...";
     try {
-        for (size_t i = 0; i < net->sites.size(); i++) {
-            // Deliver trainX to each node
-            size_t start = i * chunkSizeX;
-            size_t end = (i + 1) * chunkSizeX;
-            net->sites.at(i)->trainX = trainX.subcube(arma::span(), arma::span(start, end - 1), arma::span());
-
-            // Deliver trainY to each node
-            start = i * chunkSizeY;
-            end = (i + 1) * chunkSizeY;
-            net->sites.at(i)->trainY = trainY.subcube(arma::span(), arma::span(start, end - 1), arma::span());
-        }
-
-        net->hub->testX = testX;
-        net->hub->testY = testY;
-
+        CreateTimeSeriesData(dataset, X, y);
         cout << " OK." << endl;
     } catch (...) {
         cout << " ERROR." << endl;
     }
 
+    cout << "\t[+]Splitting the data into training and testing sets ...";
+    try {
+        // Split the data into training and testing sets.
+        size_t trainingSize = (1 - trainTestRatio) * X.n_cols;
+        trainX = X.subcube(arma::span(), arma::span(0, trainingSize - 1), arma::span());
+        trainY = y.subcube(arma::span(), arma::span(0, trainingSize - 1), arma::span());
+        testX = X.subcube(arma::span(), arma::span(trainingSize, X.n_cols - 1), arma::span());
+        testY = y.subcube(arma::span(), arma::span(trainingSize, X.n_cols - 1), arma::span());
+
+
+        auto *net = _netContainer.front();
+        net->hub->testX = testX;
+        net->hub->testY = testY;
+        net->hub->trainPoints = trainX.n_cols;
+        cout << " OK." << endl;
+    } catch (...) {
+        cout << " ERROR." << endl;
+    }
 }

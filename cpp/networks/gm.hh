@@ -38,6 +38,7 @@ namespace gm_network {
         // Protocol Stuff 
         RnnLearner *globalLearner;          // ML model
         arma::cube testX, testY;            // Testset data points and labels
+        size_t trainPoints;
         Query *Q;                           // query
         QueryState *query;                  // current query state
         SafezoneFunction *safezone;         // the safe zone wrapper

@@ -223,10 +223,15 @@ void Coordinator::ShowOverallStats() {
 
     cout << "\n[+]Overall Training Statistics ..." << endl;
     cout << "\t-- Model: Global model" << endl;
-    cout << "\t-- Network name: " << net()->name() << endl;
-    cout << "\t-- Accuracy: " << std::setprecision(6) << query->accuracy << "%" << endl;
+    cout << "\t-- Network name: " << Net()->name() << endl;
+    cout << "\t-- Accuracy: " << setprecision(3) << query->accuracy << "%" << endl;
     cout << "\t-- Number of rounds: " << numRounds << endl;
     cout << "\t-- Total updates: " << totalUpdates << endl;
+
+    for (auto nd:nodePtr)
+        cout << "\t\t-- Node: " << nd->site_id() << setprecision(2) << " - Usage: "
+             << (((double) nd->learner->UsedTimes() / (double) totalUpdates) * 100.) << "%" << endl;
+
 }
 
 
@@ -263,6 +268,7 @@ void LearningNode::InitializeLearner() {
 }
 
 void LearningNode::UpdateState(arma::cube &x, arma::cube &y) {
+
     learner->TrainModelByBatch(x, y);
     datapointsPassed += x.n_cols;
 

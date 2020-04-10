@@ -41,14 +41,6 @@ size_t IntValue::byte_size() const { return sizeof(int); }
 
 
 /*********************************************
-	Increment
-*********************************************/
-Increment::Increment(int inc) : increase(inc) {}
-
-size_t Increment::byte_size() const { return sizeof(int); }
-
-
-/*********************************************
 	Model State
 *********************************************/
 ModelState::ModelState(arma::mat _mdl, size_t _updates) : _model(_mdl), updates(_updates) {}
@@ -82,7 +74,7 @@ void SafezoneFunction::UpdateDrift(arma::mat &drift, arma::mat &params, float mu
         else if (!drift.empty())
             globalModel = mat(size(params), arma::fill::zeros);
         else
-            assert(false);
+            return;
     }
 
     if (drift.empty()) {
@@ -91,7 +83,7 @@ void SafezoneFunction::UpdateDrift(arma::mat &drift, arma::mat &params, float mu
         else if (!params.empty())
             drift = mat(size(params), arma::fill::zeros);
         else
-            assert(false);
+            return;
     }
 
     if (params.empty()) {
@@ -100,7 +92,7 @@ void SafezoneFunction::UpdateDrift(arma::mat &drift, arma::mat &params, float mu
         else if (!drift.empty())
             params = mat(size(drift), arma::fill::zeros);
         else
-            assert(false);
+            return;
     }
 
 
@@ -152,17 +144,6 @@ float Norm2ndDegree::RegionAdmissibility(arma::mat mdl) const {
 
 size_t Norm2ndDegree::ByteSize() const { return (1 + globalModel.n_elem) * sizeof(float) + sizeof(size_t); }
 
-
-/*********************************************
-	Batch Learning Safezone Function
-*********************************************/
-BatchLearning::BatchLearning(arma::mat GlMd, size_t thr) : SafezoneFunction(GlMd), threshold(thr) {}
-
-BatchLearning::~BatchLearning() = default;
-
-size_t BatchLearning::RegionAdmissibility(const size_t counter) const { return threshold - counter; }
-
-size_t BatchLearning::ByteSize() const { return globalModel.n_elem * sizeof(float) + sizeof(size_t); }
 
 
 /*********************************************
@@ -220,11 +201,6 @@ QueryState::QueryState(const arma::SizeMat &vsz) {
 
 QueryState::~QueryState() = default;
 
-void QueryState::InitializeGlobalModel(const arma::SizeMat &vsz) {
-    globalModel.set_size(vsz);
-    globalModel.zeros();
-}
-
 void QueryState::UpdateEstimate(arma::mat mdl) { globalModel += mdl; }
 
 SafezoneFunction *QueryState::Safezone(const string &cfg, string algo) {
@@ -255,17 +231,9 @@ Query::Query(const string &cfg, string nm) {
         std::ifstream cfgfl(cfg);
         cfgfl >> root;
 
-        config.learningAlgorithm = root["gm_network_" + nm]
-                .get("learning_algorithm", "Trash").asString();
-        config.distributedLearningAlgorithm = root["gm_network_" + nm]
-                .get("distributed_learning_algorithm", "Trash").asString();
-        config.networkName = nm;
+        config.distributedLearningAlgorithm = root["net"].get("distributed_learning_algorithm", "trash").asString();
+        config.networkName = root["simulations"].get("net_name", "trash").asString();
         config.precision = root[config.distributedLearningAlgorithm].get("precision", 0.01).asFloat();
-        config.rebalancing = root[config.distributedLearningAlgorithm].get("rebalancing", false).asBool();
-        config.reb_mult = root[config.distributedLearningAlgorithm].get("reb_mult", -1.).asFloat();
-        config.betaMu = root[config.distributedLearningAlgorithm].get("beta_mu", 0.5).asFloat();
-        config.maxRebs = root[config.distributedLearningAlgorithm].get("max_rebs", 2).asInt64();
-
         config.cfgfile = cfg;
 
         cout << " OK." << endl;
@@ -279,29 +247,27 @@ Query::~Query() = default;
 
 QueryState *Query::CreateQueryState() { return new QueryState(); }
 
-QueryState *Query::CreateQueryState(arma::SizeMat sz) { return new QueryState(sz); }
-
 double Query::QueryAccuracy(RnnLearner *rnn, arma::cube &tX, arma::cube &tY) { return rnn->MakePrediction(tX, tY); }
 
 
 /*********************************************
-	GM Learning Network
+	Learning Network
 *********************************************/
 template<typename Net, typename Coord, typename Node>
-GmLearningNetwork<Net, Coord, Node>::GmLearningNetwork(const set<source_id> &_hids, const string &_name, Query *_Q)
+LearningNetwork<Net, Coord, Node>::LearningNetwork(const set<source_id> &_hids, const string &_name, Query *_Q)
         : star_network_t(_hids), Q(_Q) {
     this->set_name(_name);
     this->setup(Q);
 }
 
 template<typename Net, typename Coord, typename Node>
-GmLearningNetwork<Net, Coord, Node>::~GmLearningNetwork() { delete Q; }
+LearningNetwork<Net, Coord, Node>::~LearningNetwork() { delete Q; }
 
 template<typename Net, typename Coord, typename Node>
-const ProtocolConfig &GmLearningNetwork<Net, Coord, Node>::Cfg() const { return Q->config; }
+const ProtocolConfig &LearningNetwork<Net, Coord, Node>::Cfg() const { return Q->config; }
 
 template<typename Net, typename Coord, typename Node>
-channel *GmLearningNetwork<Net, Coord, Node>::CreateChannel(host *src, host *dst, rpcc_t endp) const {
+channel *LearningNetwork<Net, Coord, Node>::CreateChannel(host *src, host *dst, rpcc_t endp) const {
     if (!dst->is_mcast())
         return new TcpChannel(src, dst, endp);
     else
@@ -309,12 +275,12 @@ channel *GmLearningNetwork<Net, Coord, Node>::CreateChannel(host *src, host *dst
 }
 
 template<typename Net, typename Coord, typename Node>
-void GmLearningNetwork<Net, Coord, Node>::StartTraining() { this->hub->StartRound(); }
+void LearningNetwork<Net, Coord, Node>::StartTraining() { this->hub->StartRound(); }
 
 template<typename Net, typename Coord, typename Node>
-void GmLearningNetwork<Net, Coord, Node>::TrainNode(size_t node, arma::cube &x, arma::cube &y) {
+void LearningNetwork<Net, Coord, Node>::TrainNode(size_t node, arma::cube &x, arma::cube &y) {
     this->source_site(this->sites.at(node)->site_id())->UpdateState(x, y);
 }
 
 template<typename Net, typename Coord, typename Node>
-void GmLearningNetwork<Net, Coord, Node>::ShowTrainingStats() { this->hub->ShowOverallStats(); }
+void LearningNetwork<Net, Coord, Node>::ShowTrainingStats() { this->hub->ShowOverallStats(); }

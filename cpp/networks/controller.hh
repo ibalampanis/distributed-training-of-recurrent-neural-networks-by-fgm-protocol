@@ -44,13 +44,28 @@ namespace controller {
 
     };
 
+    // A very simple progress bar for loops (based on this repo: https://github.com/gipert/progressbar)
+    class LoopProgressBar {
+
+    public:
+        explicit LoopProgressBar(size_t iters);
+
+        void Update();
+
+    private:
+        size_t progress;
+        size_t nCycles;
+        size_t lastPerc;
+        bool bUpdateIsCalled;
+    };
+
     // The purpose of Controller class is to synchronize the training of the
     // network nodes by providing the appropriate data points to these.
     template<typename networkType>
     class Controller {
 
     protected:
-        std::string configFile;                     // JSON file to read the hyperparameters.
+        string configFile;                     // JSON file to read the hyperparameters.
         time_t seed;                                // The seed for the random generator.
         NetContainer<networkType> _netContainer;   // A container for networks.
         QueryContainer _queryContainer;             // A container for queries.

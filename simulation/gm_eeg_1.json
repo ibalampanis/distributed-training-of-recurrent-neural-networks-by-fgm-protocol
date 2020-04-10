@@ -2,32 +2,26 @@
   "simulations": {
     "encoding": "UTF-8",
     "net_name": "GM_Net",
+    "net_type": "gm",
     "number_of_networks": 1,
-    "data": "data",
-    "stream_distribution": "Stream_Distribution",
-    "log_diff_acc": false,
-    "Communication_File": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/sim/eeg_comm.csv",
-    "Differential_Communication_File": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/sim/eeg_diff_comm.csv",
     "seed": -1
   },
-  "data_section": {
-    "encoding": "UTF-8",
-    "warmup_size": 1000
-  },
-  "gm_net": {
+  "net": {
     "encoding": "UTF-8",
     "number_of_local_nodes": 4,
     "learning_algorithm": "RNN",
     "number_of_channels": 1,
     "distributed_learning_algorithm": "GM_RNN"
   },
-  "GM_RNN": {
-    "algorithm": "Variance_Learning",
+  "query": {
+    "encoding": "UTF-8",
+    "algorithm": "variance",
     "precision": 0.01,
     "threshold": 0.0008,
     "batch_size": 16
   },
   "hyperparameters": {
+    "encoding": "UTF-8",
     "trainingEpochs": "100",
     "lstmCells": 10,
     "rho": 15,
@@ -45,8 +39,6 @@
     "encoding": "UTF-8",
     "input_size": 15,
     "output_size": 1,
-    "path": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/datasets/EEG_Eye_State.csv",
-    "train_dset_name": "eegTrainSet",
-    "test_dset_name": "eegTestSet"
+    "path": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/datasets/EEG_Eye_State.csv"
   }
 }

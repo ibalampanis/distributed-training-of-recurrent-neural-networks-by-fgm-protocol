@@ -30,6 +30,7 @@ RnnLearner::RnnLearner(const string &cfg, const RNN<MeanSquaredError<>, HeInitia
         datasetPath = root["data"].get("path", "").asString();
     } catch (...) {}
     numberOfUpdates = 0;
+    usedTimes = 0;
     maxRho = rho;
     modelAccuracy = 0.0;
 }
@@ -55,6 +56,8 @@ double RnnLearner::CalcMSE(arma::cube &pred, arma::cube &Y) {
 }
 
 size_t RnnLearner::NumberOfUpdates() const { return numberOfUpdates; }
+
+size_t RnnLearner::UsedTimes() const { return usedTimes; }
 
 arma::mat RnnLearner::ModelParameters() const { return model.Parameters(); }
 
@@ -126,16 +129,6 @@ void RnnLearner::TrainModel() {
     // Run EPOCH number of cycles for optimizing the solution
     for (size_t epoch = 1; epoch <= trainingEpochs; epoch++) {
 
-//Copies
-//        arma::mat tmp;
-//        tmp.copy_size(model.Parameters());
-//        if (epoch == 2)
-//            tmp = model.Parameters();
-//        if (epoch == 10)
-//            model.Parameters() = tmp;
-//        if (epoch == 25)
-//            model.Parameters() = tmp;
-
         // Train neural network. If this is the first iteration, weights are random,
         // using current values as starting point otherwise.
         model.Train(trainX, trainY, optimizer);
@@ -173,14 +166,10 @@ void RnnLearner::TrainModel() {
 }
 
 void RnnLearner::TrainModelByBatch(arma::cube &x, arma::cube &y) {
-    // Train neural network. If this is the first iteration, weights are random,
-    // using current values as starting point otherwise.
     model.Train(x, y, optimizer);
-
     numberOfUpdates += x.n_cols;
-
+    usedTimes++;
     optimizer.ResetPolicy() = false;
-
 }
 
 void RnnLearner::MakePrediction() {
@@ -199,9 +188,7 @@ void RnnLearner::MakePrediction() {
 double RnnLearner::MakePrediction(arma::cube &tX, arma::cube &tY) {
 
     arma::cube predOut;
-
     model.Predict(tX, predOut);
-
     return (100 - CalcMSE(predOut, tY));
 }
 

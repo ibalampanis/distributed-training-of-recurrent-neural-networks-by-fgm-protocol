@@ -53,6 +53,7 @@ namespace rnn_learner {
         double beta2;                                       // Optimizer beta2
 
         size_t numberOfUpdates;                             // Number of model updates
+        size_t usedTimes;                                   // Times that routine Train() called.
         double modelAccuracy;                               // Current accuracy of model
         Json::Value root;                                   // JSON file to read the hyperparameters
 
@@ -68,6 +69,8 @@ namespace rnn_learner {
         static double CalcMSE(arma::cube &pred, arma::cube &Y);
 
         size_t NumberOfUpdates() const;
+
+        size_t UsedTimes() const;
 
         arma::mat ModelParameters() const;
 

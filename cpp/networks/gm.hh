@@ -19,9 +19,9 @@ namespace gm_network {
     struct LearningNodeProxy;
 
     // This is the GM Network implementation for the classic Geometric Method protocol. 
-    struct GmNet : gm_protocol::GmLearningNetwork<GmNet, Coordinator, LearningNode> {
+    struct GmNet : gm_protocol::LearningNetwork<GmNet, Coordinator, LearningNode> {
 
-        typedef gm_protocol::GmLearningNetwork<network_t, coordinator_t, node_t> gm_learning_network_t;
+        typedef gm_protocol::LearningNetwork<network_t, coordinator_t, node_t> gm_learning_network_t;
 
         GmNet(const set<source_id> &_hids, const string &_name, Query *_Q);
     };
@@ -116,9 +116,8 @@ namespace gm_network {
 
         query_t *Q;                         // The query management object
         Safezone szone;                     // The safezone object
-        RnnLearner *learner;                // The learning algorithm
+        RnnLearner *learner{};                // The learning algorithm
         arma::cube trainX, trainY;          // Trainset data points and labels
-        arma::cube testX, testY;            // Testset data points and labels
         arma::mat drift;                    // The drift of the node
         coord_proxy_t coord;                // The proxy of the coordinator/hub
         size_t datapointsPassed;

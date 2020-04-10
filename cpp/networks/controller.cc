@@ -2,7 +2,9 @@
 #include <mlpack/core.hpp>
 #include <jsoncpp/json/json.h>
 #include <iostream>
+#include <random>
 #include "controller.hh"
+
 
 using namespace gm_protocol;
 using namespace gm_network;
@@ -26,6 +28,42 @@ void NetContainer<networkType>::Leave(int i) { this->erase(this->begin() + i); }
 void QueryContainer::Join(Query *qry) { this->push_back(qry); }
 
 void QueryContainer::Leave(int i) { this->erase(this->begin() + i); }
+
+/*********************************************
+	Progress Bar
+*********************************************/
+LoopProgressBar::LoopProgressBar(size_t iters) : progress(0),
+                                                 nCycles(iters),
+                                                 lastPerc(0),
+                                                 bUpdateIsCalled(false) {}
+
+void LoopProgressBar::Update() {
+
+    if (!bUpdateIsCalled)
+        cout << "0%";
+
+    bUpdateIsCalled = true;
+
+    auto perc = size_t(progress * 100 / (nCycles - 1));
+
+    if (perc < lastPerc)
+        return;
+
+    // Update percentage each unit
+    if (perc == lastPerc + 1) {
+        // erase the correct  number of characters
+        if (perc <= 10)
+            cout << "\b\b" << perc << '%';
+        else if (perc > 10 and perc < 100)
+            cout << "\b\b\b" << perc << '%';
+        else if (perc == 100)
+            cout << "\b\b\b" << perc << '%';
+    }
+
+    lastPerc = perc;
+    progress++;
+    cout << flush;
+}
 
 
 /*********************************************
@@ -59,20 +97,21 @@ void Controller<networkType>::InitializeSimulation() {
     cout << "\n[+]Initializing the star network ..." << endl;
     try {
         Json::Value root;
-        std::ifstream cfgfile(configFile); // Parse from JSON file.
+        ifstream cfgfile(configFile); // Parse from JSON file.
         cfgfile >> root;
 
         source_id count = 0;
 
         string netName = root["simulations"].get("net_name", "NoNet").asString();
-        string learningAlgorithm = root["gm_net"].get("learning_algorithm",
-                                                      "NoAlgo").asString();
+        string netType = root["simulations"].get("net_type", "NoType").asString();
+        string learningAlgorithm = root["net"].get("learning_algorithm",
+                                                   "NoAlgo").asString();
 
         auto query = new gm_protocol::Query(configFile, netName);
         AddQuery(query);
 
-        source_id numOfNodes = (source_id) root["gm_net"].get("number_of_local_nodes",
-                                                              1).asInt64();
+        source_id numOfNodes = (source_id) root["net"].get("number_of_local_nodes",
+                                                           1).asInt64();
         set<source_id> nodeIDs;
         for (source_id j = 1; j <= numOfNodes; j++) {
             nodeIDs.insert(count + j);
@@ -82,6 +121,13 @@ void Controller<networkType>::InitializeSimulation() {
 
         cout << "\t[+]Initializing RNNs ...";
         try {
+
+//            if(netType == "gm")
+//                auto net = new GmNet(nodeIDs, netName, query);
+//            else if (netType == "fgm")
+//                auto net = new FgmNet(nodeIDs, netName, query);
+//            else
+//                assert(false);
             auto net = new GmNet(nodeIDs, netName, query);
             AddNet(net);
             net->hub->SetupConnections();
@@ -107,7 +153,8 @@ void Controller<networkType>::ShowNetworkInfo() const {
     cout << "\t-- Coordinator: " << net->hub->name() << " with ID: " << net->hub->addr() << endl;
     cout << "\t-- Number of nodes: " << net->sites.size() << endl;
     for (size_t j = 0; j < net->sites.size(); j++)
-        cout << "\t\t-- Node: " << net->sites.at(j)->name() << " with ID: " << net->sites.at(j)->site_id() << endl;
+        cout << "\t\t-- Node: " << net->sites.at(j)->name() << " with networkID: " << net->sites.at(j)->site_id()
+             << endl;
 }
 
 template<typename networkType>
@@ -121,33 +168,38 @@ void Controller<networkType>::TrainOverNetwork() {
         cout << "[-]Preparing data ... ERROR." << endl;
     }
 
-    auto beginTrainTime = std::chrono::high_resolution_clock::now();
-    cout << "\n[+]Training ...";
+    cout << "\n[+]Training ... ";
     try {
         auto *net = _netContainer.front();
 
         net->StartTraining();
 
+        // Using random lib (C++11 Standard) to generate random numbers in the range of the size of sites.
+        random_device rd;     // only used once to initialise (seed) engine
+        mt19937 rng(rd());    // random-number engine used (Mersenne-Twister in this case)
+        uniform_int_distribution<int> uni(0, net->sites.size() - 1); // guaranteed unbiased
+
+        int iterations = trainX.n_cols;
+        LoopProgressBar progressBar(iterations);
+
         // In this loop, whole dataset will get crossed as well as each
         // time point, a random node will get fit by a new point of dataset.
         for (size_t i = 0; i < trainX.n_cols; i++) {
-            size_t currentNode = rand() % (net->sites.size());
+            size_t currentNode = uni(rng);
             arma::cube x = trainX.subcube(arma::span(), arma::span(i, i), arma::span());
             arma::cube y = trainY.subcube(arma::span(), arma::span(i, i), arma::span());
 
             net->TrainNode(currentNode, x, y);
+
+            progressBar.Update();
         }
 
-        auto endTrainTime = std::chrono::high_resolution_clock::now();
-        auto trainTime = endTrainTime - beginTrainTime;
-
-//        cout << "\n[+]Training ... FINISHED in " << setprecision(2) << fixed << trainTime.count() / 1e+9
-//             << " second(s)." << endl;
-        cout << " FINISHED." << endl;
+        cout << " ... FINISHED." << endl;
 
         net->ShowTrainingStats();
+
     } catch (...) {
-        cout << " ERROR." << endl;
+        cout << " ... ERROR." << endl;
     }
 }
 
@@ -159,6 +211,7 @@ void Controller<networkType>::AddQuery(Query *qry) { _queryContainer.Join(qry); 
 
 template<typename networkType>
 void Controller<networkType>::CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y) {
+
     for (size_t i = 0; i < dataset.n_cols - rho; i++) {
         X.subcube(arma::span(), arma::span(i), arma::span()) = dataset.submat(arma::span(), arma::span(i, i + rho - 1));
         y.subcube(arma::span(), arma::span(i), arma::span()) = dataset.submat(
@@ -208,10 +261,8 @@ void Controller<networkType>::DataPreparation() {
     size_t chunks = net->size() - 1; // The coordinator mustn't be taken into account
     size_t trainXSize = trainX.n_cols;
     size_t chunkSizeX = trainXSize / chunks;
-//    size_t moduloX = trainXSize % chunks;
     size_t trainYSize = trainY.n_cols;
     size_t chunkSizeY = trainYSize / chunks;
-//    size_t moduloY = trainYSize % chunks;
 
     cout << "\t[+]Sliver dataset to " << chunks << " chunks ...";
     try {
@@ -225,10 +276,6 @@ void Controller<networkType>::DataPreparation() {
             start = i * chunkSizeY;
             end = (i + 1) * chunkSizeY;
             net->sites.at(i)->trainY = trainY.subcube(arma::span(), arma::span(start, end - 1), arma::span());
-
-            // All nodes have the same testSet
-            net->sites.at(i)->testX = testX;
-            net->sites.at(i)->testY = testY;
         }
 
         net->hub->testX = testX;

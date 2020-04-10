@@ -58,15 +58,6 @@ namespace gm_protocol {
 
     };
 
-    struct Increment {
-
-        const int increase;
-
-        explicit Increment(int inc);
-
-        size_t byte_size() const;
-    };
-
     // Wrapper for a state parameters.
     // This class wraps a reference to the parameters of a model together with a count
     // of the updates it contains since the last synchronization.
@@ -139,24 +130,6 @@ namespace gm_protocol {
         size_t ByteSize() const override;
     };
 
-    // This safezone function just checks the number of points
-    // a local site has proccesed since the last synchronisation. The threshold
-    // variable basically indicates the batch size. If the proccesed points reach
-    // the batch size, then the function returns an inadmissible region.
-    struct BatchLearning : SafezoneFunction {
-
-        size_t threshold; // The maximum number of points fitted by each node before requesting synch from the Hub.
-
-        // Constructors and Destructor 
-        BatchLearning(arma::mat GlMd, size_t thr);
-
-        ~BatchLearning();
-
-        size_t RegionAdmissibility(size_t counter) const override;
-
-        size_t ByteSize() const override;
-    };
-
     // A wrapper containing the safezone function for machine learning purposes.
     // It is essentially a wrapper for the more verbose, polymorphic safezone_func API,
     // but it conforms to the standard functional API. It is copyable and in addition, it
@@ -211,8 +184,6 @@ namespace gm_protocol {
 
         ~QueryState();
 
-        void InitializeGlobalModel(const arma::SizeMat &vsz);
-
         // Update the global model parameters.
         // After this function, the query estimate, accuracy and safezone should adjust to the new global model.
         void UpdateEstimate(arma::mat mdl);
@@ -231,17 +202,12 @@ namespace gm_protocol {
     struct ProtocolConfig {
         string cfgfile;             // The JSON file containing the info for the test.
         string networkName;         // The name of the network being queried.
-        bool rebalancing = false;   // A boolean determining whether the monitoring protocol should run with rabalancing.
-        float betaMu = 0.5;         // Beta vector coefficient of rebalancing.
-        int maxRebs = 2;            // Maximum number of rebalances
         float precision;
-        float reb_mult;
-        string learningAlgorithm;
         string distributedLearningAlgorithm;
     };
 
 
-    // A base class for a continuous query. Objects inheriting this class must override the virtual methods.
+    // A base class for the query. Objects inheriting this class must override the virtual methods.
     struct Query {
         // These are attributes requested by the user
         ProtocolConfig config;
@@ -252,15 +218,14 @@ namespace gm_protocol {
 
         static QueryState *CreateQueryState();
 
-        static QueryState *CreateQueryState(arma::SizeMat sz);
-
         double QueryAccuracy(RnnLearner *rnn, arma::cube &tX, arma::cube &tY);
     };
 
 
     // The star network topology using the Geometric Method for Distributed Machine Learning.
     template<typename Net, typename Coord, typename Node>
-    struct GmLearningNetwork : dds::star_network<Net, Coord, Node> {
+    struct LearningNetwork : dds::star_network<Net, Coord, Node> {
+
         typedef Coord coordinator_t;
         typedef Node node_t;
         typedef Net network_t;
@@ -269,9 +234,9 @@ namespace gm_protocol {
         Query *Q;
 
         // Constructor and Destructor
-        GmLearningNetwork(const set<source_id> &_hids, const string &_name, Query *_Q);
+        LearningNetwork(const set<source_id> &_hids, const string &_name, Query *_Q);
 
-        ~GmLearningNetwork();
+        ~LearningNetwork();
 
         const ProtocolConfig &Cfg() const;
 

@@ -23,8 +23,8 @@ namespace fgm_network {
     struct LearningNodeProxy;
 
     // This is the FGM Network implementation.
-    struct FgmNet : GmLearningNetwork<FgmNet, Coordinator, LearningNode> {
-        typedef GmLearningNetwork<network_t, coordinator_t, node_t> gm_learning_network_t;
+    struct FgmNet : LearningNetwork<FgmNet, Coordinator, LearningNode> {
+        typedef LearningNetwork<network_t, coordinator_t, node_t> gm_learning_network_t;
 
         FgmNet(const set<source_id> &_hids, const string &_name, Query *_Q);
     };

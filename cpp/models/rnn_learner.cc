@@ -45,13 +45,7 @@ void RnnLearner::CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cu
 }
 
 double RnnLearner::CalcMSE(arma::cube &pred, arma::cube &Y) {
-    double err_sum = 0.0;
-    arma::cube diff = pred - Y;
-    for (size_t i = 0; i < diff.n_slices; i++) {
-        arma::mat temp = diff.slice(i);
-        err_sum += accu(temp % temp);
-    }
-    return (err_sum / (diff.n_elem + 1e-50));
+    return metric::SquaredEuclideanDistance::Evaluate(pred, Y) / (Y.n_elem);
 }
 
 size_t RnnLearner::NumberOfUpdates() const { return numberOfUpdates; }

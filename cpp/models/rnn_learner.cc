@@ -71,7 +71,6 @@ void RnnLearner::CentralizedDataPreparation() {
     scale.Fit(dataset);
     scale.Transform(dataset, dataset);
 
-
     // We need to represent the input data for RNN in an arma::cube (3D matrix).
     // The 3rd dimension is rho, the number of past data records the RNN uses for learning.
     arma::cube X, y;

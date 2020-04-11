@@ -17,7 +17,7 @@ RnnLearner::RnnLearner(const string &cfg, const RNN<MeanSquaredError<>, HeInitia
         rho = root["hyperparameters"].get("rho", 0).asInt();
         stepSize = root["hyperparameters"].get("stepSize", 0).asDouble();
         batchSize = root["hyperparameters"].get("batchSize", 0).asInt();
-        iterationsPerEpoch = root["hyperparameters"].get("iterationsPerEpoch", 0).asInt();
+        maxOptIterations = root["hyperparameters"].get("maxOptIterations", 0).asInt();
         tolerance = root["hyperparameters"].get("tolerance", 0).asDouble();
         bShuffle = root["hyperparameters"].get("bShuffle", 0).asBool();
         epsilon = root["hyperparameters"].get("epsilon", 0).asDouble();
@@ -44,7 +44,7 @@ void RnnLearner::CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cu
     }
 }
 
-double RnnLearner::CalcMSE(arma::cube &pred, arma::cube &Y) {
+double RnnLearner::CalculateMSPE(arma::cube &pred, arma::cube &Y) {
     return metric::SquaredEuclideanDistance::Evaluate(pred, Y) / (Y.n_elem);
 }
 
@@ -107,7 +107,7 @@ void RnnLearner::BuildModel() {
     model.Add<Linear<> >(lstmCells, outputSize);
 
     /** Define and set parameters for the Stochastic Gradient Descent (SGD) optimizer. */
-    optimizer = SGD<AdamUpdate>(stepSize, batchSize, iterationsPerEpoch, tolerance, bShuffle,
+    optimizer = SGD<AdamUpdate>(stepSize, batchSize, maxOptIterations, tolerance, bShuffle,
                                 AdamUpdate(epsilon, beta1, beta2));
 
 }
@@ -135,7 +135,7 @@ void RnnLearner::TrainModel() {
         model.Predict(testX, predOut);
 
         // Calculating MSE and accuracy on test data points.
-        double testMSE = CalcMSE(predOut, testY);
+        double testMSE = CalculateMSPE(predOut, testY);
         modelAccuracy = 100 - testMSE;
 
         // Print stats during training
@@ -173,7 +173,7 @@ void RnnLearner::MakePrediction() {
     model.Predict(testX, predOut);
     cout << " OK." << endl;
     // Calculate MSE on prediction.
-    double testMSEPred = CalcMSE(predOut, testY);
+    double testMSEPred = CalculateMSPE(predOut, testY);
     cout << "Prediction Accuracy: " << setprecision(2) << fixed << (100 - testMSEPred) << " %" << endl;
 
 }
@@ -182,7 +182,7 @@ double RnnLearner::MakePrediction(arma::cube &tX, arma::cube &tY) {
 
     arma::cube predOut;
     model.Predict(tX, predOut);
-    return (100 - CalcMSE(predOut, tY));
+    return (100 - CalculateMSPE(predOut, tY));
 }
 
 

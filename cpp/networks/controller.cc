@@ -253,7 +253,7 @@ void Controller<networkType>::DataPreparation() {
         cout << " ERROR." << endl;
     }
 
-    cout << "\t[+]Splitting the data into training and testing sets ...";
+    cout << "\t[+]Splitting the data into train and test sets ...";
     try {
         // Split the data into training and testing sets.
         size_t trainingSize = (1 - trainTestRatio) * X.n_cols;

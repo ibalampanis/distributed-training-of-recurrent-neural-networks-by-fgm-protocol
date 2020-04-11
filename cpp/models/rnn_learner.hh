@@ -45,7 +45,7 @@ namespace rnn_learner {
         size_t maxRho = rho;                                // Max Rho for LSTM
         double stepSize;                                    // Step size of an optimizer
         size_t batchSize;                                   // Number of data points in each iteration of SGD
-        size_t iterationsPerEpoch;                          // Number of iterations per cycle
+        size_t maxOptIterations;                          // Number of iterations per cycle
         double tolerance;                                   // Optimizer tolerance
         bool bShuffle;                                      // Let optimizer shuffle batches
         double epsilon;                                     // Optimizer epsilon
@@ -66,7 +66,7 @@ namespace rnn_learner {
 
         static void CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y, size_t rho);
 
-        static double CalcMSE(arma::cube &pred, arma::cube &Y);
+        static double CalculateMSPE(arma::cube &pred, arma::cube &Y);
 
         size_t NumberOfUpdates() const;
 

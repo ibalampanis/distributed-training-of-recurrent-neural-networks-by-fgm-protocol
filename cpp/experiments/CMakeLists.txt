@@ -17,7 +17,7 @@ include_directories(${PYTHON_INCLUDE_DIRS})
 
 set(MLSOURCES ../models/rnn_learner.cc)
 
-add_executable(CentrLearn centr_eeg.cc ${MLSOURCES})
+add_executable(CentrLearn centr_training.cc ${MLSOURCES})
 target_link_libraries(CentrLearn
         jsoncpp
         ${MLPACK_LIBRARIES}
@@ -28,8 +28,8 @@ target_link_libraries(CentrLearn
 ############################################################################
 ######################## GMNetEEG / FGMNetEEG ##############################
 ############################################################################
-add_executable(GMLearn gm_net_eeg.cc)
-#add_executable(FGMNetEEG fgm_net_eeg.cc)
+add_executable(GMLearn gm_training_net.cc)
+add_executable(FGMLearn fgm_training_net.cc)
 
 # dml Library Building
 # The abbreviation dml came from "Distributed Machine Learning"
@@ -51,6 +51,16 @@ file(TOUCH ${CMAKE_BINARY_DIR}/cpp/experiments/libdml.a)
 find_library(DML_LIBRARIES dml ${CMAKE_BINARY_DIR}/cpp/experiments)
 message(STATUS "Found DML_LIBRARIES: [${DML_LIBRARIES}]")
 target_link_libraries(GMLearn
+        jsoncpp
+        ${DML_LIBRARIES}
+        ${HDF5_LIBRARIES}
+        ${MLPACK_LIBRARIES}
+        ${ARMADILLO_LIBRARIES}
+        ${Boost_LIBRARIES}
+        ${PYTHON_LIBRARIES}
+        )
+
+target_link_libraries(FGMLearn
         jsoncpp
         ${DML_LIBRARIES}
         ${HDF5_LIBRARIES}

@@ -2,14 +2,14 @@
 #include "gm.hh"
 #include "protocols.cc"
 
-using namespace gm_protocol;
-using namespace gm_network;
+using namespace protocols;
+using namespace gm;
 
 /*********************************************
 	Network
 *********************************************/
 GmNet::GmNet(const set<source_id> &_hids, const string &_name, Query *_Q)
-        : gm_learning_network_t(_hids, _name, _Q) {
+        : gmLearningNetwork(_hids, _name, _Q) {
     this->set_protocol_name("ML_GM");
 }
 
@@ -17,26 +17,26 @@ GmNet::GmNet(const set<source_id> &_hids, const string &_name, Query *_Q)
 /*********************************************
 	Coordinator
 *********************************************/
-Coordinator::Coordinator(network_t *nw, Query *_Q) : process(nw), proxy(this),
-                                                     Q(_Q),
-                                                     k(0),
-                                                     numViolations(0), numRounds(0), numSubrounds(0),
-                                                     szSent(0), totalUpdates(0) {
+gm::Coordinator::Coordinator(network_t *nw, Query *_Q) : process(nw), proxy(this),
+                                                         Q(_Q),
+                                                         k(0),
+                                                         numViolations(0), numRounds(0), numSubrounds(0),
+                                                         szSent(0), totalUpdates(0) {
     InitializeGlobalLearner();
     query = Q->CreateQueryState();
     safezone = query->Safezone(Cfg().cfgfile, Cfg().distributedLearningAlgorithm);
 }
 
-Coordinator::~Coordinator() {
+gm::Coordinator::~Coordinator() {
     delete safezone;
     delete query;
 }
 
-Coordinator::network_t *Coordinator::Net() { return dynamic_cast<network_t *>(host::net()); }
+gm::Coordinator::network_t *gm::Coordinator::Net() { return dynamic_cast<network_t *>(host::net()); }
 
-const ProtocolConfig &Coordinator::Cfg() const { return Q->config; }
+const ProtocolConfig &gm::Coordinator::Cfg() const { return Q->config; }
 
-void Coordinator::InitializeGlobalLearner() {
+void gm::Coordinator::InitializeGlobalLearner() {
 
     cout << "\n\t\t[+]Coordinator's neural net ...";
     try {
@@ -55,7 +55,7 @@ void Coordinator::InitializeGlobalLearner() {
     }
 }
 
-void Coordinator::SetupConnections() {
+void gm::Coordinator::SetupConnections() {
 
     proxy.add_sites(Net()->sites);
 
@@ -67,7 +67,7 @@ void Coordinator::SetupConnections() {
     k = nodePtr.size();
 }
 
-void Coordinator::StartRound() {
+void gm::Coordinator::StartRound() {
     // Send new safezone.
     for (auto n : Net()->sites) {
         if (numRounds == 0) {
@@ -79,7 +79,7 @@ void Coordinator::StartRound() {
     numRounds++;
 }
 
-void Coordinator::Rebalance(node_t *lvnode) {
+void gm::Coordinator::Rebalance(node_t *lvnode) {
 
     Bcompl.clear();
     B.insert(lvnode);
@@ -138,7 +138,7 @@ void Coordinator::Rebalance(node_t *lvnode) {
 
 }
 
-void Coordinator::FetchUpdates(node_t *node) {
+void gm::Coordinator::FetchUpdates(node_t *node) {
 
     ModelState up = proxy[node].SendDrift();
     if (!arma::approx_equal(arma::mat(arma::size(up._model), arma::fill::zeros), up._model, "absdiff",
@@ -149,7 +149,7 @@ void Coordinator::FetchUpdates(node_t *node) {
     totalUpdates += up.updates;
 }
 
-oneway Coordinator::LocalViolation(sender<node_t> ctx) {
+oneway gm::Coordinator::LocalViolation(sender<node_t> ctx) {
 
     node_t *n = ctx.value;
     numViolations++;
@@ -159,7 +159,7 @@ oneway Coordinator::LocalViolation(sender<node_t> ctx) {
     Mean.zeros();
     cnt = 0;
 
-    if (SafezoneFunction *entity = (Norm2ndDegree *) safezone) {
+    if (SafezoneFunction *funcType = (SquaredNorm *) safezone) {
         numViolations = 0;
         FinishRound();
     } else {
@@ -171,7 +171,7 @@ oneway Coordinator::LocalViolation(sender<node_t> ctx) {
     }
 }
 
-void Coordinator::ShowProgress() {
+void gm::Coordinator::ShowProgress() {
 
     // Query thr accuracy of the global model.
     query->accuracy = Q->QueryAccuracy(globalLearner, testX, testY);
@@ -184,7 +184,7 @@ void Coordinator::ShowProgress() {
     cout << "\t\t-- Total updates: " << totalUpdates << endl << endl;
 }
 
-vector<size_t> Coordinator::UpdateStats() const {
+vector<size_t> gm::Coordinator::UpdateStats() const {
     vector<size_t> stats;
     stats.push_back(numRounds);
     stats.push_back(numSubrounds);
@@ -193,14 +193,14 @@ vector<size_t> Coordinator::UpdateStats() const {
     return stats;
 }
 
-void Coordinator::FinishRound() {
+void gm::Coordinator::FinishRound() {
 
     // Collect all data
     for (auto n : nodePtr) {
         FetchUpdates(n);
     }
-    for (size_t i = 0; i < Mean.size(); i++)
-        Mean.at(i) /= cnt;
+    for (double &i : Mean)
+        i /= cnt;
 
     // New round
     query->UpdateEstimate(Mean);
@@ -210,9 +210,9 @@ void Coordinator::FinishRound() {
     StartRound();
 }
 
-double Coordinator::Accuracy() { return query->accuracy = Q->QueryAccuracy(globalLearner, testX, testY); }
+double gm::Coordinator::Accuracy() { return query->accuracy = Q->QueryAccuracy(globalLearner, testX, testY); }
 
-void Coordinator::ShowOverallStats() {
+void gm::Coordinator::ShowOverallStats() {
 
     // Query thr accuracy of the global model.
     query->accuracy = Q->QueryAccuracy(globalLearner, testX, testY);
@@ -239,18 +239,19 @@ void Coordinator::ShowOverallStats() {
 /*********************************************
 	Learning Node
 *********************************************/
-LearningNode::LearningNode(LearningNode::network_t *net, source_id hid, LearningNode::query_t *_Q) : local_site(net,
-                                                                                                                hid),
-                                                                                                     Q(_Q),
-                                                                                                     coord(this) {
+gm::LearningNode::LearningNode(gm::LearningNode::network_t *net, source_id hid, gm::LearningNode::query_t *_Q)
+        : local_site(net,
+                     hid),
+          Q(_Q),
+          coord(this) {
     coord <<= net->hub;
     InitializeLearner();
     datapointsPassed = 0;
 };
 
-const ProtocolConfig &LearningNode::Cfg() const { return Q->config; }
+const ProtocolConfig &gm::LearningNode::Cfg() const { return Q->config; }
 
-void LearningNode::InitializeLearner() {
+void gm::LearningNode::InitializeLearner() {
     cout << "\t\t[+]Node's local neural net ...";
     try {
         Json::Value root;
@@ -268,12 +269,12 @@ void LearningNode::InitializeLearner() {
     }
 }
 
-void LearningNode::UpdateState(arma::cube &x, arma::cube &y) {
+void gm::LearningNode::UpdateState(arma::cube &x, arma::cube &y) {
 
     learner->TrainModelByBatch(x, y);
     datapointsPassed += x.n_cols;
 
-    if (SafezoneFunction *funcType = dynamic_cast<Norm2ndDegree *>(szone.GetSzone())) {
+    if (SafezoneFunction *funcType = dynamic_cast<SquaredNorm *>(szone.GetSzone())) {
         if (szone(datapointsPassed) <= 0) {
             datapointsPassed = 0;
             if (szone(learner->ModelParameters()) < 0.)
@@ -283,18 +284,18 @@ void LearningNode::UpdateState(arma::cube &x, arma::cube &y) {
         coord.LocalViolation(this);
 }
 
-oneway LearningNode::Reset(const Safezone &newsz) {
+oneway gm::LearningNode::Reset(const Safezone &newsz) {
     szone = newsz;       // Reset the safezone object
     learner->UpdateModel(szone.GetSzone()->GlobalModel()); // Updates the parameters of the local learner
     datapointsPassed = 0;
 }
 
-ModelState LearningNode::SendDrift() {
+ModelState gm::LearningNode::SendDrift() {
     szone(drift, learner->ModelParameters(), 1.);
     return ModelState(drift, learner->NumberOfUpdates());
 }
 
-void LearningNode::ReceiveDrift(const ModelState &mdl) { learner->UpdateModel(mdl._model); }
+void gm::LearningNode::ReceiveDrift(const ModelState &mdl) { learner->UpdateModel(mdl._model); }
 
-oneway LearningNode::ReceiveGlobalParameters(const ModelState &params) { learner->UpdateModel(params._model); }
+oneway gm::LearningNode::ReceiveGlobalParameters(const ModelState &params) { learner->UpdateModel(params._model); }
 

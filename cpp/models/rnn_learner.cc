@@ -1,6 +1,7 @@
 #include <mlpack/core.hpp>
 #include <jsoncpp/json/json.h>
 #include <iostream>
+#include <utility>
 #include "rnn_learner.hh"
 
 using namespace rnn_learner;
@@ -12,18 +13,18 @@ RnnLearner::RnnLearner(const string &cfg, const RNN<MeanSquaredError<>, HeInitia
     try {
         std::ifstream cfgfile(cfg);
         cfgfile >> root;
-        trainingEpochs = root["hyperparameters"].get("trainingEpochs", 0).asInt();
-        lstmCells = root["hyperparameters"].get("lstmCells", 0).asInt();
+        trainingEpochs = root["hyperparameters"].get("training_epochs", 0).asInt();
+        lstmCells = root["hyperparameters"].get("lstm_cells", 0).asInt();
         rho = root["hyperparameters"].get("rho", 0).asInt();
-        stepSize = root["hyperparameters"].get("stepSize", 0).asDouble();
-        batchSize = root["hyperparameters"].get("batchSize", 0).asInt();
-        maxOptIterations = root["hyperparameters"].get("maxOptIterations", 0).asInt();
+        stepSize = root["hyperparameters"].get("step_size", 0).asDouble();
+        batchSize = root["hyperparameters"].get("batch_size", 0).asInt();
+        maxOptIterations = root["hyperparameters"].get("max_opt_iterations", 0).asInt();
         tolerance = root["hyperparameters"].get("tolerance", 0).asDouble();
-        bShuffle = root["hyperparameters"].get("bShuffle", 0).asBool();
+        bShuffle = root["hyperparameters"].get("shuffle", 0).asBool();
         epsilon = root["hyperparameters"].get("epsilon", 0).asDouble();
         beta1 = root["hyperparameters"].get("beta1", 0).asDouble();
         beta2 = root["hyperparameters"].get("beta2", 0).asDouble();
-        trainTestRatio = root["hyperparameters"].get("trainTestRatio", 0).asDouble();
+        trainTestRatio = root["hyperparameters"].get("train_test_ratio", 0).asDouble();
         inputSize = root["data"].get("input_size", 0).asInt();
         outputSize = root["data"].get("output_size", 0).asInt();
         datasetPath = root["data"].get("path", "").asString();
@@ -54,7 +55,7 @@ size_t RnnLearner::UsedTimes() const { return usedTimes; }
 
 arma::mat RnnLearner::ModelParameters() const { return model.Parameters(); }
 
-void RnnLearner::UpdateModel(arma::mat params) { model.Parameters() = params; }
+void RnnLearner::UpdateModel(arma::mat params) { model.Parameters() = move(params); }
 
 double RnnLearner::ModelAccuracy() const { return modelAccuracy; }
 

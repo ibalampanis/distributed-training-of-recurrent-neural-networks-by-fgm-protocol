@@ -7,11 +7,11 @@
 #include "protocols.hh"
 #include "cpp/models/rnn_learner.hh"
 
-namespace gm_network {
+namespace gm {
 
     using namespace dds;
     using namespace rnn_learner;
-    using namespace gm_protocol;
+    using namespace protocols;
 
     struct Coordinator;
     struct CoordinatorProxy;
@@ -19,9 +19,9 @@ namespace gm_network {
     struct LearningNodeProxy;
 
     // This is the GM Network implementation for the classic Geometric Method protocol. 
-    struct GmNet : gm_protocol::LearningNetwork<GmNet, Coordinator, LearningNode> {
+    struct GmNet : LearningNetwork<GmNet, Coordinator, LearningNode> {
 
-        typedef gm_protocol::LearningNetwork<network_t, coordinator_t, node_t> gm_learning_network_t;
+        typedef LearningNetwork<network_t, coordinator_t, node_t> gmLearningNetwork;
 
         GmNet(const set<source_id> &_hids, const string &_name, Query *_Q);
     };
@@ -117,7 +117,7 @@ namespace gm_network {
 
         query_t *Q;                         // The query management object
         Safezone szone;                     // The safezone object
-        RnnLearner *learner{};                // The learning algorithm
+        RnnLearner *learner{};              // The learning algorithm
         arma::cube trainX, trainY;          // Trainset data points and labels
         arma::mat drift;                    // The drift of the node
         coord_proxy_t coord;                // The proxy of the coordinator/hub
@@ -145,8 +145,9 @@ namespace gm_network {
 
     };
 
-    struct LearningNodeProxy : remote_proxy<gm_network::LearningNode> {
-        typedef gm_network::LearningNode node_t;
+    struct LearningNodeProxy : remote_proxy<LearningNode> {
+        typedef LearningNode node_t;
+
         REMOTE_METHOD(node_t, Reset);
         REMOTE_METHOD(node_t, SendDrift);
         REMOTE_METHOD(node_t, ReceiveDrift);
@@ -156,12 +157,12 @@ namespace gm_network {
     };
 
 
-} // end namespace gm_network
+} // end namespace gm
 
 namespace dds {
     template<>
-    inline size_t byte_size<gm_network::LearningNode *>(
-            gm_network::LearningNode *const &) { return 4; }
+    inline size_t byte_size<gm::LearningNode *>(
+            gm::LearningNode *const &) { return 4; }
 }
 
 #endif

@@ -13,7 +13,7 @@
 #include "ddsim/dds.hh"
 #include "cpp/models/rnn_learner.hh"
 
-namespace gm_protocol {
+namespace protocols {
 
     using namespace dds;
     using namespace arma;
@@ -45,7 +45,6 @@ namespace gm_protocol {
         explicit DoubleValue(double val);
 
         size_t byte_size() const;
-
     };
 
     struct IntValue {
@@ -55,7 +54,6 @@ namespace gm_protocol {
         explicit IntValue(size_t val);
 
         size_t byte_size() const;
-
     };
 
     // Wrapper for a state parameters.
@@ -97,34 +95,36 @@ namespace gm_protocol {
 
         virtual float RegionAdmissibility(const arma::mat mdl) const { return 0.; }
 
-        virtual float RegionAdmissibilityReb(const arma::mat &par1, const arma::mat &par2,
+        virtual float RegionAdmissibility(const arma::mat &mdl1, const arma::mat &mdl2) const { return 0.; }
+
+        virtual float RegionAdmissibilityReb(const arma::mat &mdl1, const arma::mat &mdl2,
                                              double coef) const { return 0.; }
 
         virtual size_t ByteSize() const { return 0; }
-
-
     };
 
     // This safezone function implements the algorithm presented in
     // in the paper "Communication-Efficient Distributed Online Prediction
     // by Dynamic Model Synchronization"
     // by Michael Kamp, Mario Boley, Assaf Schuster and Izchak Sharfman.
-    struct Norm2ndDegree : SafezoneFunction {
+    struct SquaredNorm : SafezoneFunction {
 
 
         double threshold;               // The threshold of the variance between the models of the network.
         size_t batchSize;               // The number of points seen by the node since the last synchronization.
 
         // Constructors and Destructor 
-        Norm2ndDegree(arma::mat GlMd, float thr, size_t batch_sz);
+        SquaredNorm(arma::mat GlMd, float thr, size_t batch_sz);
 
-        ~Norm2ndDegree();
+        ~SquaredNorm();
 
         float Zeta(const arma::mat &params) const override;
 
         float RegionAdmissibility(arma::mat mdl) const override;
 
-        float RegionAdmissibilityReb(const arma::mat &par1, const arma::mat &par2,
+        float RegionAdmissibility(const arma::mat &mdl1, const arma::mat &mdl2) const override;
+
+        float RegionAdmissibilityReb(const arma::mat &mdl1, const arma::mat &mdl2,
                                      double coef) const override;
 
         size_t ByteSize() const override;
@@ -165,8 +165,9 @@ namespace gm_protocol {
 
         float operator()(const arma::mat &mdl);
 
-        size_t byte_size() const;
+        float operator()(const arma::mat &mdl1, const arma::mat &mdl2);
 
+        size_t byte_size() const;
     };
 
 
@@ -194,7 +195,6 @@ namespace gm_protocol {
         SafezoneFunction *Safezone(const string &cfg, string algo);
 
         size_t ByteSize() const;
-
     };
 
 
@@ -203,6 +203,7 @@ namespace gm_protocol {
         string cfgfile;             // The JSON file containing the info for the test.
         string networkName;         // The name of the network being queried.
         float precision;
+        bool rebalancing;
         string distributedLearningAlgorithm;
     };
 
@@ -251,6 +252,6 @@ namespace gm_protocol {
     };
 
 
-} // end namespace gm_protocol
+} // end namespace protocols
 
 #endif

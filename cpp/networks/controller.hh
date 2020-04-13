@@ -8,41 +8,19 @@
 #include <mlpack/core.hpp>
 #include "protocols.hh"
 #include "gm.hh"
+#include "fgm.hh"
 #include "ddsim/dds.hh"
 
 
 namespace controller {
 
     using namespace std;
-    using namespace gm_protocol;
-    using namespace gm_network;
+    using namespace protocols;
+    using namespace gm;
+    using namespace fgm;
     using namespace arma;
     using namespace dds;
 
-    // A Vector container for the networks. 
-    template<typename networkType>
-    class NetContainer : public vector<networkType *> {
-
-    public:
-        using vector<networkType *>::vector;
-
-        void Join(networkType *net);
-
-        void Leave(int i);
-
-    };
-
-    // A Vector container for the queries. 
-    class QueryContainer : public vector<Query *> {
-
-    public:
-        using vector<Query *>::vector;
-
-        void Join(Query *qry);
-
-        void Leave(int i);
-
-    };
 
     // A very simple progress bar for loops (based on this repo: https://github.com/gipert/progressbar)
     class LoopProgressBar {
@@ -66,9 +44,6 @@ namespace controller {
 
     protected:
         string configFile;                     // JSON file to read the hyperparameters.
-        time_t seed;                                // The seed for the random generator.
-        NetContainer<networkType> _netContainer;   // A container for networks.
-        QueryContainer _queryContainer;             // A container for queries.
 
         // Dataset and model parameters 
         arma::cube trainX, trainY;                  // Trainset data points and labels
@@ -76,6 +51,7 @@ namespace controller {
         size_t inputSize;                           // Number of neurons at the input layer
         size_t outputSize;                          // Number of neurons at the output layer
         string datasetPath;                         // Path for finding dataset file
+        string datasetName;                         // The name of the dataset we use
         double trainTestRatio;                      // Testing data is taken from the dataset in this ratio
         size_t rho;                                 // Number of time steps to look backward for in the RNN
 
@@ -83,10 +59,10 @@ namespace controller {
         vector<chan_frame> stats;
         size_t msgs{};
         size_t bts{};
+        networkType *net;
 
 
     public:
-
         // Constructor 
         explicit Controller<networkType>(string cfg);
 

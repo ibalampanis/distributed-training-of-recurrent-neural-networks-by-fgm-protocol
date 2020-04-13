@@ -1,0 +1,40 @@
+{
+  "simulations": {
+    "encoding": "UTF-8",
+    "net_name": "FGM Net"
+  },
+  "net": {
+    "encoding": "UTF-8",
+    "local_nodes": 4,
+    "learning_algorithm": "RNN",
+    "distributed_learning_algorithm": "FGM_RNN"
+  },
+  "query": {
+    "encoding": "UTF-8",
+    "algorithm": "variance",
+    "precision": 0.01,
+    "threshold": 0.08,
+    "batch_size": 16
+  },
+  "hyperparameters": {
+    "encoding": "UTF-8",
+    "lstm_cells": 10,
+    "rho": 15,
+    "step_size": 5e-5,
+    "batch_size": 16,
+    "max_opt_iterations": 3000,
+    "tolerance": 1e-8,
+    "shuffle": true,
+    "epsilon": 2e-8,
+    "beta1": 0.9,
+    "beta2": 0.99,
+    "train_test_ratio": 0.3
+  },
+  "data": {
+    "encoding": "UTF-8",
+    "input_size": 15,
+    "output_size": 1,
+    "path": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/datasets/EEG_Eye_State.csv",
+    "dataset_name": "EEG Eye State"
+  }
+}

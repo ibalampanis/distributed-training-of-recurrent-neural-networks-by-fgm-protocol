@@ -115,8 +115,13 @@ void Controller<networkType>::InitializeSimulation() {
 template<typename networkType>
 void Controller<networkType>::ShowNetworkInfo() const {
 
+    Json::Value root;
+    ifstream cfgfile(configFile); // Parse from JSON file.
+    cfgfile >> root;
+
     cout << "\n[+]Printing network information ..." << endl;
     cout << "\t-- Dataset Name: " << datasetName << endl;
+    cout << "\t-- Experiment ID: " << root["simulations"].get("expID", "-1").asInt() << endl;
     cout << "\t-- Network Name: " << net->name() << endl;
     cout << "\t-- Coordinator: " << net->hub->name() << " with netID: " << net->hub->addr() << endl;
     cout << "\t-- Number of nodes: " << net->sites.size() << endl;

@@ -89,18 +89,18 @@ namespace protocols {
 
         void UpdateDrift(arma::mat &drift, arma::mat &params, float mul);
 
-        virtual float Zeta(const arma::mat &params) const { return 0.; }
+        virtual float Zeta(const arma::mat &params) { return 0.; }
 
-        virtual size_t RegionAdmissibility(const size_t counter) const { return 0.; }
+        virtual size_t RegionAdmissibility(const size_t counter) { return 0; }
 
-        virtual float RegionAdmissibility(const arma::mat mdl) const { return 0.; }
+        virtual float RegionAdmissibility(const arma::mat &mdl) { return 0.; }
 
-        virtual float RegionAdmissibility(const arma::mat &mdl1, const arma::mat &mdl2) const { return 0.; }
+        virtual float RegionAdmissibility(const arma::mat &mdl1, const arma::mat &mdl2) { return 0.; }
 
         virtual float RegionAdmissibilityReb(const arma::mat &mdl1, const arma::mat &mdl2,
-                                             double coef) const { return 0.; }
+                                             double coef) { return 0.; }
 
-        virtual size_t ByteSize() const { return 0; }
+        virtual size_t ByteSize() { return 0; }
     };
 
     // This safezone function implements the algorithm presented in
@@ -114,20 +114,20 @@ namespace protocols {
         size_t batchSize;               // The number of points seen by the node since the last synchronization.
 
         // Constructors and Destructor 
-        SquaredNorm(arma::mat GlMd, float thr, size_t batch_sz);
+        SquaredNorm(arma::mat GlMd, double thr, size_t batch_sz);
 
         ~SquaredNorm();
 
-        float Zeta(const arma::mat &params) const override;
+        float Zeta(const arma::mat &params) override;
 
-        float RegionAdmissibility(arma::mat mdl) const override;
+        float RegionAdmissibility(const arma::mat &mdl) override;
 
-        float RegionAdmissibility(const arma::mat &mdl1, const arma::mat &mdl2) const override;
+        float RegionAdmissibility(const arma::mat &mdl1, const arma::mat &mdl2) override;
 
         float RegionAdmissibilityReb(const arma::mat &mdl1, const arma::mat &mdl2,
-                                     double coef) const override;
+                                     double coef) override;
 
-        size_t ByteSize() const override;
+        size_t ByteSize() override;
     };
 
     // A wrapper containing the safezone function for machine learning purposes.
@@ -202,7 +202,7 @@ namespace protocols {
     struct ProtocolConfig {
         string cfgfile;             // The JSON file containing the info for the test.
         string networkName;         // The name of the network being queried.
-        float precision;
+        double precision;
         bool rebalancing;
         string distributedLearningAlgorithm;
     };

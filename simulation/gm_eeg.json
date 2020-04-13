@@ -11,9 +11,8 @@
   },
   "query": {
     "encoding": "UTF-8",
-    "algorithm": "variance",
     "precision": 0.01,
-    "threshold": 0.08,
+    "threshold": 8e-4,
     "batch_size": 16
   },
   "hyperparameters": {

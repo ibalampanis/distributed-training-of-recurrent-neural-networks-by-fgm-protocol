@@ -111,8 +111,8 @@ void gm::Coordinator::Rebalance(node_t *lvnode) {
     for (auto n:Bcompl) {
         FetchUpdates(n);
         B.insert(n);
-        for (size_t i = 0; i < Mean.size(); i++)
-            Mean.at(i) /= cnt;
+        for (double &i : Mean)
+            i /= cnt;
         if (safezone->RegionAdmissibility(Mean) > 0. || B.size() == k)
             break;
         for (auto &i : Mean)
@@ -274,14 +274,14 @@ void gm::LearningNode::UpdateState(arma::cube &x, arma::cube &y) {
     learner->TrainModelByBatch(x, y);
     datapointsPassed += x.n_cols;
 
-    if (SafezoneFunction *funcType = dynamic_cast<SquaredNorm *>(szone.GetSzone())) {
-        if (szone(datapointsPassed) <= 0) {
-            datapointsPassed = 0;
-            if (szone(learner->ModelParameters()) < 0.)
-                coord.LocalViolation(this);
-        }
-    } else if (szone(datapointsPassed) <= 0.)
-        coord.LocalViolation(this);
+//    if (SafezoneFunction *funcType = dynamic_cast<SquaredNorm *>(szone.GetSzone())) {
+    if (szone(datapointsPassed) <= 0) {
+        datapointsPassed = 0;
+        if (szone(learner->ModelParameters()) < 0.)
+            coord.LocalViolation(this);
+    }
+//    } else if (szone(datapointsPassed) <= 0.)
+//        coord.LocalViolation(this);
 }
 
 oneway gm::LearningNode::Reset(const Safezone &newsz) {

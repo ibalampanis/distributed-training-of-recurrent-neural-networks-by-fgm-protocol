@@ -287,9 +287,14 @@ template<typename Net, typename Coord, typename Node>
 void LearningNetwork<Net, Coord, Node>::StartTraining() { this->hub->StartRound(); }
 
 template<typename Net, typename Coord, typename Node>
+void LearningNetwork<Net, Coord, Node>::WarmupNetwork() { this->hub->WarmupGlobalLearner(); }
+
+template<typename Net, typename Coord, typename Node>
 void LearningNetwork<Net, Coord, Node>::TrainNode(size_t node, arma::cube &x, arma::cube &y) {
     this->source_site(this->sites.at(node)->site_id())->UpdateState(x, y);
 }
 
 template<typename Net, typename Coord, typename Node>
 void LearningNetwork<Net, Coord, Node>::ShowTrainingStats() { this->hub->ShowOverallStats(); }
+
+

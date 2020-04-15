@@ -23,10 +23,10 @@ namespace controller {
 
 
     // A very simple progress bar for loops (based on this repo: https://github.com/gipert/progressbar)
-    class LoopProgressBar {
+    class LoopProgressPercentage {
 
     public:
-        explicit LoopProgressBar(size_t iters);
+        explicit LoopProgressPercentage(size_t iters);
 
         void Update();
 
@@ -54,6 +54,7 @@ namespace controller {
         string datasetName;                         // The name of the dataset we use
         double trainTestRatio;                      // Testing data is taken from the dataset in this ratio
         size_t rho;                                 // Number of time steps to look backward for in the RNN
+        bool warmup;
 
         // Stats
         vector<chan_frame> stats;

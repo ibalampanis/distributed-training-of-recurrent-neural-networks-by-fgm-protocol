@@ -37,6 +37,7 @@ namespace gm {
 
         // Protocol Stuff 
         RnnLearner *globalLearner;          // ML model
+        arma::cube trainX, trainY;          // Trainset data points and labels for warmup
         arma::cube testX, testY;            // Testset data points and labels
         size_t trainPoints;
         Query *Q;                           // query
@@ -68,6 +69,8 @@ namespace gm {
 
         // Initialize learner and  variables 
         void InitializeGlobalLearner();
+
+        void WarmupGlobalLearner();
 
         void SetupConnections();
 

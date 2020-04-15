@@ -245,6 +245,8 @@ namespace protocols {
 
         void StartTraining();
 
+        void WarmupNetwork();
+
         // This is called to update a specific learning node in the network.
         void TrainNode(size_t node, arma::cube &x, arma::cube &y);
 

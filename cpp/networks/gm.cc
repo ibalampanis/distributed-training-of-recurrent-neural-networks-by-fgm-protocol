@@ -269,19 +269,18 @@ void gm::LearningNode::InitializeLearner() {
     }
 }
 
+void gm::Coordinator::WarmupGlobalLearner() { globalLearner->TrainModelByBatch(trainX, trainY); }
+
 void gm::LearningNode::UpdateState(arma::cube &x, arma::cube &y) {
 
     learner->TrainModelByBatch(x, y);
     datapointsPassed += x.n_cols;
 
-//    if (SafezoneFunction *funcType = dynamic_cast<SquaredNorm *>(szone.GetSzone())) {
     if (szone(datapointsPassed) <= 0) {
         datapointsPassed = 0;
         if (szone(learner->ModelParameters()) < 0.)
             coord.LocalViolation(this);
     }
-//    } else if (szone(datapointsPassed) <= 0.)
-//        coord.LocalViolation(this);
 }
 
 oneway gm::LearningNode::Reset(const Safezone &newsz) {

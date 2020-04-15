@@ -1,25 +1,26 @@
 {
   "simulations": {
     "encoding": "UTF-8",
-    "net_name": "GM Net",
-    "expID": 5
+    "net_name": "FGM Net",
+    "expID": -1
   },
   "net": {
     "encoding": "UTF-8",
     "local_nodes": 4,
     "learning_algorithm": "RNN",
-    "distributed_learning_algorithm": "GM_RNN"
+    "number_of_channels": 1,
+    "distributed_learning_algorithm": "FGM_RNN"
   },
   "query": {
     "encoding": "UTF-8",
     "algorithm": "variance",
     "precision": 0.01,
-    "threshold": 8e-4,
+    "threshold": 0.08,
     "batch_size": 16
   },
   "hyperparameters": {
     "encoding": "UTF-8",
-    "lstm_cells": 15,
+    "lstm_cells": 10,
     "rho": 15,
     "step_size": 5e-5,
     "batch_size": 16,
@@ -35,7 +36,7 @@
     "encoding": "UTF-8",
     "input_size": 19,
     "output_size": 1,
-    "path": "/home/ibalampanis/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/datasets/San_Francisco_Crime.csv",
+    "path": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/datasets/San_Francisco_Crime.csv",
     "dataset_name": "San Francisco Crime"
   }
 }

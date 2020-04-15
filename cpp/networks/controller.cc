@@ -16,12 +16,12 @@ using namespace controller;
 /*********************************************
 	Progress Bar
 *********************************************/
-LoopProgressBar::LoopProgressBar(size_t iters) : progress(0),
-                                                 nCycles(iters),
-                                                 lastPerc(0),
-                                                 bUpdateIsCalled(false) {}
+LoopProgressPercentage::LoopProgressPercentage(size_t iters) : progress(0),
+                                                               nCycles(iters),
+                                                               lastPerc(0),
+                                                               bUpdateIsCalled(false) {}
 
-void LoopProgressBar::Update() {
+void LoopProgressPercentage::Update() {
 
     if (!bUpdateIsCalled)
         cout << "0%";
@@ -38,9 +38,7 @@ void LoopProgressBar::Update() {
         // erase the correct  number of characters
         if (perc <= 10)
             cout << "\b\b" << perc << '%';
-        else if (perc > 10 and perc < 100)
-            cout << "\b\b\b" << perc << '%';
-        else if (perc == 100)
+        else if (perc > 10 and perc <= 100)
             cout << "\b\b\b" << perc << '%';
     }
 
@@ -66,6 +64,7 @@ Controller<networkType>::Controller(string cfg) : configFile(move(cfg)) {
     inputSize = root["data"].get("input_size", -1).asInt();
     outputSize = root["data"].get("output_size", -1).asInt();
     rho = root["hyperparameters"].get("rho", -1).asInt();
+    warmup = root["net"].get("warmup", false).asBool();
 }
 
 template<typename networkType>
@@ -141,8 +140,21 @@ void Controller<networkType>::TrainOverNetwork() {
         cout << "[-]Preparing data ... ERROR." << endl;
     }
 
+
+    try {
+        if (warmup) {
+            cout << "\n[+]Warming up the network ...";
+            net->WarmupNetwork();
+            cout << " OK." << endl;
+        }
+    } catch (...) {
+        cout << " ERROR." << endl;
+    }
+
+
     cout << "\n[+]Training ... ";
     try {
+
         net->StartTraining();
 
         // Using random lib (C++11 Standard) to generate random numbers in the range of the size of sites.
@@ -151,7 +163,7 @@ void Controller<networkType>::TrainOverNetwork() {
         uniform_int_distribution<int> uni(0, net->sites.size() - 1); // guaranteed unbiased
 
         int iterations = trainX.n_cols;
-        LoopProgressBar progressBar(iterations);
+        LoopProgressPercentage progressPercentage(iterations);
 
         // In this loop, whole dataset will get crossed as well as each
         // time point, a random node will get fit by a new point of dataset.
@@ -162,7 +174,7 @@ void Controller<networkType>::TrainOverNetwork() {
 
             net->TrainNode(currentNode, x, y);
 
-            progressBar.Update();
+            progressPercentage.Update();
         }
 
         cout << " ... FINISHED." << endl;
@@ -220,16 +232,44 @@ void Controller<networkType>::DataPreparation() {
 
     cout << "\t[+]Splitting the data into train and test set ...";
     try {
-        // Split the data into training and testing sets.
-        size_t trainingSize = (1 - trainTestRatio) * X.n_cols;
-        trainX = X.subcube(arma::span(), arma::span(0, trainingSize - 1), arma::span());
-        trainY = y.subcube(arma::span(), arma::span(0, trainingSize - 1), arma::span());
-        testX = X.subcube(arma::span(), arma::span(trainingSize, X.n_cols - 1), arma::span());
-        testY = y.subcube(arma::span(), arma::span(trainingSize, X.n_cols - 1), arma::span());
+        if (!warmup) {
+            // Split the data into training and testing set.
+            size_t trainingSize = (1 - trainTestRatio) * X.n_cols;
+            trainX = X.subcube(arma::span(), arma::span(0, trainingSize - 1), arma::span());
+            trainY = y.subcube(arma::span(), arma::span(0, trainingSize - 1), arma::span());
+            testX = X.subcube(arma::span(), arma::span(trainingSize, X.n_cols - 1), arma::span());
+            testY = y.subcube(arma::span(), arma::span(trainingSize, X.n_cols - 1), arma::span());
 
-        net->hub->testX = testX;
-        net->hub->testY = testY;
-        net->hub->trainPoints = trainX.n_cols;
+            assert(X.n_cols == trainX.n_cols + testX.n_cols);
+            assert(y.n_cols == trainY.n_cols + testY.n_cols);
+
+            net->hub->testX = testX;
+            net->hub->testY = testY;
+            net->hub->trainPoints = trainX.n_cols;
+        } else {
+            arma::cube tmpX, tmpY;
+            // Split the data into training and testing set.
+            size_t trainingSize = (1 - trainTestRatio) * X.n_cols;
+            tmpX = X.subcube(arma::span(), arma::span(0, trainingSize - 1), arma::span());
+            tmpY = y.subcube(arma::span(), arma::span(0, trainingSize - 1), arma::span());
+            testX = X.subcube(arma::span(), arma::span(trainingSize, X.n_cols - 1), arma::span());
+            testY = y.subcube(arma::span(), arma::span(trainingSize, X.n_cols - 1), arma::span());
+
+            size_t warmupSize = 0.05 * tmpX.n_cols;
+            net->hub->trainX = tmpX.subcube(arma::span(), arma::span(0, warmupSize - 1), arma::span());
+            net->hub->trainY = tmpY.subcube(arma::span(), arma::span(0, warmupSize - 1), arma::span());
+            trainX = tmpX.subcube(arma::span(), arma::span(warmupSize, tmpX.n_cols - 1), arma::span());
+            trainY = tmpY.subcube(arma::span(), arma::span(warmupSize, tmpY.n_cols - 1), arma::span());
+
+
+            assert(X.n_cols == trainX.n_cols + net->hub->trainX.n_cols + testX.n_cols);
+            assert(y.n_cols == trainY.n_cols + net->hub->trainY.n_cols + testY.n_cols);
+
+            net->hub->testX = testX;
+            net->hub->testY = testY;
+            net->hub->trainPoints = trainX.n_cols;
+
+        }
         cout << " OK." << endl;
     } catch (...) {
         cout << " ERROR." << endl;

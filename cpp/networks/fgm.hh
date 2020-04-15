@@ -36,6 +36,7 @@ namespace fgm {
 
         // Protocol Stuff 
         RnnLearner *globalLearner;          // ML model
+        arma::cube trainX, trainY;          // Trainset data points and labels for warmup
         arma::cube testX, testY;            // Testset data points and labels
         size_t trainPoints;
         Query *Q;                           // query
@@ -72,6 +73,8 @@ namespace fgm {
 
         // Initialize the Learner and its' variables 
         void InitializeGlobalLearner();
+
+        void WarmupGlobalLearner();
 
         // Method used by the hub to establish the connections with the nodes of the star network 
         void SetupConnections();

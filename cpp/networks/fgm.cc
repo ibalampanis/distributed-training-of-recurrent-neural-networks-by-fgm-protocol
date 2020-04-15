@@ -56,6 +56,8 @@ void fgm::Coordinator::InitializeGlobalLearner() {
     }
 }
 
+void fgm::Coordinator::WarmupGlobalLearner() { globalLearner->TrainModelByBatch(trainX, trainY); }
+
 void fgm::Coordinator::SetupConnections() {
 
     proxy.add_sites(Net()->sites);
@@ -81,9 +83,9 @@ void fgm::Coordinator::StartRound() {
 
     // Send new safezone.
     for (auto n : Net()->sites) {
-        if (numRounds == 0) {
+        if (numRounds == 0)
             proxy[n].ReceiveGlobalParameters(ModelState(globalLearner->ModelParameters(), 0));
-        }
+
         szSent++;
         proxy[n].Reset(Safezone(safezone), DoubleValue(quantum));
         nodeBoolDrift[n] = 0;
@@ -123,7 +125,6 @@ oneway fgm::Coordinator::SendIncrement(IntValue inc) {
             // send the new quantum
             for (auto n : nodePtr)
                 proxy[n].ReceiveQuantum(DoubleValue(quantum));
-
             numSubrounds++;
         } else {
             for (auto n : nodePtr)
@@ -244,13 +245,14 @@ void fgm::LearningNode::UpdateState(arma::cube &x, arma::cube &y) {
 oneway fgm::LearningNode::Reset(const Safezone &newsz, DoubleValue qntm) {
 
     counter = 0;
-    szone = newsz;                                                    // Reset the safezone object
-    quantum = 1. * qntm.value;                                          // Reset the quantum
+    szone = newsz;                                                      // Reset the safezone object
+    quantum = (double) 1. * qntm.value;                                 // Reset the quantum
     learner->UpdateModel(szone.GetSzone()->GlobalModel());       // Updates the parameters of the local learner
-    zeta = szone.GetSzone()->Zeta(learner->ModelParameters());              // Reset zeta
+    zeta = szone.GetSzone()->Zeta(learner->ModelParameters());   // Reset zeta
 
     // Initializng the helping matrices if they are not yet initialized.
     arma::mat m = arma::mat(arma::size(eDelta), arma::fill::zeros);
+    // FIXME: max()
     if (arma::max(arma::max(arma::abs(eDelta - m))) < 1e-8) {
         for (size_t i = 0; i < learner->ModelParameters().size(); i++) {
             arma::mat tmp1 = arma::mat(arma::size(learner->ModelParameters()), arma::fill::zeros);

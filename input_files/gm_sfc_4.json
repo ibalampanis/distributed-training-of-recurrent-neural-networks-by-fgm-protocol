@@ -2,7 +2,7 @@
   "simulations": {
     "encoding": "UTF-8",
     "net_name": "GM Net",
-    "expID": 8
+    "expID": 4
   },
   "net": {
     "encoding": "UTF-8",
@@ -35,7 +35,7 @@
     "encoding": "UTF-8",
     "input_size": 19,
     "output_size": 1,
-    "path": "/home/ibalampanis/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/datasets/San_Francisco_Crime.csv",
+    "path": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/datasets/San_Francisco_Crime.csv",
     "dataset_name": "San Francisco Crime"
   }
 }

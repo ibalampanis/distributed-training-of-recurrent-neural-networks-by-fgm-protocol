@@ -1,6 +1,6 @@
 #include <string>
 #include "cpp/networks/controller.cc"
-#include "cpp/networks/fgm.hh"
+#include "cpp/networks/fgm.cc"
 
 
 using namespace controller;
@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
     controller::Controller<FgmNet> ctrl(cfg);
     ctrl.InitializeSimulation();
     ctrl.ShowNetworkInfo();
-//    ctrl.TrainNetworks();
+    ctrl.TrainOverNetwork();
 
     return 0;
 }

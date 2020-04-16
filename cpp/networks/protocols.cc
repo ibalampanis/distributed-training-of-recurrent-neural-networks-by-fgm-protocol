@@ -150,7 +150,7 @@ float SquaredNorm::RegionAdmissibility(const arma::mat &mdl1, const arma::mat &m
     return sqrt(threshold) - sqrt(res);
 }
 
-size_t SquaredNorm::ByteSize() { return (1 + globalModel.n_elem) * sizeof(float) + sizeof(size_t); }
+size_t SquaredNorm::byte_size() { return (1 + globalModel.n_elem) * sizeof(float) + sizeof(size_t); }
 
 
 /*********************************************
@@ -196,7 +196,7 @@ float Safezone::operator()(const arma::mat &mdl1, const arma::mat &mdl2) {
     return (szone != nullptr) ? szone->RegionAdmissibility(mdl1, mdl2) : NAN;
 }
 
-size_t Safezone::byte_size() const { return (szone != nullptr) ? szone->ByteSize() : 0; }
+size_t Safezone::byte_size() const { return (szone != nullptr) ? szone->byte_size() : 0; }
 
 
 /*********************************************
@@ -227,7 +227,7 @@ SafezoneFunction *QueryState::Safezone(const string &cfg, string algo) {
 
 }
 
-size_t QueryState::ByteSize() const { return (1 + globalModel.n_elem) * sizeof(float); }
+size_t QueryState::byte_size() const { return (1 + globalModel.n_elem) * sizeof(float); }
 
 
 /*********************************************

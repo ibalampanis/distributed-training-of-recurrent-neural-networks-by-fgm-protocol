@@ -100,7 +100,7 @@ namespace protocols {
         virtual float RegionAdmissibilityReb(const arma::mat &mdl1, const arma::mat &mdl2,
                                              double coef) { return 0.; }
 
-        virtual size_t ByteSize() { return 0; }
+        virtual size_t byte_size() { return 0; }
     };
 
     // This safezone function implements the algorithm presented in
@@ -127,7 +127,7 @@ namespace protocols {
         float RegionAdmissibilityReb(const arma::mat &mdl1, const arma::mat &mdl2,
                                      double coef) override;
 
-        size_t ByteSize() override;
+        size_t byte_size() override;
     };
 
     // A wrapper containing the safezone function for machine learning purposes.
@@ -194,7 +194,7 @@ namespace protocols {
         // It is the caller's responsibility to delete the returned object and do so before this object is destroyed.
         SafezoneFunction *Safezone(const string &cfg, string algo);
 
-        size_t ByteSize() const;
+        size_t byte_size() const;
     };
 
 

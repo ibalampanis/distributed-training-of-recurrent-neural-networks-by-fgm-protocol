@@ -6,12 +6,13 @@
 
 using namespace rnn_learner;
 using namespace arma;
+using namespace std;
 
 RnnLearner::RnnLearner(const string &cfg, const RNN<MeanSquaredError<>, HeInitialization> &model) : model(model) {
 
     // Take values from JSON file and initialize parameters
     try {
-        std::ifstream cfgfile(cfg);
+        ifstream cfgfile(cfg);
         cfgfile >> root;
         trainingEpochs = root["hyperparameters"].get("training_epochs", 0).asInt();
         lstmCells = root["hyperparameters"].get("lstm_cells", 0).asInt();
@@ -60,7 +61,6 @@ void RnnLearner::UpdateModel(arma::mat params) { model.Parameters() = move(param
 double RnnLearner::ModelAccuracy() const { return modelAccuracy; }
 
 void RnnLearner::CentralizedDataPreparation() {
-
     arma::mat dataset;
     // In Armadillo rows represent features, columns represent data points.
     cout << "Reading dataset ...";
@@ -86,15 +86,13 @@ void RnnLearner::CentralizedDataPreparation() {
     trainY = y.subcube(arma::span(), arma::span(0, trainingSize - 1), arma::span());
     testX = X.subcube(arma::span(), arma::span(trainingSize, X.n_cols - 1), arma::span());
     testY = y.subcube(arma::span(), arma::span(trainingSize, X.n_cols - 1), arma::span());
-
 }
 
 void RnnLearner::BuildModel() {
-
-    /** Model definition */
+    // Model definition
     model = RNN<MeanSquaredError<>, HeInitialization>(rho);
 
-    /** Model building */
+    // Model building 
     model.Add<IdentityLayer<> >();
     model.Add<LSTM<> >(inputSize, lstmCells, maxRho);
     model.Add<Dropout<> >(0.5);
@@ -106,7 +104,7 @@ void RnnLearner::BuildModel() {
     model.Add<ReLULayer<> >();
     model.Add<Linear<> >(lstmCells, outputSize);
 
-    /** Define and set parameters for the Stochastic Gradient Descent (SGD) optimizer. */
+    // Define and set parameters for the Stochastic Gradient Descent (SGD) optimizer. 
     optimizer = SGD<AdamUpdate>(stepSize, batchSize, maxOptIterations, tolerance, bShuffle,
                                 AdamUpdate(epsilon, beta1, beta2));
 
@@ -117,7 +115,7 @@ void RnnLearner::TrainModel() {
     cout << "Training ..." << endl;
     cout << "===========================================" << endl;
 
-    auto begin_train_time = std::chrono::high_resolution_clock::now();
+    auto begin_train_time = chrono::high_resolution_clock::now();
 
     // Run EPOCH number of cycles for optimizing the solution
     for (size_t epoch = 1; epoch <= trainingEpochs; epoch++) {
@@ -146,7 +144,7 @@ void RnnLearner::TrainModel() {
 
     cout << "===========================================" << endl;
     // End of measuring training time
-    auto end_train_time = std::chrono::high_resolution_clock::now();
+    auto end_train_time = chrono::high_resolution_clock::now();
     auto train_time = end_train_time - begin_train_time;
     cout << "Training ... OK." << endl;
 
@@ -175,11 +173,9 @@ void RnnLearner::MakePrediction() {
     // Calculate MSE on prediction.
     double testMSEPred = CalculateMSPE(predOut, testY);
     cout << "Prediction Accuracy: " << setprecision(2) << fixed << (100 - testMSEPred) << " %" << endl;
-
 }
 
 double RnnLearner::MakePrediction(arma::cube &tX, arma::cube &tY) {
-
     arma::cube predOut;
     model.Predict(tX, predOut);
     return (100 - CalculateMSPE(predOut, tY));

@@ -21,8 +21,8 @@ fgm::Coordinator::Coordinator(network_t *nw, Query *_Q)
         : process(nw), proxy(this),
           Q(_Q),
           k(0),
-          numRounds(0), numSubrounds(0),
-          szSent(0), totalUpdates(0) {
+          nRounds(0), nSubrounds(0),
+          nSzSent(0), nUpdates(0) {
     InitializeGlobalLearner();
     query = Q->CreateQueryState();
     safezone = query->Safezone(Cfg().cfgfile, Cfg().distributedLearningAlgorithm);
@@ -83,16 +83,16 @@ void fgm::Coordinator::StartRound() {
 
     // Send new safezone.
     for (auto n : Net()->sites) {
-        if (numRounds == 0)
-            proxy[n].ReceiveGlobalParameters(ModelState(globalLearner->ModelParameters(), 0));
+        if (nRounds == 0)
+            proxy[n].ReceiveGlobalModel(ModelState(globalLearner->ModelParameters(), 0));
 
-        szSent++;
+        nSzSent++;
         proxy[n].Reset(Safezone(safezone), DoubleValue(quantum));
         nodeBoolDrift[n] = 0;
     }
 
-    numRounds++;
-    numSubrounds++;
+    nRounds++;
+    nSubrounds++;
 }
 
 void fgm::Coordinator::FetchUpdates(node_t *node) {
@@ -106,7 +106,7 @@ void fgm::Coordinator::FetchUpdates(node_t *node) {
         }
         params += up._model;
     }
-    totalUpdates += up.updates;
+    nUpdates += up.updates;
 }
 
 oneway fgm::Coordinator::SendIncrement(IntValue inc) {
@@ -125,7 +125,7 @@ oneway fgm::Coordinator::SendIncrement(IntValue inc) {
             // send the new quantum
             for (auto n : nodePtr)
                 proxy[n].ReceiveQuantum(DoubleValue(quantum));
-            numSubrounds++;
+            nSubrounds++;
         } else {
             for (auto n : nodePtr)
                 FetchUpdates(n);
@@ -154,15 +154,15 @@ void fgm::Coordinator::ShowOverallStats() {
 
     // See the total number of points received by all the nodes. For debugging.
     for (auto nd:nodePtr)
-        totalUpdates += nd->learner->NumberOfUpdates();
+        nUpdates += nd->learner->NumberOfUpdates();
 
     cout << "\n[+]Overall Training Statistics ..." << endl;
     cout << "\t-- Model: Global model" << endl;
     cout << "\t-- Network name: " << Net()->name() << endl;
     cout << "\t-- Accuracy: " << setprecision(4) << query->accuracy << "%" << endl;
-    cout << "\t-- Number of rounds: " << numRounds << endl;
-    cout << "\t-- Number of subrounds: " << numSubrounds << endl;
-    cout << "\t-- Total updates: " << totalUpdates << endl;
+    cout << "\t-- Number of rounds: " << nRounds << endl;
+    cout << "\t-- Number of subrounds: " << nSubrounds << endl;
+    cout << "\t-- Total updates: " << nUpdates << endl;
 
     for (auto nd:nodePtr)
         cout << "\t\t-- Node: " << nd->site_id() << setprecision(4) << " - Usage: "
@@ -172,25 +172,23 @@ void fgm::Coordinator::ShowOverallStats() {
 }
 
 void fgm::Coordinator::ShowProgress() {
-    // Query thr accuracy of the global model.
-    query->accuracy = Q->QueryAccuracy(globalLearner, testX, testY);
 
     cout << "\n\t[+]Showing progress statistics of training ..." << endl;
     cout << "\t\t-- Model: Global model" << endl;
     cout << "\t\t-- Network name: " << net()->name() << endl;
-    cout << "\t\t-- Accuracy: " << std::setprecision(2) << query->accuracy << "%" << endl;
-    cout << "\t\t-- Number of rounds: " << numRounds << endl;
-    cout << "\t\t-- Number of subrounds: " << numSubrounds << endl;
-    cout << "\t\t-- Total updates: " << totalUpdates << endl << endl;
+    cout << "\t\t-- Accuracy: " << std::setprecision(2) << Accuracy() << "%" << endl;
+    cout << "\t\t-- Number of rounds: " << nRounds << endl;
+    cout << "\t\t-- Number of subrounds: " << nSubrounds << endl;
+    cout << "\t\t-- Total updates: " << nUpdates << endl << endl;
 }
 
-double fgm::Coordinator::Accuracy() { return query->accuracy = Q->QueryAccuracy(globalLearner, testX, testY); }
+double fgm::Coordinator::Accuracy() { return globalLearner->MakePrediction(testX, testY); }
 
 vector<size_t> fgm::Coordinator::UpdateStats() const {
     vector<size_t> stats;
-    stats.push_back(numRounds);
-    stats.push_back(numSubrounds);
-    stats.push_back(szSent);
+    stats.push_back(nRounds);
+    stats.push_back(nSubrounds);
+    stats.push_back(nSzSent);
     return stats;
 }
 
@@ -246,7 +244,7 @@ oneway fgm::LearningNode::Reset(const Safezone &newsz, DoubleValue qntm) {
 
     counter = 0;
     szone = newsz;                                                      // Reset the safezone object
-    quantum = (double) 1. * qntm.value;                                 // Reset the quantum
+    quantum = 1. * qntm.value;                                 // Reset the quantum
     learner->UpdateModel(szone.GetSzone()->GlobalModel());       // Updates the parameters of the local learner
     zeta = szone.GetSzone()->Zeta(learner->ModelParameters());   // Reset zeta
 
@@ -285,7 +283,7 @@ ModelState fgm::LearningNode::SendDrift() {
 
 DoubleValue fgm::LearningNode::SendZetaValue() { return DoubleValue(szone(learner->ModelParameters(), eDelta)); }
 
-oneway fgm::LearningNode::ReceiveGlobalParameters(const ModelState &params) { learner->UpdateModel(params._model); }
+oneway fgm::LearningNode::ReceiveGlobalModel(const ModelState &params) { learner->UpdateModel(params._model); }
 
 
 

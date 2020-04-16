@@ -13,47 +13,12 @@ using namespace arma;
 using namespace dds;
 using namespace controller;
 
-/*********************************************
-	Progress Bar
-*********************************************/
-LoopProgressPercentage::LoopProgressPercentage(size_t iters) : progress(0),
-                                                               nCycles(iters),
-                                                               lastPerc(0),
-                                                               bUpdateIsCalled(false) {}
-
-void LoopProgressPercentage::Update() {
-
-    if (!bUpdateIsCalled)
-        cout << "0%";
-
-    bUpdateIsCalled = true;
-
-    auto perc = size_t(progress * 100 / (nCycles - 1));
-
-    if (perc < lastPerc)
-        return;
-
-    // Update percentage each unit
-    if (perc == lastPerc + 1) {
-        // erase the correct  number of characters
-        if (perc <= 10)
-            cout << "\b\b" << perc << '%';
-        else if (perc > 10 and perc <= 100)
-            cout << "\b\b\b" << perc << '%';
-    }
-
-    lastPerc = perc;
-    progress++;
-    cout << flush;
-}
-
 
 /*********************************************
 	Controller
 *********************************************/
 template<typename networkType>
 Controller<networkType>::Controller(string cfg) : configFile(move(cfg)) {
-
     Json::Value root;
     ifstream cfgfile(configFile); // Parse from JSON file.
     cfgfile >> root;
@@ -65,6 +30,7 @@ Controller<networkType>::Controller(string cfg) : configFile(move(cfg)) {
     outputSize = root["data"].get("output_size", -1).asInt();
     rho = root["hyperparameters"].get("rho", -1).asInt();
     warmup = root["net"].get("warmup", false).asBool();
+    interStats = root["simulations"].get("inter_stats", false).asBool();
 }
 
 template<typename networkType>
@@ -103,6 +69,8 @@ void Controller<networkType>::InitializeSimulation() {
         } catch (...) {
             cout << "\t[-]Initializing RNNs ... ERROR.";
         }
+
+        stats = chan_frame(net);
         msgs = 0;
         bts = 0;
         cout << "\n[+]Initializing the star network ... OK." << endl;
@@ -120,70 +88,13 @@ void Controller<networkType>::ShowNetworkInfo() const {
 
     cout << "\n[+]Printing network information ..." << endl;
     cout << "\t-- Dataset Name: " << datasetName << endl;
-    cout << "\t-- Experiment ID: " << root["simulations"].get("expID", "-1").asInt() << endl;
+    cout << "\t-- Experiment ID: " << root["simulations"].get("expID", "-1").asString() << endl;
     cout << "\t-- Network Name: " << net->name() << endl;
     cout << "\t-- Coordinator: " << net->hub->name() << " with netID: " << net->hub->addr() << endl;
     cout << "\t-- Number of nodes: " << net->sites.size() << endl;
     for (size_t j = 0; j < net->sites.size(); j++)
         cout << "\t\t-- Node: " << net->sites.at(j)->name() << " with netID: " << net->sites.at(j)->site_id()
              << endl;
-}
-
-template<typename networkType>
-void Controller<networkType>::TrainOverNetwork() {
-
-    cout << "\n[+]Preparing data ..." << endl;
-    try {
-        DataPreparation();
-        cout << "[+]Preparing data ... OK." << endl;
-    } catch (...) {
-        cout << "[-]Preparing data ... ERROR." << endl;
-    }
-
-
-    try {
-        if (warmup) {
-            cout << "\n[+]Warming up the network ...";
-            net->WarmupNetwork();
-            cout << " OK." << endl;
-        }
-    } catch (...) {
-        cout << " ERROR." << endl;
-    }
-
-
-    cout << "\n[+]Training ... ";
-    try {
-
-        net->StartTraining();
-
-        // Using random lib (C++11 Standard) to generate random numbers in the range of the size of sites.
-        random_device rd;     // only used once to initialise (seed) engine
-        mt19937 rng(rd());    // random-number engine used (Mersenne-Twister in this case)
-        uniform_int_distribution<int> uni(0, net->sites.size() - 1); // guaranteed unbiased
-
-        int iterations = trainX.n_cols;
-        LoopProgressPercentage progressPercentage(iterations);
-
-        // In this loop, whole dataset will get crossed as well as each
-        // time point, a random node will get fit by a new point of dataset.
-        for (size_t i = 0; i < trainX.n_cols; i++) {
-            size_t currentNode = uni(rng);
-            arma::cube x = trainX.subcube(arma::span(), arma::span(i, i), arma::span());
-            arma::cube y = trainY.subcube(arma::span(), arma::span(i, i), arma::span());
-
-            net->TrainNode(currentNode, x, y);
-
-            progressPercentage.Update();
-        }
-
-        cout << " ... FINISHED." << endl;
-
-        net->ShowTrainingStats();
-
-    } catch (...) {
-        cout << " ... ERROR." << endl;
-    }
 }
 
 template<typename networkType>
@@ -274,4 +185,126 @@ void Controller<networkType>::DataPreparation() {
     } catch (...) {
         cout << " ERROR." << endl;
     }
+}
+
+template<typename networkType>
+void Controller<networkType>::TrainOverNetwork() {
+
+    cout << "\n[+]Preparing data ..." << endl;
+    try {
+        DataPreparation();
+        cout << "[+]Preparing data ... OK." << endl;
+    } catch (...) {
+        cout << "[-]Preparing data ... ERROR." << endl;
+    }
+
+
+    try {
+        if (warmup) {
+            cout << "\n[+]Warming up the network ...";
+            net->WarmupNetwork();
+            cout << " OK." << endl;
+        }
+    } catch (...) {
+        cout << " ERROR." << endl;
+    }
+
+
+    cout << "\n[+]Training ... ";
+    try {
+
+        net->StartTraining();
+
+        // Using random lib (C++11 Standard) to generate random numbers in the range of the size of sites.
+        random_device rd;     // only used once to initialise (seed) engine
+        mt19937 rng(rd());    // random-number engine used (Mersenne-Twister in this case)
+        uniform_int_distribution<int> uni(0, net->sites.size() - 1); // guaranteed unbiased
+
+        int iterations = trainX.n_cols;
+        LoopProgressPercentage progressPercentage(iterations);
+
+        // In this loop, whole dataset will get crossed as well as each
+        // time point, a random node will get fit by a new point of dataset.
+        for (size_t i = 0; i < trainX.n_cols; i++) {
+            size_t currentNode = uni(rng);
+            arma::cube x = trainX.subcube(arma::span(), arma::span(i, i), arma::span());
+            arma::cube y = trainY.subcube(arma::span(), arma::span(i, i), arma::span());
+
+            net->TrainNode(currentNode, x, y);
+
+            if (interStats)
+                GatherIntermediateNetStats();
+
+            progressPercentage.Update();
+        }
+
+        cout << " ... FINISHED." << endl;
+
+
+        net->ShowTrainingStats();
+
+        if (interStats)
+            ShowNetworkStats();
+
+    } catch (...) {
+        cout << " ... ERROR." << endl;
+    }
+}
+
+template<typename networkType>
+void Controller<networkType>::GatherIntermediateNetStats() {
+    // Gathering the info of the communication triggered by the streaming batch.
+    size_t batchMessages = 0;
+    size_t batchBytes = 0;
+
+    for (auto chnl:stats) {
+        batchMessages += chnl->messages_received();
+        batchBytes += chnl->bytes_received();
+    }
+
+    msgs = batchMessages;
+    bts = batchBytes;
+
+}
+
+template<typename networkType>
+void Controller<networkType>::ShowNetworkStats() {
+    cout << "\t-> Network Statistics:" << endl;
+    cout << "\t\t-- Messages: " << msgs << endl;
+    cout << "\t\t-- Bytes: " << bts << endl;
+}
+
+
+/*********************************************
+	Progress Bar
+*********************************************/
+LoopProgressPercentage::LoopProgressPercentage(size_t iters) : progress(0),
+                                                               nCycles(iters),
+                                                               lastPerc(0),
+                                                               bUpdateIsCalled(false) {}
+
+void LoopProgressPercentage::Update() {
+
+    if (!bUpdateIsCalled)
+        cout << "0%";
+
+    bUpdateIsCalled = true;
+
+    auto perc = size_t(progress * 100 / (nCycles - 1));
+
+    if (perc < lastPerc)
+        return;
+
+    // Update percentage each unit
+    if (perc == lastPerc + 1) {
+        // erase the correct  number of characters
+        if (perc <= 10)
+            cout << "\b\b" << perc << '%';
+        else if (perc > 10 and perc <= 100)
+            cout << "\b\b\b" << perc << '%';
+    }
+
+    lastPerc = perc;
+    progress++;
+    cout << flush;
 }

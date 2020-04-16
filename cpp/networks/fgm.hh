@@ -57,10 +57,10 @@ namespace fgm {
         arma::mat params;                   // A placeholder for the parameters send by the nodes.
 
         // Statistics 
-        size_t numRounds;                   // Total number of rounds
-        size_t numSubrounds;                // Total number of subrounds
-        size_t szSent;                      // Total safe zones sent
-        size_t totalUpdates;                // Number of stream updates received
+        size_t nRounds;                   // Total number of rounds
+        size_t nSubrounds;                // Total number of subrounds
+        size_t nSzSent;                    // Total safe zones sent
+        size_t nUpdates;                // Number of stream updates received
 
         // Constructor and Destructor 
         Coordinator(network_t *nw, Query *_Q);
@@ -154,7 +154,7 @@ namespace fgm {
         DoubleValue SendZetaValue();
 
         // Loading the parameters of the hub to the local model.
-        oneway ReceiveGlobalParameters(const ModelState &params);
+        oneway ReceiveGlobalModel(const ModelState &params);
     };
 
     struct LearningNodeProxy : remote_proxy<LearningNode> {
@@ -164,7 +164,7 @@ namespace fgm {
         REMOTE_METHOD(node_t, ReceiveQuantum);
         REMOTE_METHOD(node_t, SendDrift);
         REMOTE_METHOD(node_t, SendZetaValue);
-        REMOTE_METHOD(node_t, ReceiveGlobalParameters);
+        REMOTE_METHOD(node_t, ReceiveGlobalModel);
 
         explicit LearningNodeProxy(process *p) : remote_proxy<node_t>(p) {}
     };

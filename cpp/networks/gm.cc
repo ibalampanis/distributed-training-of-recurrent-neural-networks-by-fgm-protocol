@@ -17,11 +17,8 @@ GmNet::GmNet(const set<source_id> &_hids, const string &_name, Query *_Q)
 /*********************************************
 	Coordinator
 *********************************************/
-gm::Coordinator::Coordinator(network_t *nw, Query *_Q) : process(nw), proxy(this),
-                                                         Q(_Q),
-                                                         k(0),
-                                                         numViolations(0), numRounds(0), numSubrounds(0),
-                                                         szSent(0), totalUpdates(0) {
+gm::Coordinator::Coordinator(network_t *nw, Query *_Q) : process(nw), proxy(this), Q(_Q), k(0), numViolations(0),
+                                                         nRounds(0), nRebalances(0), nSzSent(0), nUpdates(0) {
     InitializeGlobalLearner();
     query = Q->CreateQueryState();
     safezone = query->Safezone(Cfg().cfgfile, Cfg().distributedLearningAlgorithm);
@@ -70,16 +67,18 @@ void gm::Coordinator::SetupConnections() {
 void gm::Coordinator::StartRound() {
     // Send new safezone.
     for (auto n : Net()->sites) {
-        if (numRounds == 0) {
+        if (nRounds == 0) {
             proxy[n].ReceiveGlobalParameters(ModelState(globalLearner->ModelParameters(), 0));
         }
-        szSent++;
+        nSzSent++;
         proxy[n].Reset(Safezone(safezone));
     }
-    numRounds++;
+    nRounds++;
 }
 
 void gm::Coordinator::Rebalance(node_t *lvnode) {
+
+    nRebalances++;
 
     Bcompl.clear();
     B.insert(lvnode);
@@ -126,7 +125,6 @@ void gm::Coordinator::Rebalance(node_t *lvnode) {
         for (auto n : B) {
             proxy[n].ReceiveDrift(ModelState(Mean, 0));
         }
-        numSubrounds++;
     } else {
         // New round
         numViolations = 0;
@@ -146,7 +144,7 @@ void gm::Coordinator::FetchUpdates(node_t *node) {
         cnt++;
         Mean += up._model;
     }
-    totalUpdates += up.updates;
+    nUpdates += up.updates;
 }
 
 oneway gm::Coordinator::LocalViolation(sender<node_t> ctx) {
@@ -180,15 +178,16 @@ void gm::Coordinator::ShowProgress() {
     cout << "\t\t-- Model: Global model" << endl;
     cout << "\t\t-- Network name: " << net()->name() << endl;
     cout << "\t\t-- Accuracy: " << std::setprecision(2) << query->accuracy << "%" << endl;
-    cout << "\t\t-- Number of rounds: " << numRounds << endl;
-    cout << "\t\t-- Total updates: " << totalUpdates << endl << endl;
+    cout << "\t\t-- Number of rounds: " << nRounds << endl;
+    cout << "\t\t-- Number of rebalances: " << nRebalances << endl;
+    cout << "\t\t-- Total updates: " << nUpdates << endl << endl;
 }
 
 vector<size_t> gm::Coordinator::UpdateStats() const {
     vector<size_t> stats;
-    stats.push_back(numRounds);
-    stats.push_back(numSubrounds);
-    stats.push_back(szSent);
+    stats.push_back(nRounds);
+    stats.push_back(nRebalances);
+    stats.push_back(nSzSent);
     stats.push_back(0);
     return stats;
 }
@@ -214,22 +213,21 @@ double gm::Coordinator::Accuracy() { return query->accuracy = Q->QueryAccuracy(g
 
 void gm::Coordinator::ShowOverallStats() {
 
-    // Query thr accuracy of the global model.
-    query->accuracy = Q->QueryAccuracy(globalLearner, testX, testY);
-
     // See the total number of points received by all the nodes. For debugging.
     for (auto nd:nodePtr)
-        totalUpdates += nd->learner->NumberOfUpdates();
+        nUpdates += nd->learner->NumberOfUpdates();
 
     cout << "\n[+]Overall Training Statistics ..." << endl;
-    cout << "\t-- Model: Global model" << endl;
-    cout << "\t-- Network name: " << Net()->name() << endl;
-    cout << "\t-- Accuracy: " << setprecision(4) << query->accuracy << "%" << endl;
-    cout << "\t-- Number of rounds: " << numRounds << endl;
-    cout << "\t-- Total updates: " << totalUpdates << endl;
+    cout << "\t-> Model Statistics:" << endl;
+    cout << "\t\t-- Model: Global model" << endl;
+    cout << "\t\t-- Network name: " << Net()->name() << endl;
+    cout << "\t\t-- Number of rounds: " << nRounds << endl;
+    cout << "\t\t-- Number of rebalances: " << nRebalances << endl;
+    cout << "\t\t-- Accuracy: " << setprecision(4) << Accuracy() << "%" << endl;
+    cout << "\t\t-- Total updates: " << nUpdates << endl;
 
     for (auto nd:nodePtr)
-        cout << "\t\t-- Node: " << nd->site_id() << setprecision(4) << " - Usage: "
+        cout << "\t\t\t-- Node: " << nd->site_id() << setprecision(4) << " - Usage: "
              << (((double) nd->learner->UsedTimes() / (double) trainPoints) * 100.) << "%" <<
              " (" << nd->learner->UsedTimes() << " of " << trainPoints << ")" << endl;
 

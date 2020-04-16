@@ -53,10 +53,10 @@ namespace gm {
         int cnt;                            // Helping counter.
 
         // Statistics 
-        size_t numRounds;                   // Total number of rounds
-        size_t numSubrounds;                // Total number of subrounds
-        size_t szSent;                      // Total safe zones sent
-        size_t totalUpdates;                // Number of stream updates received
+        size_t nRounds;                     // Total number of rounds
+        size_t nRebalances;                 // Total number of rebalances
+        size_t nSzSent;                     // Total safe zones sent
+        size_t nUpdates;                    // Number of stream updates received
 
         // Constructor and Destructor 
         Coordinator(network_t *nw, Query *_Q);

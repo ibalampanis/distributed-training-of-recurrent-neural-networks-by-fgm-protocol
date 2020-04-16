@@ -22,21 +22,6 @@ namespace controller {
     using namespace dds;
 
 
-    // A very simple progress bar for loops (based on this repo: https://github.com/gipert/progressbar)
-    class LoopProgressPercentage {
-
-    public:
-        explicit LoopProgressPercentage(size_t iters);
-
-        void Update();
-
-    private:
-        size_t progress;
-        size_t nCycles;
-        size_t lastPerc;
-        bool bUpdateIsCalled;
-    };
-
     // The purpose of Controller class is to synchronize the training of the
     // network nodes by providing the appropriate data points to these.
     template<typename networkType>
@@ -54,10 +39,11 @@ namespace controller {
         string datasetName;                         // The name of the dataset we use
         double trainTestRatio;                      // Testing data is taken from the dataset in this ratio
         size_t rho;                                 // Number of time steps to look backward for in the RNN
-        bool warmup;
+        bool warmup;                                // Define if hub warmup is needed
+        bool interStats;                            // Define if intermediate communication stats is needed
 
         // Stats
-        vector<chan_frame> stats;
+        chan_frame stats;
         size_t msgs{};
         size_t bts{};
         networkType *net;
@@ -73,17 +59,31 @@ namespace controller {
         // This method prints the star learning network for debbuging purposes. 
         void ShowNetworkInfo() const;
 
-        void TrainOverNetwork();
-
-        // This method appends a network in the network container. 
-        void AddNet(networkType *net);
-
-        // This method appends a query in the query container. 
-        void AddQuery(Query *qry);
-
         void CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y);
 
         void DataPreparation();
+
+        void TrainOverNetwork();
+
+        // Method that monitors communication stattistics after each mini-batch of training samples.
+        void GatherIntermediateNetStats();
+
+        void ShowNetworkStats();
+    };
+
+    // A very simple progress bar for loops (based on this repo: https://github.com/gipert/progressbar)
+    class LoopProgressPercentage {
+
+    public:
+        explicit LoopProgressPercentage(size_t iters);
+
+        void Update();
+
+    private:
+        size_t progress;
+        size_t nCycles;
+        size_t lastPerc;
+        bool bUpdateIsCalled;
     };
 
 } // end namespace controller

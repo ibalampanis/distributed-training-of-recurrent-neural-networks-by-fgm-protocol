@@ -16,8 +16,7 @@ namespace controller {
 
     using namespace std;
     using namespace protocols;
-    using namespace gm;
-    using namespace fgm;
+    using namespace algorithms;
     using namespace arma;
     using namespace dds;
 
@@ -28,7 +27,7 @@ namespace controller {
     class Controller {
 
     protected:
-        string configFile;                     // JSON file to read the hyperparameters.
+        string configFile;                          // JSON file to read the hyperparameters.
 
         // Dataset and model parameters 
         arma::cube trainX, trainY;                  // Trainset data points and labels

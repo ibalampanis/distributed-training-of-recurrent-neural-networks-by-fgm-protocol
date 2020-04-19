@@ -102,15 +102,15 @@ void SafezoneFunction::UpdateDrift(arma::mat &drift, arma::mat &params, float mu
 }
 
 /*********************************************
-	SquaredNorm Safezone Function
+	P2Norm Safezone Function
 *********************************************/
-SquaredNorm::SquaredNorm(arma::mat GlMd, double thr, size_t batch_sz) : SafezoneFunction(GlMd),
-                                                                        threshold(thr),
-                                                                        batchSize(batch_sz) {}
+P2Norm::P2Norm(arma::mat GlMd, double thr, size_t batch_sz) : SafezoneFunction(GlMd),
+                                                              threshold(thr),
+                                                              batchSize(batch_sz) {}
 
-SquaredNorm::~SquaredNorm() = default;
+P2Norm::~P2Norm() = default;
 
-float SquaredNorm::Zeta(const arma::mat &params) {
+float P2Norm::Zeta(const arma::mat &params) {
     float res = 0.;
 
     arma::mat subtr = globalModel - params;
@@ -119,7 +119,7 @@ float SquaredNorm::Zeta(const arma::mat &params) {
     return float(sqrt(threshold) - sqrt(res));
 }
 
-float SquaredNorm::RegionAdmissibilityReb(const arma::mat &mdl1, const arma::mat &mdl2, double coef) {
+float P2Norm::RegionAdmissibilityReb(const arma::mat &mdl1, const arma::mat &mdl2, double coef) {
     float res = 0.;
     arma::mat subtr = mdl1 - mdl2;
     subtr *= coef;
@@ -128,7 +128,7 @@ float SquaredNorm::RegionAdmissibilityReb(const arma::mat &mdl1, const arma::mat
     return float(coef * (sqrt(threshold) - sqrt(res)));
 }
 
-float SquaredNorm::RegionAdmissibility(const arma::mat &mdl) {
+float P2Norm::RegionAdmissibility(const arma::mat &mdl) {
 
     if (globalModel.empty() || mdl.empty())
         return -1;
@@ -141,7 +141,7 @@ float SquaredNorm::RegionAdmissibility(const arma::mat &mdl) {
     return float(sqrt(threshold) - sqrt(dotProduct));
 }
 
-float SquaredNorm::RegionAdmissibility(const arma::mat &mdl1, const arma::mat &mdl2) {
+float P2Norm::RegionAdmissibility(const arma::mat &mdl1, const arma::mat &mdl2) {
 
     double res = 0.;
     arma::mat subtr = mdl1 - mdl2;
@@ -150,7 +150,7 @@ float SquaredNorm::RegionAdmissibility(const arma::mat &mdl1, const arma::mat &m
     return sqrt(threshold) - sqrt(res);
 }
 
-size_t SquaredNorm::byte_size() { return (1 + globalModel.n_elem) * sizeof(float) + sizeof(size_t); }
+size_t P2Norm::byte_size() { return (1 + globalModel.n_elem) * sizeof(float) + sizeof(size_t); }
 
 
 /*********************************************
@@ -182,7 +182,7 @@ Safezone &Safezone::operator=(const Safezone &other) {
     return *this;
 }
 
-void Safezone::Swap(Safezone &other) { std::swap(szone, other.szone); }
+void Safezone::Swap(Safezone &other) { swap(szone, other.szone); }
 
 SafezoneFunction *Safezone::GetSzone() { return (szone != nullptr) ? szone : nullptr; }
 
@@ -217,12 +217,12 @@ void QueryState::UpdateEstimate(arma::mat mdl) { globalModel += mdl; }
 SafezoneFunction *QueryState::Safezone(const string &cfg, string algo) {
 
     Json::Value root;
-    std::ifstream cfgfl(cfg);
+    ifstream cfgfl(cfg);
     cfgfl >> root;
 
-    auto func = new SquaredNorm(globalModel,
-                                root["query"].get("threshold", -1).asDouble(),
-                                root[algo].get("batch_size", -1).asInt());
+    auto func = new P2Norm(globalModel,
+                           root["query"].get("threshold", -1).asDouble(),
+                           root[algo].get("batch_size", -1).asInt());
     return func;
 
 }
@@ -237,7 +237,7 @@ Query::Query(const string &cfg, string nm) {
     cout << "\t[+]Initializing the query ...";
     try {
         Json::Value root;
-        std::ifstream cfgfl(cfg);
+        ifstream cfgfl(cfg);
         cfgfl >> root;
 
         config.distributedLearningAlgorithm = root["net"].get("distributed_learning_algorithm", "trash").asString();

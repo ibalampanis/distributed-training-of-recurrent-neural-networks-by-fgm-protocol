@@ -7,165 +7,164 @@
 #include "protocols.hh"
 #include "cpp/models/rnn_learner.hh"
 
-namespace gm {
 
-    using namespace dds;
-    using namespace rnn_learner;
-    using namespace protocols;
+namespace algorithms {
 
-    struct Coordinator;
-    struct CoordinatorProxy;
-    struct LearningNode;
-    struct LearningNodeProxy;
+    namespace gm {
 
-    // This is the GM Network implementation for the classic Geometric Method protocol. 
-    struct GmNet : LearningNetwork<GmNet, Coordinator, LearningNode> {
+        using namespace dds;
+        using namespace rnn_learner;
+        using namespace protocols;
 
-        typedef LearningNetwork<network_t, coordinator_t, node_t> gmLearningNetwork;
+        struct Coordinator;
+        struct CoordinatorProxy;
+        struct LearningNode;
+        struct LearningNodeProxy;
 
-        GmNet(const set<source_id> &_hids, const string &_name, Query *_Q);
-    };
+        // This is the GM Network implementation for the classic Geometric Method protocol.
+        struct GmNet : LearningNetwork<GmNet, Coordinator, LearningNode> {
 
-    // This is the hub/coordinator implementation for the classic Geometric Method protocol. 
-    struct Coordinator : process {
-        typedef Coordinator coordinator_t;
-        typedef LearningNode node_t;
-        typedef LearningNodeProxy node_proxy_t;
-        typedef GmNet network_t;
+            typedef LearningNetwork<network_t, coordinator_t, node_t> gmLearningNetwork;
 
-        proxy_map<node_proxy_t, node_t> proxy;
+            GmNet(const set<source_id> &_hids, const string &_name, Query *Q);
+        };
 
-        // Protocol Stuff 
-        RnnLearner *globalLearner;          // ML model
-        arma::cube trainX, trainY;          // Trainset data points and labels for warmup
-        arma::cube testX, testY;            // Testset data points and labels
-        size_t trainPoints;
-        Query *Q;                           // query
-        QueryState *query;                  // current query state
-        SafezoneFunction *safezone;         // the safe zone wrapper
-        size_t k;                           // number of sites
-        map<node_t *, size_t> nodeIndex;    // index the nodes
-        vector<node_t *> nodePtr;
-        set<node_t *> B;                    // initialized by local_violation(), updated by rebalancing algorithm
-        set<node_t *> Bcompl;               // Complement of B, updated by rebalancing algo
-        arma::mat Mean;                     // Used to compute the mean model
-        size_t numViolations;               // Number of violations in the same round (for rebalancing)
-        int cnt;                            // Helping counter.
+        // This is the hub/coordinator implementation for the classic Geometric Method protocol.
+        struct Coordinator : process {
+            typedef Coordinator coordinator_t;
+            typedef LearningNode node_t;
+            typedef LearningNodeProxy node_proxy_t;
+            typedef GmNet network_t;
 
-        // Statistics 
-        size_t nRounds;                     // Total number of rounds
-        size_t nRebalances;                 // Total number of rebalances
-        size_t nSzSent;                     // Total safe zones sent
-        size_t nUpdates;                    // Number of stream updates received
+            proxy_map<node_proxy_t, node_t> proxy;
 
-        // Constructor and Destructor 
-        Coordinator(network_t *nw, Query *_Q);
+            // Protocol Stuff
+            RnnLearner *globalLearner;          // ML model
+            arma::cube trainX, trainY;          // Trainset data points and labels for warmup
+            arma::cube testX, testY;            // Testset data points and labels
+            size_t trainPoints;
+            Query *Q;                           // query
+            QueryState *query;                  // current query state
+            SafezoneFunction *safezone;         // the safe zone wrapper
+            size_t k;                           // number of sites
+            map<node_t *, size_t> nodeIndex;    // index the nodes
+            vector<node_t *> nodePtr;
+            set<node_t *> B;                    // initialized by local_violation(), updated by rebalancing algorithm
+            set<node_t *> Bcompl;               // Complement of B, updated by rebalancing algo
+            arma::mat Mean;                     // Used to compute the mean model
+            size_t numViolations;               // Number of violations in the same round (for rebalancing)
+            int cnt;                            // Helping counter.
 
-        ~Coordinator() override;
+            // Statistics
+            size_t nRounds;                     // Total number of rounds
+            size_t nRebalances;                 // Total number of rebalances
+            size_t nSzSent;                     // Total safe zones sent
+            size_t nUpdates;                    // Number of stream updates received
 
-        network_t *Net();
+            // Constructor and Destructor
+            Coordinator(network_t *nw, Query *Q);
 
-        const ProtocolConfig &Cfg() const;
+            ~Coordinator() override;
 
-        // Initialize learner and  variables 
-        void InitializeGlobalLearner();
+            network_t *Net();
 
-        void WarmupGlobalLearner();
+            const ProtocolConfig &Cfg() const;
 
-        void SetupConnections();
+            // Initialize learner and  variables
+            void InitializeGlobalLearner();
 
-        // Initialize a new round 
-        void StartRound();
+            void WarmupGlobalLearner();
 
-        // Rebalance algorithm by Kamp
-        void Rebalance(node_t *n);
+            void SetupConnections();
 
-        // Get a model of a node
-        void FetchUpdates(node_t *n);
+            // Initialize a new round
+            void StartRound();
 
-        // Remote call on host violation
-        oneway LocalViolation(sender<node_t> ctx);
+            // Rebalance algorithm by Kamp
+            void Rebalance(node_t *n);
 
-        // Printing and saving the accuracy
-        void ShowProgress();
+            // Get a model of a node
+            void FetchUpdates(node_t *n);
 
-        // Get the communication statistics of experiment
-        vector<size_t> UpdateStats() const;
+            // Remote call on host violation
+            oneway LocalViolation(sender<node_t> ctx);
 
-        void FinishRound();
+            // Printing and saving the accuracy
+            void ShowProgress();
 
-        // Getting the accuracy of the global learner
-        double Accuracy();
+            void FinishRound();
 
-        void ShowOverallStats();
-    };
+            // Getting the accuracy of the global learner
+            double Accuracy();
 
-    struct CoordinatorProxy : remote_proxy<Coordinator> {
-        using coordinator_t = Coordinator;
+            void ShowOverallStats();
+        };
 
-        REMOTE_METHOD(coordinator_t, LocalViolation);
+        struct CoordinatorProxy : remote_proxy<Coordinator> {
+            using coordinator_t = Coordinator;
 
-        explicit CoordinatorProxy(process *c) : remote_proxy<coordinator_t>(c) {}
-    };
+            REMOTE_METHOD(coordinator_t, LocalViolation);
 
-    // This is the site/learning node implementation for the classic Geometric Method protocol. 
-    struct LearningNode : local_site {
+            explicit CoordinatorProxy(process *c) : remote_proxy<coordinator_t>(c) {}
+        };
 
-        typedef Coordinator coordinator_t;
-        typedef LearningNode node_t;
-        typedef LearningNodeProxy node_proxy_t;
-        typedef GmNet network_t;
-        typedef CoordinatorProxy coord_proxy_t;
-        typedef Query query_t;
+        // This is the site/learning node implementation for the classic Geometric Method protocol.
+        struct LearningNode : local_site {
 
-        query_t *Q;                         // The query management object
-        Safezone szone;                     // The safezone object
-        RnnLearner *learner{};              // The learning algorithm
-        arma::cube trainX, trainY;          // Trainset data points and labels
-        arma::mat drift;                    // The drift of the node
-        coord_proxy_t coord;                // The proxy of the coordinator/hub
-        size_t datapointsPassed;
+            typedef Coordinator coordinator_t;
+            typedef LearningNode node_t;
+            typedef LearningNodeProxy node_proxy_t;
+            typedef GmNet network_t;
+            typedef CoordinatorProxy coord_proxy_t;
+            typedef Query query_t;
 
-        // Constructor 
-        LearningNode(network_t *net, source_id hid, query_t *_Q);
+            query_t *Q;                         // The query management object
+            Safezone szone;                     // The safezone object
+            RnnLearner *learner{};              // The learning algorithm
+            arma::mat drift;                    // The drift of the node
+            coord_proxy_t coord;                // The proxy of the coordinator/hub
+            size_t datapointsPassed;
 
-        const ProtocolConfig &Cfg() const;
+            // Constructor
+            LearningNode(network_t *net, source_id hid, query_t *_Q);
 
-        void InitializeLearner();
+            const ProtocolConfig &Cfg() const;
 
-        void UpdateState(arma::cube &x, arma::cube &y);
+            void InitializeLearner();
 
-        // Call at the start of a round 
-        oneway Reset(const Safezone &newsz);
+            void UpdateState(arma::cube &x, arma::cube &y);
 
-        // Transfer data to the coordinator 
-        ModelState SendDrift();
+            // Call at the start of a round
+            oneway Reset(const Safezone &newsz);
 
-        // Set the drift vector (for rebalancing) 
-        void ReceiveDrift(const ModelState &mdl);
+            // Transfer data to the coordinator
+            ModelState SendDrift();
 
-        oneway ReceiveGlobalParameters(const ModelState &params);
+            // Set the drift vector (for rebalancing)
+            void ReceiveRebGlobalParameters(const ModelState &mdl);
 
-    };
+            void ReceiveGlobalParameters(const ModelState &params);
 
-    struct LearningNodeProxy : remote_proxy<LearningNode> {
-        typedef LearningNode node_t;
+        };
 
-        REMOTE_METHOD(node_t, Reset);
-        REMOTE_METHOD(node_t, SendDrift);
-        REMOTE_METHOD(node_t, ReceiveDrift);
-        REMOTE_METHOD(node_t, ReceiveGlobalParameters);
+        struct LearningNodeProxy : remote_proxy<LearningNode> {
+            typedef LearningNode node_t;
 
-        explicit LearningNodeProxy(process *p) : remote_proxy<node_t>(p) {}
-    };
+            REMOTE_METHOD(node_t, Reset);
+            REMOTE_METHOD(node_t, SendDrift);
+            REMOTE_METHOD(node_t, ReceiveRebGlobalParameters);
+            REMOTE_METHOD(node_t, ReceiveGlobalParameters);
 
+            explicit LearningNodeProxy(process *p) : remote_proxy<node_t>(p) {}
+        };
+    } // end namespace gm
+} // end namespace algorithms
 
-} // end namespace gm
 
 namespace dds {
     template<>
-    inline size_t byte_size<gm::LearningNode *>(
-            gm::LearningNode *const &) { return 4; }
+    inline size_t byte_size<algorithms::gm::LearningNode *>(
+            algorithms::gm::LearningNode *const &) { return 4; }
 }
 
 #endif

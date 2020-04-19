@@ -7,174 +7,172 @@
 #include "protocols.hh"
 #include "cpp/models/rnn_learner.hh"
 
-namespace fgm {
 
-    using namespace dds;
-    using namespace protocols;
-    using namespace rnn_learner;
+namespace algorithms {
 
-    struct Coordinator;
-    struct CoordinatorProxy;
-    struct LearningNode;
-    struct LearningNodeProxy;
+    namespace fgm {
 
-    // This is the FGM Network implementation.
-    struct FgmNet : LearningNetwork<FgmNet, Coordinator, LearningNode> {
-        typedef LearningNetwork<network_t, coordinator_t, node_t> fgmLearningNetwork;
+        using namespace dds;
+        using namespace protocols;
+        using namespace rnn_learner;
 
-        FgmNet(const set<source_id> &_hids, const string &_name, Query *_Q);
-    };
+        struct Coordinator;
+        struct CoordinatorProxy;
+        struct LearningNode;
+        struct LearningNodeProxy;
 
-    // This is the hub/coordinator implementation for the Functional Geometric Method protocol.
-    struct Coordinator : process {
-        typedef Coordinator coordinator_t;
-        typedef LearningNode node_t;
-        typedef LearningNodeProxy node_proxy_t;
-        typedef FgmNet network_t;
+        // This is the FGM Network implementation.
+        struct FgmNet : LearningNetwork<FgmNet, Coordinator, LearningNode> {
+            typedef LearningNetwork<network_t, coordinator_t, node_t> fgmLearningNetwork;
 
-        proxy_map<node_proxy_t, node_t> proxy;
+            FgmNet(const set<source_id> &_hids, const string &_name, Query *Q);
+        };
 
-        // Protocol Stuff 
-        RnnLearner *globalLearner;          // ML model
-        arma::cube trainX, trainY;          // Trainset data points and labels for warmup
-        arma::cube testX, testY;            // Testset data points and labels
-        size_t trainPoints;
-        Query *Q;                           // query
-        QueryState *query;                  // current query state
-        SafezoneFunction *safezone;         // the safe zone wrapper
-        size_t k;                           // number of sites
+        // This is the hub/coordinator implementation for the Functional Geometric Method protocol.
+        struct Coordinator : process {
+            typedef Coordinator coordinator_t;
+            typedef LearningNode node_t;
+            typedef LearningNodeProxy node_proxy_t;
+            typedef FgmNet network_t;
 
-        // Nodes indexing 
-        map<node_t *, size_t> nodeIndex;
-        map<node_t *, size_t> nodeBoolDrift;
-        vector<node_t *> nodePtr;
+            proxy_map<node_proxy_t, node_t> proxy;
 
-        double phi;                          // The phi value of the functional geometric protocol.
-        double quantum;                      // The quantum of the functional geometric protocol.
-        size_t counter;                     // A counter used by the functional geometric protocol.
-        double barrier;                      // The smallest number the zeta function can reach.
-        size_t cnt;                         // Helping counter.
-        arma::mat params;                   // A placeholder for the parameters send by the nodes.
+            // Protocol Stuff
+            RnnLearner *globalLearner;          // ML model
+            arma::cube trainX, trainY;          // Trainset data points and labels for warmup
+            arma::cube testX, testY;            // Testset data points and labels
+            size_t trainPoints;
+            Query *Q;                           // query
+            QueryState *query;                  // current query state
+            SafezoneFunction *safezone;         // the safe zone wrapper
+            size_t k;                           // number of sites
 
-        // Statistics 
-        size_t nRounds;                   // Total number of rounds
-        size_t nSubrounds;                // Total number of subrounds
-        size_t nSzSent;                    // Total safe zones sent
-        size_t nUpdates;                // Number of stream updates received
+            // Nodes indexing
+            map<node_t *, size_t> nodeIndex;
+            map<node_t *, size_t> nodeBoolDrift;
+            vector<node_t *> nodePtr;
 
-        // Constructor and Destructor 
-        Coordinator(network_t *nw, Query *_Q);
+            double phi;                          // The phi value of the functional geometric protocol.
+            double quantum;                      // The quantum of the functional geometric protocol.
+            size_t counter;                     // A counter used by the functional geometric protocol.
+            double barrier;                      // The smallest number the zeta function can reach.
+            size_t cnt;                         // Helping counter.
+            arma::mat params;                   // A placeholder for the parameters send by the nodes.
 
-        ~Coordinator() override;
+            // Statistics
+            size_t nRounds;                   // Total number of rounds
+            size_t nSubrounds;                // Total number of subrounds
+            size_t nSzSent;                    // Total safe zones sent
+            size_t nUpdates;                // Number of stream updates received
 
-        network_t *Net();
+            // Constructor and Destructor
+            Coordinator(network_t *nw, Query *Q);
 
-        const ProtocolConfig &Cfg() const;
+            ~Coordinator() override;
 
-        // Initialize the Learner and its' variables 
-        void InitializeGlobalLearner();
+            network_t *Net();
 
-        void WarmupGlobalLearner();
+            const ProtocolConfig &Cfg() const;
 
-        // Method used by the hub to establish the connections with the nodes of the star network 
-        void SetupConnections();
+            // Initialize the Learner and its' variables
+            void InitializeGlobalLearner();
 
-        // Initialize a new round 
-        void StartRound();
+            void WarmupGlobalLearner();
 
-        // Getting the model of a node 
-        void FetchUpdates(node_t *n);
+            // Method used by the hub to establish the connections with the nodes of the star network
+            void SetupConnections();
 
-        // Remote call on host violation 
-        oneway SendIncrement(IntValue inc);
+            // Initialize a new round
+            void StartRound();
 
-        void FinishRound();
+            // Getting the model of a node
+            void FetchUpdates(node_t *n);
 
-        void ShowOverallStats();
+            // Remote call on host violation
+            oneway SendIncrement(IntValue inc);
 
-        // Printing and saving the accuracy 
-        void ShowProgress();
+            void FinishRound();
 
-        // Getting the accuracy of the global learner 
-        double Accuracy();
+            void ShowOverallStats();
 
-        // Get the communication statistics of experiment 
-        vector<size_t> UpdateStats() const;
+            // Printing and saving the accuracy
+            void ShowProgress();
 
-    };
+            // Getting the accuracy of the global learner
+            double Accuracy();
+        };
 
-    struct CoordinatorProxy : remote_proxy<Coordinator> {
-        using coordinator_t = Coordinator;
+        struct CoordinatorProxy : remote_proxy<Coordinator> {
+            using coordinator_t = Coordinator;
 
-        REMOTE_METHOD(coordinator_t, SendIncrement);
+            REMOTE_METHOD(coordinator_t, SendIncrement);
 
-        explicit CoordinatorProxy(process *c) : remote_proxy<coordinator_t>(c) {}
-    };
+            explicit CoordinatorProxy(process *c) : remote_proxy<coordinator_t>(c) {}
+        };
 
-    // This is the site/learning node implementation for the Functional Geometric Method protocol.
-    struct LearningNode : local_site {
+        // This is the site/learning node implementation for the Functional Geometric Method protocol.
+        struct LearningNode : local_site {
 
-        typedef Coordinator coordinator_t;
-        typedef LearningNode node_t;
-        typedef LearningNodeProxy node_proxy_t;
-        typedef FgmNet network_t;
-        typedef CoordinatorProxy coord_proxy_t;
-        typedef Query continuous_query_t;
+            typedef Coordinator coordinator_t;
+            typedef LearningNode node_t;
+            typedef LearningNodeProxy node_proxy_t;
+            typedef FgmNet network_t;
+            typedef CoordinatorProxy coord_proxy_t;
+            typedef Query continuous_query_t;
 
-        Query *Q;                           // The query management object.
-        Safezone szone;                     // The safezone object.
-        RnnLearner *learner;                // The learning algorithm.
-        arma::cube trainX, trainY;          // Trainset data points and labels
-        arma::mat deltaVector;
-        arma::mat eDelta;
-        coord_proxy_t coord;                // The proxy of the coordinator/hub.
-        size_t datapointsPassed;
-        size_t counter;                     // The counter used by the FGM protocol.
-        float quantum;                      // The quantum provided by the hub.
-        float zeta;                         // The value of the safezone function.
+            Query *Q;                           // The query management object.
+            Safezone szone;                     // The safezone object.
+            RnnLearner *learner;                // The learning algorithm.
+            arma::mat deltaVector;
+            arma::mat eDelta;
+            coord_proxy_t coord;                // The proxy of the coordinator/hub.
+            size_t datapointsPassed;
+            size_t counter;                     // The counter used by the FGM protocol.
+            float quantum;                      // The quantum provided by the hub.
+            float zeta;                         // The value of the safezone function.
 
-        LearningNode(network_t *net, source_id hid, continuous_query_t *_Q);
+            LearningNode(network_t *net, source_id hid, continuous_query_t *_Q);
 
-        const ProtocolConfig &Cfg() const;
+            const ProtocolConfig &Cfg() const;
 
-        void InitializeLearner();
+            void InitializeLearner();
 
-        void UpdateState(arma::cube &x, arma::cube &y);
+            void UpdateState(arma::cube &x, arma::cube &y);
 
-        // called at the start of a round
-        oneway Reset(const Safezone &newsz, DoubleValue qntm);
+            // called at the start of a round
+            oneway Reset(const Safezone &newsz, DoubleValue qntm);
 
-        // Refreshing the quantum for a new subround
-        oneway ReceiveQuantum(DoubleValue qntm);
+            // Refreshing the quantum for a new subround
+            oneway ReceiveQuantum(DoubleValue qntm);
 
-        // Transfer data to the coordinator
-        ModelState SendDrift();
+            // Transfer data to the coordinator
+            ModelState SendDrift();
 
-        // Transfer the value of z(Xi) to the coordinator
-        DoubleValue SendZetaValue();
+            // Transfer the value of z(Xi) to the coordinator
+            DoubleValue SendZetaValue();
 
-        // Loading the parameters of the hub to the local model.
-        oneway ReceiveGlobalModel(const ModelState &params);
-    };
+            // Loading the parameters of the hub to the local model.
+            oneway ReceiveGlobalModel(const ModelState &params);
+        };
 
-    struct LearningNodeProxy : remote_proxy<LearningNode> {
-        typedef LearningNode node_t;
+        struct LearningNodeProxy : remote_proxy<LearningNode> {
+            typedef LearningNode node_t;
 
-        REMOTE_METHOD(node_t, Reset);
-        REMOTE_METHOD(node_t, ReceiveQuantum);
-        REMOTE_METHOD(node_t, SendDrift);
-        REMOTE_METHOD(node_t, SendZetaValue);
-        REMOTE_METHOD(node_t, ReceiveGlobalModel);
+            REMOTE_METHOD(node_t, Reset);
+            REMOTE_METHOD(node_t, ReceiveQuantum);
+            REMOTE_METHOD(node_t, SendDrift);
+            REMOTE_METHOD(node_t, SendZetaValue);
+            REMOTE_METHOD(node_t, ReceiveGlobalModel);
 
-        explicit LearningNodeProxy(process *p) : remote_proxy<node_t>(p) {}
-    };
+            explicit LearningNodeProxy(process *p) : remote_proxy<node_t>(p) {}
+        };
+    } // end namespace fgm
+} // end namespace algorithms
 
-
-} // end namespace fgm
 
 namespace dds {
     template<>
-    inline size_t byte_size<fgm::LearningNode *>(
-            fgm::LearningNode *const &) { return 4; }
+    inline size_t byte_size<algorithms::fgm::LearningNode *>(
+            algorithms::fgm::LearningNode *const &) { return 4; }
 }
 #endif

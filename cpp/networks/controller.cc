@@ -7,8 +7,7 @@
 
 
 using namespace protocols;
-using namespace gm;
-using namespace fgm;
+using namespace algorithms;
 using namespace arma;
 using namespace dds;
 using namespace controller;
@@ -20,7 +19,7 @@ using namespace controller;
 template<typename networkType>
 Controller<networkType>::Controller(string cfg) : configFile(move(cfg)) {
     Json::Value root;
-    ifstream cfgfile(configFile); // Parse from JSON file.
+    ifstream cfgfile(configFile);
     cfgfile >> root;
 
     datasetPath = root["data"].get("path", "").asString();
@@ -270,8 +269,8 @@ void Controller<networkType>::GatherIntermediateNetStats() {
 template<typename networkType>
 void Controller<networkType>::ShowNetworkStats() {
     cout << "\t-> Network Statistics:" << endl;
-    cout << "\t\t-- Messages: " << msgs << endl;
-    cout << "\t\t-- Bytes: " << bts << endl;
+    cout << "\t\t-- Total messages: " << msgs << endl;
+    cout << "\t\t-- Total bytes: " << bts << endl;
 }
 
 

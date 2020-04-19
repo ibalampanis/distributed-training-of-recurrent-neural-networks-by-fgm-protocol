@@ -107,16 +107,16 @@ namespace protocols {
     // in the paper "Communication-Efficient Distributed Online Prediction
     // by Dynamic Model Synchronization"
     // by Michael Kamp, Mario Boley, Assaf Schuster and Izchak Sharfman.
-    struct SquaredNorm : SafezoneFunction {
+    struct P2Norm : SafezoneFunction {
 
 
         double threshold;               // The threshold of the variance between the models of the network.
         size_t batchSize;               // The number of points seen by the node since the last synchronization.
 
         // Constructors and Destructor 
-        SquaredNorm(arma::mat GlMd, double thr, size_t batch_sz);
+        P2Norm(arma::mat GlMd, double thr, size_t batch_sz);
 
-        ~SquaredNorm();
+        ~P2Norm();
 
         float Zeta(const arma::mat &params) override;
 

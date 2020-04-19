@@ -4,7 +4,7 @@
 
 
 using namespace controller;
-using namespace fgm;
+using namespace algorithms::fgm;
 using namespace std;
 
 int main(int argc, char **argv) {

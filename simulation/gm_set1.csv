@@ -1,2 +1,2 @@
-expID,sites,lstm_cells,threshold,batch_size,opt_max_iters,accuracy,rounds,bytes
-0,0,0,0,0,0,0,0,0
+expID,sites,lstm_cells,threshold,batch_size,opt_max_iters,accuracy,rounds,rebalances,bytes
+0,0,0,0,0,0,0,0,0,0

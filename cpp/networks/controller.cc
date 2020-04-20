@@ -29,6 +29,7 @@ Controller<networkType>::Controller(string cfg) : configFile(move(cfg)) {
     outputSize = root["data"].get("output_size", -1).asInt();
     rho = root["hyperparameters"].get("rho", -1).asInt();
     warmup = root["net"].get("warmup", false).asBool();
+    miniBatchSize = root["hyperparameters"].get("mini_batch_size", -1).asInt();
     interStats = root["simulations"].get("inter_stats", false).asBool();
 }
 
@@ -219,15 +220,17 @@ void Controller<networkType>::TrainOverNetwork() {
         mt19937 rng(rd());    // random-number engine used (Mersenne-Twister in this case)
         uniform_int_distribution<int> uni(0, net->sites.size() - 1); // guaranteed unbiased
 
-        int iterations = trainX.n_cols;
+        size_t mod = trainX.n_cols % miniBatchSize;
+
+        size_t iterations = (trainX.n_cols) / miniBatchSize;
         LoopProgressPercentage progressPercentage(iterations);
 
         // In this loop, whole dataset will get crossed as well as each
         // time point, a random node will get fit by a new point of dataset.
-        for (size_t i = 0; i < trainX.n_cols; i++) {
+        for (size_t i = 0; i < trainX.n_cols - mod; i += miniBatchSize) {
             size_t currentNode = uni(rng);
-            arma::cube x = trainX.subcube(arma::span(), arma::span(i, i), arma::span());
-            arma::cube y = trainY.subcube(arma::span(), arma::span(i, i), arma::span());
+            arma::cube x = trainX.subcube(arma::span(), arma::span(i, (i + miniBatchSize - 1)), arma::span());
+            arma::cube y = trainY.subcube(arma::span(), arma::span(i, (i + miniBatchSize - 1)), arma::span());
 
             net->TrainNode(currentNode, x, y);
 

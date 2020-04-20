@@ -39,6 +39,7 @@ namespace controller {
         double trainTestRatio;                      // Testing data is taken from the dataset in this ratio
         size_t rho;                                 // Number of time steps to look backward for in the RNN
         bool warmup;                                // Define if hub warmup is needed
+        size_t miniBatchSize;                       // Number of training samples given each time
         bool interStats;                            // Define if intermediate communication stats is needed
 
         // Stats

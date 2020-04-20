@@ -161,12 +161,6 @@ void algorithms::fgm::Coordinator::ShowOverallStats() {
     cout << "\t\t-- Number of subrounds: " << nSubrounds << endl;
     cout << "\t\t-- Accuracy: " << setprecision(4) << Accuracy() << "%" << endl;
     cout << "\t\t-- Total updates: " << nUpdates << endl;
-
-    for (auto nd:nodePtr)
-        cout << "\t\t\t-- Node: " << nd->site_id() << setprecision(4) << " - Usage: "
-             << (((double) nd->learner->UsedTimes() / (double) trainPoints) * 100.) << "%" <<
-             " (" << nd->learner->UsedTimes() << " of " << trainPoints << ")" << endl;
-
 }
 
 void algorithms::fgm::Coordinator::ShowProgress() {

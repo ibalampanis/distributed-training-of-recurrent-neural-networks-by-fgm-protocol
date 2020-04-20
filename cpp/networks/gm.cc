@@ -19,16 +19,14 @@ GmNet::GmNet(const set<source_id> &_hids, const string &_name, Query *_Q)
 *********************************************/
 algorithms::gm::Coordinator::Coordinator(network_t *nw, Query *Q) : process(nw), proxy(this), Q(Q), k(0),
                                                                     numViolations(0),
-                                                                    nRounds(0), nRebalances(0), nSzSent(0), nUpdates(0) {
+                                                                    nRounds(0), nRebalances(0), nSzSent(0),
+                                                                    nUpdates(0) {
     InitializeGlobalLearner();
     query = Q->CreateQueryState();
     safezone = query->Safezone(Cfg().cfgfile, Cfg().distributedLearningAlgorithm);
 }
 
-algorithms::gm::Coordinator::~Coordinator() {
-    delete safezone;
-    delete query;
-}
+algorithms::gm::Coordinator::~Coordinator() { delete query; }
 
 algorithms::gm::Coordinator::network_t *
 algorithms::gm::Coordinator::Net() { return dynamic_cast<network_t *>(host::net()); }
@@ -215,12 +213,6 @@ void algorithms::gm::Coordinator::ShowOverallStats() {
     cout << "\t\t-- Number of rebalances: " << nRebalances << endl;
     cout << "\t\t-- Accuracy: " << setprecision(4) << Accuracy() << "%" << endl;
     cout << "\t\t-- Total updates: " << nUpdates << endl;
-
-    for (auto nd:nodePtr)
-        cout << "\t\t\t-- Node: " << nd->site_id() << setprecision(4) << " - Usage: "
-             << (((double) nd->learner->UsedTimes() / (double) trainPoints) * 100.) << "%" <<
-             " (" << nd->learner->UsedTimes() << " of " << trainPoints << ")" << endl;
-
 }
 
 
@@ -228,11 +220,8 @@ void algorithms::gm::Coordinator::ShowOverallStats() {
 	Learning Node
 *********************************************/
 algorithms::gm::LearningNode::LearningNode(algorithms::gm::LearningNode::network_t *net, source_id hid,
-                                           algorithms::gm::LearningNode::query_t *Q)
-        : local_site(net,
-                     hid),
-          Q(Q),
-          coord(this) {
+                                           algorithms::gm::LearningNode::query_t *Q) : local_site(net, hid), Q(Q),
+                                                                                       coord(this) {
     coord <<= net->hub;
     InitializeLearner();
     datapointsPassed = 0;

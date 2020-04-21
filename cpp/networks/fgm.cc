@@ -125,7 +125,7 @@ oneway algorithms::fgm::Coordinator::SendIncrement(IntValue inc) {
         // Collect all data
         for (auto n : nodePtr)
             phi += proxy[n].SendZetaValue().value;
-
+        // FIXME: check the following condition, it is always FALSE
         if (phi >= barrier) {
             counter = 0;
             quantum = phi / (2 * k);
@@ -248,7 +248,6 @@ oneway algorithms::fgm::LearningNode::Reset(const Safezone &newsz, DoubleValue q
 
     // Initializng the helping matrices if they are not yet initialized.
     arma::mat m = arma::mat(arma::size(eDelta), arma::fill::zeros);
-    // FIXME: max()
     if (eDelta.empty() || approx_equal(eDelta, m, "absdiff", 1e-8)) {
         arma::mat tmp1 = arma::mat(arma::size(learner->ModelParameters()), arma::fill::zeros);
         arma::mat tmp2 = arma::mat(arma::size(learner->ModelParameters()), arma::fill::zeros);

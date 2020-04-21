@@ -97,9 +97,6 @@ namespace protocols {
 
         virtual float RegionAdmissibility(const arma::mat &mdl1, const arma::mat &mdl2) { return 0.; }
 
-        virtual float RegionAdmissibilityReb(const arma::mat &mdl1, const arma::mat &mdl2,
-                                             double coef) { return 0.; }
-
         virtual size_t byte_size() { return 0; }
     };
 
@@ -123,9 +120,6 @@ namespace protocols {
         float RegionAdmissibility(const arma::mat &mdl) override;
 
         float RegionAdmissibility(const arma::mat &mdl1, const arma::mat &mdl2) override;
-
-        float RegionAdmissibilityReb(const arma::mat &mdl1, const arma::mat &mdl2,
-                                     double coef) override;
 
         size_t byte_size() override;
     };

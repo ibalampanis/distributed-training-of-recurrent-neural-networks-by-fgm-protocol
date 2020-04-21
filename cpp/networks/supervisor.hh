@@ -1,5 +1,5 @@
-#ifndef DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_CONTROLLER_HH
-#define DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_CONTROLLER_HH
+#ifndef DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_SUPERVISOR_HH
+#define DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_SUPERVISOR_HH
 
 
 #include <fstream>
@@ -12,7 +12,7 @@
 #include "ddsim/dds.hh"
 
 
-namespace controller {
+namespace supervisor {
 
     using namespace std;
     using namespace protocols;
@@ -21,10 +21,10 @@ namespace controller {
     using namespace dds;
 
 
-    // The purpose of Controller class is to synchronize the training of the
+    // The purpose of Supervisor class is to synchronize the training of the
     // network nodes by providing the appropriate data points to these.
     template<typename networkType>
-    class Controller {
+    class Supervisor {
 
     protected:
         string configFile;                          // JSON file to read the hyperparameters.
@@ -51,7 +51,7 @@ namespace controller {
 
     public:
         // Constructor 
-        explicit Controller<networkType>(string cfg);
+        explicit Supervisor<networkType>(string cfg);
 
         // This method initializes all the networks. 
         void InitializeSimulation();
@@ -86,6 +86,6 @@ namespace controller {
         bool bUpdateIsCalled;
     };
 
-} // end namespace controller
+} // end namespace supervisor
 
-#endif //DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_CONTROLLER_HH
+#endif //DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_SUPERVISOR_HH

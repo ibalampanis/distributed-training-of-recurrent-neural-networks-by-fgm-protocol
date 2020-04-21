@@ -57,7 +57,10 @@ void algorithms::fgm::Coordinator::InitializeGlobalLearner() {
     }
 }
 
-void algorithms::fgm::Coordinator::WarmupGlobalLearner() { globalLearner->TrainModelByBatch(trainX, trainY); }
+void algorithms::fgm::Coordinator::WarmupGlobalLearner() {
+    globalLearner->TrainModelByBatch(trainX, trainY);
+    query->globalModel = globalLearner->ModelParameters();
+}
 
 void algorithms::fgm::Coordinator::SetupConnections() {
 
@@ -78,7 +81,7 @@ void algorithms::fgm::Coordinator::StartRound() {
 
     // Calculating the new phi, quantum and the minimum acceptable value for phi.
     phi = k * safezone->Zeta(query->globalModel);
-    quantum = phi / (2 * k);
+    quantum = phi / double((2 * k));
     assert(quantum > 0);
     barrier = Cfg().precision * phi;
 
@@ -97,6 +100,7 @@ void algorithms::fgm::Coordinator::StartRound() {
 }
 
 void algorithms::fgm::Coordinator::FetchUpdates(node_t *node) {
+
     ModelState up = proxy[node].SendDrift();
     if (!arma::approx_equal(arma::mat(arma::size(up._model), arma::fill::zeros), up._model, "absdiff",
                             1e-6)) {
@@ -105,7 +109,10 @@ void algorithms::fgm::Coordinator::FetchUpdates(node_t *node) {
             nodeBoolDrift[node] = 1;
             cnt++;
         }
-        params += up._model;
+        if (params.empty())
+            params = up._model;
+        else
+            params += up._model;
     }
     nUpdates += up.updates;
 }
@@ -181,13 +188,16 @@ void algorithms::fgm::Coordinator::ShowProgress() {
 double algorithms::fgm::Coordinator::Accuracy() { return globalLearner->MakePrediction(testX, testY); }
 
 
-
 /*********************************************
 	Learning Node
 *********************************************/
 
-algorithms::fgm::LearningNode::LearningNode(network_t *net, source_id hid, continuous_query_t *_Q)
-        : local_site(net, hid), Q(_Q), coord(this) {
+algorithms::fgm::LearningNode::LearningNode(network_t *net, source_id hid, continuous_query_t *Q) : local_site(net,
+                                                                                                               hid),
+                                                                                                    Q(Q), coord(this),
+                                                                                                    counter(0),
+                                                                                                    quantum(0),
+                                                                                                    zeta(0) {
     coord <<= net->hub;
     InitializeLearner();
     datapointsPassed = 0;
@@ -239,13 +249,11 @@ oneway algorithms::fgm::LearningNode::Reset(const Safezone &newsz, DoubleValue q
     // Initializng the helping matrices if they are not yet initialized.
     arma::mat m = arma::mat(arma::size(eDelta), arma::fill::zeros);
     // FIXME: max()
-    if (arma::max(arma::max(arma::abs(eDelta - m))) < 1e-8) {
-        for (size_t i = 0; i < learner->ModelParameters().size(); i++) {
-            arma::mat tmp1 = arma::mat(arma::size(learner->ModelParameters()), arma::fill::zeros);
-            arma::mat tmp2 = arma::mat(arma::size(learner->ModelParameters()), arma::fill::zeros);
-            deltaVector = tmp1;
-            eDelta = tmp2;
-        }
+    if (eDelta.empty() || approx_equal(eDelta, m, "absdiff", 1e-8)) {
+        arma::mat tmp1 = arma::mat(arma::size(learner->ModelParameters()), arma::fill::zeros);
+        arma::mat tmp2 = arma::mat(arma::size(learner->ModelParameters()), arma::fill::zeros);
+        deltaVector = tmp1;
+        eDelta = tmp2;
     }
 
     // Reseting the E_Delta vector.
@@ -263,7 +271,12 @@ ModelState algorithms::fgm::LearningNode::SendDrift() {
     // Getting the delta vector is done as getting the local statistic.
     deltaVector.clear();
     arma::mat dr = arma::mat(arma::size(learner->ModelParameters()), arma::fill::zeros);
-    dr = learner->ModelParameters() - eDelta;
+
+    if (eDelta.empty())
+        dr = learner->ModelParameters();
+    else
+        dr = learner->ModelParameters() - eDelta;
+
     deltaVector = dr;
 
     return ModelState(deltaVector, learner->NumberOfUpdates());

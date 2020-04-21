@@ -3,21 +3,21 @@
 #include <jsoncpp/json/json.h>
 #include <iostream>
 #include <random>
-#include "controller.hh"
+#include "supervisor.hh"
 
 
 using namespace protocols;
 using namespace algorithms;
 using namespace arma;
 using namespace dds;
-using namespace controller;
+using namespace supervisor;
 
 
 /*********************************************
-	Controller
+	Supervisor
 *********************************************/
 template<typename networkType>
-Controller<networkType>::Controller(string cfg) : configFile(move(cfg)) {
+Supervisor<networkType>::Supervisor(string cfg) : configFile(move(cfg)) {
     Json::Value root;
     ifstream cfgfile(configFile);
     cfgfile >> root;
@@ -34,7 +34,7 @@ Controller<networkType>::Controller(string cfg) : configFile(move(cfg)) {
 }
 
 template<typename networkType>
-void Controller<networkType>::InitializeSimulation() {
+void Supervisor<networkType>::InitializeSimulation() {
 
     cout << "\n[+]Initializing the star network ..." << endl;
     try {
@@ -80,7 +80,7 @@ void Controller<networkType>::InitializeSimulation() {
 }
 
 template<typename networkType>
-void Controller<networkType>::ShowNetworkInfo() const {
+void Supervisor<networkType>::ShowNetworkInfo() const {
 
     Json::Value root;
     ifstream cfgfile(configFile); // Parse from JSON file.
@@ -98,7 +98,7 @@ void Controller<networkType>::ShowNetworkInfo() const {
 }
 
 template<typename networkType>
-void Controller<networkType>::CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y) {
+void Supervisor<networkType>::CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y) {
 
     for (size_t i = 0; i < dataset.n_cols - rho; i++) {
         X.subcube(arma::span(), arma::span(i), arma::span()) = dataset.submat(arma::span(), arma::span(i, i + rho - 1));
@@ -108,7 +108,7 @@ void Controller<networkType>::CreateTimeSeriesData(arma::mat dataset, arma::cube
 }
 
 template<typename networkType>
-void Controller<networkType>::DataPreparation() {
+void Supervisor<networkType>::DataPreparation() {
 
     arma::mat dataset;
     // In Armadillo rows represent features, columns represent data points.
@@ -188,7 +188,7 @@ void Controller<networkType>::DataPreparation() {
 }
 
 template<typename networkType>
-void Controller<networkType>::TrainOverNetwork() {
+void Supervisor<networkType>::TrainOverNetwork() {
 
     cout << "\n[+]Preparing data ..." << endl;
     try {
@@ -197,7 +197,6 @@ void Controller<networkType>::TrainOverNetwork() {
     } catch (...) {
         cout << "[-]Preparing data ... ERROR." << endl;
     }
-
 
     try {
         if (warmup) {
@@ -208,7 +207,6 @@ void Controller<networkType>::TrainOverNetwork() {
     } catch (...) {
         cout << " ERROR." << endl;
     }
-
 
     cout << "\n[+]Training ... ";
     try {
@@ -254,7 +252,7 @@ void Controller<networkType>::TrainOverNetwork() {
 }
 
 template<typename networkType>
-void Controller<networkType>::GatherIntermediateNetStats() {
+void Supervisor<networkType>::GatherIntermediateNetStats() {
     // Gathering the info of the communication triggered by the streaming batch.
     size_t batchMessages = 0;
     size_t batchBytes = 0;
@@ -270,7 +268,7 @@ void Controller<networkType>::GatherIntermediateNetStats() {
 }
 
 template<typename networkType>
-void Controller<networkType>::ShowNetworkStats() {
+void Supervisor<networkType>::ShowNetworkStats() {
     cout << "\t-> Network Statistics:" << endl;
     cout << "\t\t-- Total messages: " << msgs << endl;
     cout << "\t\t-- Total bytes: " << bts << endl;

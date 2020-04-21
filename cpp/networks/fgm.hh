@@ -52,18 +52,18 @@ namespace algorithms {
             map<node_t *, size_t> nodeBoolDrift;
             vector<node_t *> nodePtr;
 
-            double phi;                          // The phi value of the functional geometric protocol.
-            double quantum;                      // The quantum of the functional geometric protocol.
+            double phi;                         // The phi value of the functional geometric protocol.
+            double quantum;                     // The quantum of the functional geometric protocol.
             size_t counter;                     // A counter used by the functional geometric protocol.
-            double barrier;                      // The smallest number the zeta function can reach.
+            double barrier;                     // The smallest number the zeta function can reach.
             size_t cnt;                         // Helping counter.
             arma::mat params;                   // A placeholder for the parameters send by the nodes.
 
             // Statistics
-            size_t nRounds;                   // Total number of rounds
-            size_t nSubrounds;                // Total number of subrounds
-            size_t nSzSent;                    // Total safe zones sent
-            size_t nUpdates;                // Number of stream updates received
+            size_t nRounds;                     // Total number of rounds
+            size_t nSubrounds;                  // Total number of subrounds
+            size_t nSzSent;                     // Total safe zones sent
+            size_t nUpdates;                    // Number of stream updates received
 
             // Constructor and Destructor
             Coordinator(network_t *nw, Query *Q);
@@ -131,7 +131,7 @@ namespace algorithms {
             float quantum;                      // The quantum provided by the hub.
             float zeta;                         // The value of the safezone function.
 
-            LearningNode(network_t *net, source_id hid, continuous_query_t *_Q);
+            LearningNode(network_t *net, source_id hid, continuous_query_t *Q);
 
             const ProtocolConfig &Cfg() const;
 

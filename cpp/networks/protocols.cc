@@ -111,21 +111,16 @@ P2Norm::P2Norm(arma::mat GlMd, double thr, size_t batch_sz) : SafezoneFunction(G
 P2Norm::~P2Norm() = default;
 
 float P2Norm::Zeta(const arma::mat &params) {
+
+    if (globalModel.empty() || params.empty())
+        return 1;
+
     float res = 0.;
 
     arma::mat subtr = globalModel - params;
     res += arma::dot(subtr, subtr);
 
     return float(sqrt(threshold) - sqrt(res));
-}
-
-float P2Norm::RegionAdmissibilityReb(const arma::mat &mdl1, const arma::mat &mdl2, double coef) {
-    float res = 0.;
-    arma::mat subtr = mdl1 - mdl2;
-    subtr *= coef;
-    res += arma::dot(subtr, subtr);
-
-    return float(coef * (sqrt(threshold) - sqrt(res)));
 }
 
 float P2Norm::RegionAdmissibility(const arma::mat &mdl) {
@@ -142,6 +137,9 @@ float P2Norm::RegionAdmissibility(const arma::mat &mdl) {
 }
 
 float P2Norm::RegionAdmissibility(const arma::mat &mdl1, const arma::mat &mdl2) {
+
+    if (mdl1.empty() || mdl2.empty())
+        return -1;
 
     double res = 0.;
     arma::mat subtr = mdl1 - mdl2;

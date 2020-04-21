@@ -64,6 +64,8 @@ void algorithms::gm::Coordinator::SetupConnections() {
     k = nodePtr.size();
 }
 
+void algorithms::gm::Coordinator::WarmupGlobalLearner() { globalLearner->TrainModelByBatch(trainX, trainY); }
+
 void algorithms::gm::Coordinator::StartRound() {
     // Send new safezone.
     for (auto n : Net()->sites) {
@@ -77,8 +79,6 @@ void algorithms::gm::Coordinator::StartRound() {
 }
 
 void algorithms::gm::Coordinator::Rebalance(node_t *lvnode) {
-
-    nRebalances++;
 
     Bcompl.clear();
     B.insert(lvnode);
@@ -122,9 +122,9 @@ void algorithms::gm::Coordinator::Rebalance(node_t *lvnode) {
         // Rebalancing
         for (size_t i = 0; i < Mean.size(); i++)
             Mean.at(i) += query->globalModel.at(i);
-        for (auto n : B) {
+        for (auto n : B)
             proxy[n].ReceiveRebGlobalParameters(ModelState(Mean, 0));
-        }
+        nRebalances++;
     } else {
         // New round
         numViolations = 0;
@@ -246,8 +246,6 @@ void algorithms::gm::LearningNode::InitializeLearner() {
         throw;
     }
 }
-
-void algorithms::gm::Coordinator::WarmupGlobalLearner() { globalLearner->TrainModelByBatch(trainX, trainY); }
 
 void algorithms::gm::LearningNode::UpdateState(arma::cube &x, arma::cube &y) {
 

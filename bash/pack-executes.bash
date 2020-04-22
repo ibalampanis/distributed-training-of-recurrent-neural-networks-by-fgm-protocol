@@ -4,11 +4,11 @@ mkdir out
 
 cd ../
 
-for ((i=2; i<=5; i++)); do
-#    ./cmake-build-debug/bin/GMLearn /home/ibalampanis/tests/simulation/gm-set-1/gm_set1_1.json >> bash/out/exp1_iter${i}.txt &
-#    ./cmake-build-debug/bin/GMLearn /home/ibalampanis/tests/simulation/gm-set-1/gm_set1_2.json >> bash/out/exp2_iter${i}.txt &
-#    ./cmake-build-debug/bin/GMLearn /home/ibalampanis/tests/simulation/gm-set-1/gm_set1_3.json >> bash/out/exp3_iter${i}.txt &
-#    ./cmake-build-debug/bin/GMLearn /home/ibalampanis/tests/simulation/gm-set-1/gm_set1_4.json >> bash/out/exp4_iter${i}.txt &
+for ((i=1; i<=5; i++)); do
+    ./cmake-build-debug/bin/GMLearn /home/ibalampanis/tests/simulation/gm-set-1/gm_set1_1.json >> bash/out/exp1_iter${i}.txt
+    ./cmake-build-debug/bin/GMLearn /home/ibalampanis/tests/simulation/gm-set-1/gm_set1_2.json >> bash/out/exp2_iter${i}.txt
+    ./cmake-build-debug/bin/GMLearn /home/ibalampanis/tests/simulation/gm-set-1/gm_set1_3.json >> bash/out/exp3_iter${i}.txt
+    ./cmake-build-debug/bin/GMLearn /home/ibalampanis/tests/simulation/gm-set-1/gm_set1_4.json >> bash/out/exp4_iter${i}.txt
     ./cmake-build-debug/bin/GMLearn /home/ibalampanis/tests/simulation/gm-set-1/gm_set1_5.json >> bash/out/exp5_iter${i}.txt
     ./cmake-build-debug/bin/GMLearn /home/ibalampanis/tests/simulation/gm-set-1/gm_set1_6.json >> bash/out/exp6_iter${i}.txt
     ./cmake-build-debug/bin/GMLearn /home/ibalampanis/tests/simulation/gm-set-1/gm_set1_7.json >> bash/out/exp7_iter${i}.txt
@@ -25,3 +25,7 @@ for ((i=2; i<=5; i++)); do
     ./cmake-build-debug/bin/GMLearn /home/ibalampanis/tests/simulation/gm-set-1/gm_set1_21.json >> bash/out/exp21_iter${i}.txt
     ./cmake-build-debug/bin/GMLearn /home/ibalampanis/tests/simulation/gm-set-1/gm_set1_23.json >> bash/out/exp23_iter${i}.txt
 done
+
+
+
+

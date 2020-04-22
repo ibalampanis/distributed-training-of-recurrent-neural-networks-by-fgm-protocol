@@ -1,3 +1,2 @@
 * linguist-vendored
-*.cc linguist-vendored=false
-*.hh linguist-vendored=false
+*.ipynb linguist-vendored=false

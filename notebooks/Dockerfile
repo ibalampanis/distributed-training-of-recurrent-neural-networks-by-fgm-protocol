@@ -15,3 +15,6 @@ RUN adduser --disabled-password \
     ${NB_USER}
 WORKDIR ${HOME}
 USER ${USER}
+
+RUN pip install -r requirements.txt
+RUN pip3 install -r requirements.txt

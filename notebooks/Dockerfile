@@ -1,7 +1,18 @@
 FROM python:3.7-slim
+
+RUN apt-get update \
+&& apt-get install gcc -y \
+&& apt-get clean
+
 # install the notebook package
 RUN pip install --no-cache --upgrade pip && \
     pip install --no-cache notebook && \
+
+# install requirements
+COPY requirements.txt /app/requirements.txt
+WORKDIR app
+RUN pip install --user -r requirements.txt
+COPY . /app
 
 # create user with a home directory
 ARG NB_USER

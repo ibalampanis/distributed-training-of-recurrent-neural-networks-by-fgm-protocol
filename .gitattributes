@@ -1,2 +1,5 @@
 * linguist-vendored
+* linguist-vendored
+*.cc linguist-vendored=true
+*.hh linguist-vendored=true
 *.ipynb linguist-vendored=false

@@ -16,4 +16,4 @@ RUN adduser --disabled-password \
 WORKDIR ${HOME}
 USER ${USER}
 
-pip install pandas matplotlib
+RUN pip install pandas matplotlib

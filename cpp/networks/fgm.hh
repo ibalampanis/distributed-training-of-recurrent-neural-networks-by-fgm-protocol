@@ -1,11 +1,11 @@
-#ifndef DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_FGM_NETWORK_HH_TMPP
-#define DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_FGM_NETWORK_HH_TMPP
+#ifndef DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_FGM_NETWORK_HH
+#define DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_FGM_NETWORK_HH
 
 #include <boost/range/adaptors.hpp>
 #include <boost/shared_ptr.hpp>
 #include <random>
 #include "protocols.hh"
-#include "cpp/models/rnn_learner.hh"
+#include "cpp/models/rnn.hh"
 
 
 namespace algorithms {
@@ -14,7 +14,7 @@ namespace algorithms {
 
         using namespace dds;
         using namespace protocols;
-        using namespace rnn_learner;
+        using namespace rnn;
 
         struct Coordinator;
         struct CoordinatorProxy;
@@ -43,8 +43,8 @@ namespace algorithms {
             arma::cube testX, testY;            // Testset data points and labels
             size_t trainPoints;
             Query *Q;                           // query
-            QueryState *query;                  // current query state
-            SafezoneFunction *safezone;         // the safe zone wrapper
+            QueryState *queryState;             // current query state
+            SafeFunction *safeFunction;         // the safe zone wrapper
             size_t k;                           // number of sites
 
             // Nodes indexing
@@ -52,7 +52,7 @@ namespace algorithms {
             map<node_t *, size_t> nodeBoolDrift;
             vector<node_t *> nodePtr;
 
-            double phi;                         // The phi value of the functional geometric protocol.
+            double psi;                         // The psi value of the functional geometric protocol.
             double quantum;                     // The quantum of the functional geometric protocol.
             size_t counter;                     // A counter used by the functional geometric protocol.
             double barrier;                     // The smallest number the zeta function can reach.
@@ -89,7 +89,7 @@ namespace algorithms {
             void FetchUpdates(node_t *n);
 
             // Remote call on host violation
-            oneway SendIncrement(IntValue inc);
+            oneway ReceiveIncrement(IntValue inc);
 
             void FinishRound();
 
@@ -105,7 +105,7 @@ namespace algorithms {
         struct CoordinatorProxy : remote_proxy<Coordinator> {
             using coordinator_t = Coordinator;
 
-            REMOTE_METHOD(coordinator_t, SendIncrement);
+            REMOTE_METHOD(coordinator_t, ReceiveIncrement);
 
             explicit CoordinatorProxy(process *c) : remote_proxy<coordinator_t>(c) {}
         };
@@ -123,8 +123,9 @@ namespace algorithms {
             Query *Q;                           // The query management object.
             Safezone szone;                     // The safezone object.
             RnnLearner *learner;                // The learning algorithm.
-            arma::mat deltaVector;
-            arma::mat eDelta;
+//            arma::mat deltaVector;
+//            arma::mat eDelta;
+            arma::mat drift;
             coord_proxy_t coord;                // The proxy of the coordinator/hub.
             size_t datapointsPassed;
             size_t counter;                     // The counter used by the FGM protocol.
@@ -149,7 +150,7 @@ namespace algorithms {
             ModelState SendDrift();
 
             // Transfer the value of z(Xi) to the coordinator
-            DoubleValue SendZetaValue();
+            DoubleValue SendZeta();
 
             // Loading the parameters of the hub to the local model.
             oneway ReceiveGlobalModel(const ModelState &params);
@@ -161,11 +162,12 @@ namespace algorithms {
             REMOTE_METHOD(node_t, Reset);
             REMOTE_METHOD(node_t, ReceiveQuantum);
             REMOTE_METHOD(node_t, SendDrift);
-            REMOTE_METHOD(node_t, SendZetaValue);
+            REMOTE_METHOD(node_t, SendZeta);
             REMOTE_METHOD(node_t, ReceiveGlobalModel);
 
             explicit LearningNodeProxy(process *p) : remote_proxy<node_t>(p) {}
         };
+
     } // end namespace fgm
 } // end namespace algorithms
 

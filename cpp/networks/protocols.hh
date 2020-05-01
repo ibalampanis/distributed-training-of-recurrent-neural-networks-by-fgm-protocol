@@ -11,13 +11,13 @@
 #include <mlpack/core.hpp>
 #include "ddsim/dsarch.hh"
 #include "ddsim/dds.hh"
-#include "cpp/models/rnn_learner.hh"
+#include "cpp/models/rnn.hh"
 
 namespace protocols {
 
     using namespace dds;
     using namespace arma;
-    using namespace rnn_learner;
+    using namespace rnn;
 
 
     // A channel implementation which accounts a combined network cost.
@@ -77,19 +77,19 @@ namespace protocols {
     };
 
     // The base class of a safezone function for machine learning purposes.
-    struct SafezoneFunction {
+    struct SafeFunction {
 
         arma::mat globalModel;          // The global model.
 
-        explicit SafezoneFunction(arma::mat mdl);
+        explicit SafeFunction(arma::mat mdl);
 
-        ~SafezoneFunction();
+        ~SafeFunction();
 
         arma::mat GlobalModel() const;
 
         void UpdateDrift(arma::mat &drift, arma::mat &params, float mul);
 
-        virtual float Zeta(const arma::mat &params) { return 0.; }
+        virtual float Phi(const arma::mat &params) { return 0.; }
 
         virtual size_t RegionAdmissibility(const size_t counter) { return 0; }
 
@@ -104,7 +104,7 @@ namespace protocols {
     // in the paper "Communication-Efficient Distributed Online Prediction
     // by Dynamic Model Synchronization"
     // by Michael Kamp, Mario Boley, Assaf Schuster and Izchak Sharfman.
-    struct P2Norm : SafezoneFunction {
+    struct P2Norm : SafeFunction {
 
 
         double threshold;               // The threshold of the variance between the models of the network.
@@ -115,7 +115,7 @@ namespace protocols {
 
         ~P2Norm();
 
-        float Zeta(const arma::mat &params) override;
+        float Phi(const arma::mat &params) override;
 
         float RegionAdmissibility(const arma::mat &mdl) override;
 
@@ -129,13 +129,13 @@ namespace protocols {
     // but it conforms to the standard functional API. It is copyable and in addition, it
     // provides a byte_size() method, making it suitable for integration with the middleware.
     class Safezone {
-        SafezoneFunction *szone;        // the safezone function, if any
+        SafeFunction *szone;        // the safezone function, if any
 
     public:
 
         Safezone();
 
-        explicit Safezone(SafezoneFunction *sz);
+        explicit Safezone(SafeFunction *sz);
 
         ~Safezone();
 
@@ -151,7 +151,7 @@ namespace protocols {
 
         void Swap(Safezone &other);
 
-        SafezoneFunction *GetSzone();
+        SafeFunction *GetSzone();
 
         void operator()(arma::mat drift, arma::mat params, float mul);
 
@@ -183,10 +183,10 @@ namespace protocols {
         // After this function, the query estimate, accuracy and safezone should adjust to the new global model.
         void UpdateEstimate(arma::mat mdl);
 
-        // Return a SafezoneFunction object for the safe zone function.
+        // Return a SafeFunction object for the safe zone function.
         // The returned object shares state with this object.
         // It is the caller's responsibility to delete the returned object and do so before this object is destroyed.
-        SafezoneFunction *Safezone(const string &cfg, string algo);
+        SafeFunction *Safezone(const string &cfg, string algo);
 
         size_t byte_size() const;
     };
@@ -229,7 +229,7 @@ namespace protocols {
         Query *Q;
 
         // Constructor and Destructor
-        LearningNetwork(const set<source_id> &_hids, const string &_name, Query *_Q);
+        LearningNetwork(const set<source_id> &_hids, const string &_name, Query *Q);
 
         ~LearningNetwork();
 

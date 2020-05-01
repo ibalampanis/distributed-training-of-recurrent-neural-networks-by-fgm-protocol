@@ -15,7 +15,7 @@ include_directories(${PYTHON_INCLUDE_DIRS})
 ########################### CentrEEG #######################################
 ############################################################################
 
-set(MLSOURCES ../models/rnn_learner.cc)
+set(MLSOURCES ../models/rnn.cc)
 
 add_executable(CentrLearn centr_training.cc ${MLSOURCES})
 target_link_libraries(CentrLearn
@@ -35,13 +35,13 @@ add_executable(FGMLearn fgm_training_net.cc)
 # The abbreviation dml came from "Distributed Machine Learning"
 #
 # This is a static library which has built from the below files:
-#       -> models/rnn_learner.cc
+#       -> models/rnn.cc
 #       -> networks/*.cc
 #       -> networks/ddssim/*.cc
 
 file(GLOB DDSSIM_SOURCES ../networks/ddsim/*.cc)
 file(GLOB NET_SOURCES ../networks/*.cc)
-set(ML_SOURCES ../models/rnn_learner.cc)
+set(ML_SOURCES ../models/rnn.cc)
 set(DML_SOURCES ${ML_SOURCES} ${DDSSIM_SOURCES} ${NET_SOURCES})
 add_library(dml STATIC ${DML_SOURCES})
 

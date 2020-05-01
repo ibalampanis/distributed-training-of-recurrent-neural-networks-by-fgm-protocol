@@ -5,7 +5,7 @@
 #include <boost/shared_ptr.hpp>
 #include <random>
 #include "protocols.hh"
-#include "cpp/models/rnn_learner.hh"
+#include "cpp/models/rnn.hh"
 
 
 namespace algorithms {
@@ -13,7 +13,7 @@ namespace algorithms {
     namespace gm {
 
         using namespace dds;
-        using namespace rnn_learner;
+        using namespace rnn;
         using namespace protocols;
 
         struct Coordinator;
@@ -45,7 +45,7 @@ namespace algorithms {
             size_t trainPoints;
             Query *Q;                           // query
             QueryState *query;                  // current query state
-            SafezoneFunction *safezone;         // the safe zone wrapper
+            SafeFunction *safezone;             // the safe zone wrapper
             size_t k;                           // number of sites
             map<node_t *, size_t> nodeIndex;    // index the nodes
             vector<node_t *> nodePtr;
@@ -157,6 +157,7 @@ namespace algorithms {
 
             explicit LearningNodeProxy(process *p) : remote_proxy<node_t>(p) {}
         };
+
     } // end namespace gm
 } // end namespace algorithms
 

@@ -23,7 +23,7 @@ cmake --build cmake-build-debug --target GMLearn
 and to run this target, type:
 
 ```bash
-./cmake-build-debug/bin/GMLearn absolute/path/to/simulation/gm_eeg.json
+./cmake-build-debug/bin/GMLearn absolute/path/to/input/gm_sample.json
 ```
 
 For more information about this work, check [here](latex/proposal/proposal.pdf) the thesis proposal.

@@ -4,12 +4,12 @@ project(Distributed_Training_of_Recurrent_Neural_Networks_by_FGM_protocol C CXX)
 # First, define all the compilation options.
 # We default to debugging mode for developers.
 option(FORCE_CXX14
-        "Don't check that the compiler supports C++11, just assume it.  Make sure to specify any necessary flag to enable C++14 as part of CXXFLAGS."
+        "Don't check that the compiler supports C++14, just assume it.  Make sure to specify any necessary flag to enable C++14 as part of CXXFLAGS."
         OFF)
 option(DOWNLOAD_ENSMALLEN "If ensmallen is not found, download it." ON)
 option(USE_OPENMP "If available, use OpenMP for parallelization." OFF)
 
-# If we are not forcing C++11 support, check that the compiler supports C++11
+# If we are not forcing C++14 support, check that the compiler supports C++14
 # and enable it.
 if (NOT FORCE_CXX14)
     include(CMake/CXX14.cmake)

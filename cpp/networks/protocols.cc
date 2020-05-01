@@ -1,12 +1,12 @@
 #include <jsoncpp/json/json.h>
 #include "protocols.hh"
-#include "cpp/models/rnn_learner.hh"
+#include "cpp/models/rnn.hh"
 #include "ddsim/dsarch.hh"
 
 using namespace protocols;
 using namespace dds;
 using namespace arma;
-using namespace rnn_learner;
+using namespace rnn;
 
 /*********************************************
 	TCP Channel
@@ -59,13 +59,13 @@ size_t MatrixMessage::byte_size() const { return sizeof(float) * sub_params.n_el
 /*********************************************
 	Safezone Function
 *********************************************/
-SafezoneFunction::SafezoneFunction(arma::mat mdl) : globalModel(move(mdl)) {}
+SafeFunction::SafeFunction(arma::mat mdl) : globalModel(move(mdl)) {}
 
-SafezoneFunction::~SafezoneFunction() = default;
+SafeFunction::~SafeFunction() = default;
 
-arma::mat SafezoneFunction::GlobalModel() const { return globalModel; }
+arma::mat SafeFunction::GlobalModel() const { return globalModel; }
 
-void SafezoneFunction::UpdateDrift(arma::mat &drift, arma::mat &params, float mul) {
+void SafeFunction::UpdateDrift(arma::mat &drift, arma::mat &params, float mul) {
     using arma::mat;
 
     if (globalModel.empty()) {
@@ -104,23 +104,22 @@ void SafezoneFunction::UpdateDrift(arma::mat &drift, arma::mat &params, float mu
 /*********************************************
 	P2Norm Safezone Function
 *********************************************/
-P2Norm::P2Norm(arma::mat GlMd, double thr, size_t batch_sz) : SafezoneFunction(GlMd),
+P2Norm::P2Norm(arma::mat GlMd, double thr, size_t batch_sz) : SafeFunction(GlMd),
                                                               threshold(thr),
                                                               batchSize(batch_sz) {}
 
 P2Norm::~P2Norm() = default;
 
-float P2Norm::Zeta(const arma::mat &params) {
+float P2Norm::Phi(const arma::mat &params) {
 
-    if (globalModel.empty() || params.empty())
-        return 1;
+    float leftTerm, rightTerm;
 
-    float res = 0.;
+    leftTerm = (float) ((-1 * threshold * arma::norm(globalModel)) -
+                        ((arma::dot(params, globalModel)) / arma::norm(globalModel)));
 
-    arma::mat subtr = globalModel - params;
-    res += arma::dot(subtr, subtr);
+    rightTerm = (float) ((arma::norm((params + globalModel))) - ((1 + threshold) * arma::norm(globalModel)));
 
-    return float(sqrt(threshold) - sqrt(res));
+    return std::max(leftTerm, rightTerm);
 }
 
 float P2Norm::RegionAdmissibility(const arma::mat &mdl) {
@@ -128,12 +127,12 @@ float P2Norm::RegionAdmissibility(const arma::mat &mdl) {
     if (globalModel.empty() || mdl.empty())
         return -1;
 
-    double dotProduct = 0.;
+    float res = 0.;
 
-    arma::mat sub = mdl - globalModel;
-    dotProduct = arma::dot(sub, sub);
+    arma::mat subtr = globalModel - mdl;
+    res += arma::dot(subtr, subtr);
 
-    return float(sqrt(threshold) - sqrt(dotProduct));
+    return float(sqrt(threshold) - sqrt(res));
 }
 
 float P2Norm::RegionAdmissibility(const arma::mat &mdl1, const arma::mat &mdl2) {
@@ -159,7 +158,7 @@ Safezone::Safezone() : szone(nullptr) {}
 Safezone::~Safezone() = default;
 
 // valid safezone
-Safezone::Safezone(SafezoneFunction *sz) : szone(sz) {}
+Safezone::Safezone(SafeFunction *sz) : szone(sz) {}
 
 // Movable
 Safezone::Safezone(Safezone &&other) noexcept { Swap(other); }
@@ -182,7 +181,7 @@ Safezone &Safezone::operator=(const Safezone &other) {
 
 void Safezone::Swap(Safezone &other) { swap(szone, other.szone); }
 
-SafezoneFunction *Safezone::GetSzone() { return (szone != nullptr) ? szone : nullptr; }
+SafeFunction *Safezone::GetSzone() { return (szone != nullptr) ? szone : nullptr; }
 
 void Safezone::operator()(arma::mat drift, arma::mat params, float mul) { szone->UpdateDrift(drift, params, mul); }
 
@@ -212,7 +211,7 @@ QueryState::~QueryState() = default;
 
 void QueryState::UpdateEstimate(arma::mat mdl) { globalModel += mdl; }
 
-SafezoneFunction *QueryState::Safezone(const string &cfg, string algo) {
+SafeFunction *QueryState::Safezone(const string &cfg, string algo) {
 
     Json::Value root;
     ifstream cfgfl(cfg);
@@ -261,8 +260,8 @@ double Query::QueryAccuracy(RnnLearner *rnn, arma::cube &tX, arma::cube &tY) { r
 	Learning Network
 *********************************************/
 template<typename Net, typename Coord, typename Node>
-LearningNetwork<Net, Coord, Node>::LearningNetwork(const set<source_id> &_hids, const string &_name, Query *_Q)
-        : star_network_t(_hids), Q(_Q) {
+LearningNetwork<Net, Coord, Node>::LearningNetwork(const set<source_id> &_hids, const string &_name, Query *Q)
+        : star_network_t(_hids), Q(Q) {
     this->set_name(_name);
     this->setup(Q);
 }
@@ -272,14 +271,6 @@ LearningNetwork<Net, Coord, Node>::~LearningNetwork() { delete Q; }
 
 template<typename Net, typename Coord, typename Node>
 const ProtocolConfig &LearningNetwork<Net, Coord, Node>::Cfg() const { return Q->config; }
-
-template<typename Net, typename Coord, typename Node>
-channel *LearningNetwork<Net, Coord, Node>::CreateChannel(host *src, host *dst, rpcc_t endp) const {
-    if (!dst->is_mcast())
-        return new TcpChannel(src, dst, endp);
-    else
-        return CreateChannel(src, dst, endp);
-}
 
 template<typename Net, typename Coord, typename Node>
 void LearningNetwork<Net, Coord, Node>::StartTraining() { this->hub->StartRound(); }
@@ -294,5 +285,3 @@ void LearningNetwork<Net, Coord, Node>::TrainNode(size_t node, arma::cube &x, ar
 
 template<typename Net, typename Coord, typename Node>
 void LearningNetwork<Net, Coord, Node>::ShowTrainingStats() { this->hub->ShowOverallStats(); }
-
-

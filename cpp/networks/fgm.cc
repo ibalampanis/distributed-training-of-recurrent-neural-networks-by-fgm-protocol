@@ -20,17 +20,16 @@ FgmNet::FgmNet(const set<source_id> &_hids, const string &_name, Query *Q)
 algorithms::fgm::Coordinator::Coordinator(network_t *nw, Query *Q)
         : process(nw), proxy(this),
           Q(Q),
-          k(0),
           nRounds(0), nSubrounds(0),
           nSzSent(0), nUpdates(0) {
     InitializeGlobalLearner();
-    query = Q->CreateQueryState();
-    safezone = query->Safezone(Cfg().cfgfile, Cfg().distributedLearningAlgorithm);
+    queryState = Q->CreateQueryState();
+    safeFunction = queryState->Safezone(Cfg().cfgfile, Cfg().distributedLearningAlgorithm);
 }
 
 algorithms::fgm::Coordinator::~Coordinator() {
-    delete safezone;
-    delete query;
+    delete safeFunction;
+    delete queryState;
 }
 
 algorithms::fgm::Coordinator::network_t *
@@ -43,10 +42,10 @@ void algorithms::fgm::Coordinator::InitializeGlobalLearner() {
     cout << "\n\t\t[+]Coordinator's neural net ...";
     try {
         Json::Value root;
-        std::ifstream cfgfile(Cfg().cfgfile);
+        ifstream cfgfile(Cfg().cfgfile);
         cfgfile >> root;
         string temp = root["hyperparameters"].get("rho", 0).asString();
-        int rho = std::stoi(temp);
+        int rho = stoi(temp);
         globalLearner = new RnnLearner(Cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(rho));
         globalLearner->BuildModel();
 
@@ -59,7 +58,8 @@ void algorithms::fgm::Coordinator::InitializeGlobalLearner() {
 
 void algorithms::fgm::Coordinator::WarmupGlobalLearner() {
     globalLearner->TrainModelByBatch(trainX, trainY);
-    query->globalModel = globalLearner->ModelParameters();
+    queryState->globalModel = globalLearner->ModelParameters();
+    safeFunction->globalModel = queryState->globalModel;
 }
 
 void algorithms::fgm::Coordinator::SetupConnections() {
@@ -79,11 +79,12 @@ void algorithms::fgm::Coordinator::StartRound() {
     cnt = 0;
     counter = 0;
 
-    // Calculating the new phi, quantum and the minimum acceptable value for phi.
-    phi = k * safezone->Zeta(query->globalModel);
-    quantum = phi / double((2 * k));
+    // Calculating the new psi, quantum and the minimum acceptable value for psi.
+    psi = k * safeFunction->Phi(queryState->globalModel);
+    assert(safeFunction->Phi(queryState->globalModel) > 0);
+    quantum = psi / (double) (2 * k);
     assert(quantum > 0);
-    barrier = Cfg().precision * phi;
+    barrier = Cfg().precision * psi;  // Cfg().precision is the epsilon psi and is usually equal to 0.01
 
     // Send new safezone.
     for (auto n : Net()->sites) {
@@ -91,7 +92,7 @@ void algorithms::fgm::Coordinator::StartRound() {
             proxy[n].ReceiveGlobalModel(ModelState(globalLearner->ModelParameters(), 0));
 
         nSzSent++;
-        proxy[n].Reset(Safezone(safezone), DoubleValue(quantum));
+        proxy[n].Reset(Safezone(safeFunction), DoubleValue(quantum));
         nodeBoolDrift[n] = 0;
     }
 
@@ -109,6 +110,7 @@ void algorithms::fgm::Coordinator::FetchUpdates(node_t *node) {
             nodeBoolDrift[node] = 1;
             cnt++;
         }
+
         if (params.empty())
             params = up._model;
         else
@@ -117,27 +119,27 @@ void algorithms::fgm::Coordinator::FetchUpdates(node_t *node) {
     nUpdates += up.updates;
 }
 
-oneway algorithms::fgm::Coordinator::SendIncrement(IntValue inc) {
-    counter += inc.value;
-    if (counter > k) {
-        phi = 0.;
+oneway algorithms::fgm::Coordinator::ReceiveIncrement(IntValue inc) {
 
-        // Collect all data
+    counter += inc.value;
+
+    if (counter > k) {
+        psi = 0.;
+        // Collect Zeta(Xi)
         for (auto n : nodePtr)
-            phi += proxy[n].SendZetaValue().value;
-        // FIXME: check the following condition, it is always FALSE
-        if (phi >= barrier) {
+            psi += proxy[n].SendZeta().value;
+        // CHECKME: The following condition is always FALSE ... A new subround never begins
+        if (psi >= barrier) {
             counter = 0;
-            quantum = phi / (2 * k);
+            quantum = psi / (double) (2 * k);
             assert(quantum > 0);
-            // send the new quantum
+            // Send the new quantum
             for (auto n : nodePtr)
                 proxy[n].ReceiveQuantum(DoubleValue(quantum));
             nSubrounds++;
         } else {
             for (auto n : nodePtr)
                 FetchUpdates(n);
-
             FinishRound();
         }
     }
@@ -148,8 +150,8 @@ void algorithms::fgm::Coordinator::FinishRound() {
     params *= pow(cnt, -1);
 
     // New round
-    query->UpdateEstimate(params);
-    globalLearner->UpdateModel(query->globalModel);
+    queryState->UpdateEstimate(params);
+    globalLearner->UpdateModel(queryState->globalModel);
 
 //    ShowProgress();
     StartRound();
@@ -191,7 +193,6 @@ double algorithms::fgm::Coordinator::Accuracy() { return globalLearner->MakePred
 /*********************************************
 	Learning Node
 *********************************************/
-
 algorithms::fgm::LearningNode::LearningNode(network_t *net, source_id hid, continuous_query_t *Q) : local_site(net,
                                                                                                                hid),
                                                                                                     Q(Q), coord(this),
@@ -210,10 +211,10 @@ void algorithms::fgm::LearningNode::InitializeLearner() {
     cout << "\t\t[+]Node's local neural net ...";
     try {
         Json::Value root;
-        std::ifstream cfgfile(Cfg().cfgfile);
+        ifstream cfgfile(Cfg().cfgfile);
         cfgfile >> root;
         string temp = root["hyperparameters"].get("rho", 0).asString();
-        int rho = std::stoi(temp);
+        int rho = stoi(temp);
         learner = new RnnLearner(Cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(rho));
         learner->BuildModel();
         cout << " OK." << endl;
@@ -230,65 +231,39 @@ void algorithms::fgm::LearningNode::UpdateState(arma::cube &x, arma::cube &y) {
     learner->TrainModelByBatch(x, y);
     datapointsPassed += x.n_cols;
 
-    int currentC = std::floor((zeta - szone(learner->ModelParameters(), eDelta)) / quantum);
-    if (currentC - counter > 0) {
-        coord.SendIncrement(IntValue(currentC - counter));
-        counter = currentC;
+    size_t currentC = floor((zeta - szone(learner->ModelParameters()) / quantum));
+    size_t maxC = std::max(currentC, counter);
 
+    if (maxC != counter) {
+        size_t incr = maxC - counter;
+        coord.ReceiveIncrement(IntValue(incr));
+        counter = currentC;
     }
 }
 
 oneway algorithms::fgm::LearningNode::Reset(const Safezone &newsz, DoubleValue qntm) {
 
     counter = 0;
-    szone = newsz;                                                      // Reset the safezone object
-    quantum = 1. * qntm.value;                                 // Reset the quantum
-    learner->UpdateModel(szone.GetSzone()->GlobalModel());       // Updates the parameters of the local learner
-    zeta = szone.GetSzone()->Zeta(learner->ModelParameters());   // Reset zeta
-
-    // Initializng the helping matrices if they are not yet initialized.
-    arma::mat m = arma::mat(arma::size(eDelta), arma::fill::zeros);
-    if (eDelta.empty() || approx_equal(eDelta, m, "absdiff", 1e-8)) {
-        arma::mat tmp1 = arma::mat(arma::size(learner->ModelParameters()), arma::fill::zeros);
-        arma::mat tmp2 = arma::mat(arma::size(learner->ModelParameters()), arma::fill::zeros);
-        deltaVector = tmp1;
-        eDelta = tmp2;
-    }
-
-    // Reseting the E_Delta vector.
-    eDelta = learner->ModelParameters();
-
+    szone = newsz;
+    quantum = (float) qntm.value;
+    learner->UpdateModel(szone.GetSzone()->GlobalModel());
+    zeta = szone.GetSzone()->Phi(learner->ModelParameters());
+    drift = learner->ModelParameters();
 }
 
 oneway algorithms::fgm::LearningNode::ReceiveQuantum(DoubleValue qntm) {
-    counter = 0;    // Reset counter
-    quantum = 1. * qntm.value;  // Update the quantum
-    zeta = szone(learner->ModelParameters(), eDelta);  // Update zeta
+    counter = 0;
+    quantum = (float) qntm.value;
+    zeta = szone(learner->ModelParameters());
 }
 
 ModelState algorithms::fgm::LearningNode::SendDrift() {
-    // Getting the delta vector is done as getting the local statistic.
-    deltaVector.clear();
-    arma::mat dr = arma::mat(arma::size(learner->ModelParameters()), arma::fill::zeros);
-
-    if (eDelta.empty())
-        dr = learner->ModelParameters();
-    else
-        dr = learner->ModelParameters() - eDelta;
-
-    deltaVector = dr;
-
-    return ModelState(deltaVector, learner->NumberOfUpdates());
+    drift = learner->ModelParameters();
+    return ModelState(drift, learner->NumberOfUpdates());
 }
 
-DoubleValue algorithms::fgm::LearningNode::SendZetaValue() {
-    return DoubleValue(szone(learner->ModelParameters(), eDelta));
-}
+DoubleValue algorithms::fgm::LearningNode::SendZeta() { return DoubleValue(szone(learner->ModelParameters())); }
 
 oneway algorithms::fgm::LearningNode::ReceiveGlobalModel(const ModelState &params) {
     learner->UpdateModel(params._model);
 }
-
-
-
-

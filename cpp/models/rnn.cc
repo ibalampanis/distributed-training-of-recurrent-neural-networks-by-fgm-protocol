@@ -2,9 +2,9 @@
 #include <jsoncpp/json/json.h>
 #include <iostream>
 #include <utility>
-#include "rnn_learner.hh"
+#include "rnn.hh"
 
-using namespace rnn_learner;
+using namespace rnn;
 using namespace arma;
 using namespace std;
 

@@ -1,5 +1,5 @@
-#ifndef DISTRIBUTEDRNNS_RNNPREDICTOR_HH
-#define DISTRIBUTEDRNNS_RNNPREDICTOR_HH
+#ifndef DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_RNN_HH
+#define DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_RNN_HH
 
 #include <iostream>
 #include <fstream>
@@ -15,7 +15,7 @@
 #include <mlpack/methods/ann/loss_functions/mean_squared_error.hpp>
 #include <ensmallen.hpp>
 
-namespace rnn_learner {
+namespace rnn {
 
     using namespace std;
     using namespace mlpack;
@@ -92,6 +92,6 @@ namespace rnn_learner {
 
     };
 
-} // end namespace rnn_learner
+} // end namespace rnn
 
-#endif //DISTRIBUTEDRNNS_RNNPREDICTOR_HH
+#endif //DISTRIBUTEDRNNS_RNN_HH

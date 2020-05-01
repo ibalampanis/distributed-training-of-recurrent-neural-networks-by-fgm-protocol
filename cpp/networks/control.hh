@@ -12,7 +12,7 @@
 #include "ddsim/dds.hh"
 
 
-namespace supervisor {
+namespace controller {
 
     using namespace std;
     using namespace protocols;
@@ -21,10 +21,10 @@ namespace supervisor {
     using namespace dds;
 
 
-    // The purpose of Supervisor class is to synchronize the training of the
+    // The purpose of Controller class is to synchronize the training of the
     // network nodes by providing the appropriate data points to these.
     template<typename networkType>
-    class Supervisor {
+    class Controller {
 
     protected:
         string configFile;                          // JSON file to read the hyperparameters.
@@ -51,7 +51,7 @@ namespace supervisor {
 
     public:
         // Constructor 
-        explicit Supervisor<networkType>(string cfg);
+        explicit Controller<networkType>(string cfg);
 
         // This method initializes all the networks. 
         void InitializeSimulation();
@@ -86,6 +86,6 @@ namespace supervisor {
         bool bUpdateIsCalled;
     };
 
-} // end namespace supervisor
+} // end namespace controller
 
 #endif //DISTRIBUTED_TRAINING_OF_RECURRENT_NEURAL_NETWORKS_BY_FGM_PROTOCOL_SUPERVISOR_HH

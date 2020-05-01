@@ -1,8 +1,8 @@
-#include "cpp/models/rnn_learner.hh"
+#include "cpp/models/rnn.hh"
 #include <string>
 
 
-using namespace rnn_learner;
+using namespace rnn;
 using namespace std;
 
 int main(int argc, char **argv) {

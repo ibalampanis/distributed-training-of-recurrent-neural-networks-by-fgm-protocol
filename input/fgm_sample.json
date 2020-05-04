@@ -35,9 +35,9 @@
   },
   "data": {
     "encoding": "UTF-8",
-    "input_size": 19,
+    "input_size": 15,
     "output_size": 1,
-    "path": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/datasets/San_Francisco_Crime.csv",
-    "dataset_name": "SFC"
+    "path": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/datasets/EEG_Eye_State.csv",
+    "dataset_name": "EEG Eye State"
   }
 }

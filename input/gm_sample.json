@@ -15,7 +15,7 @@
   "query": {
     "encoding": "UTF-8",
     "precision": 0.01,
-    "threshold": 1,
+    "threshold": 0.01,
     "batch_size": 16
   },
   "hyperparameters": {
@@ -30,8 +30,8 @@
     "epsilon": 2e-8,
     "beta1": 0.9,
     "beta2": 0.99,
-    "train_test_ratio": 0.2,
-    "mini_batch_size": 32
+    "train_test_ratio": 0.3,
+    "mini_batch_size": 16
   },
   "data": {
     "encoding": "UTF-8",

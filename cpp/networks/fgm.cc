@@ -81,8 +81,8 @@ void algorithms::fgm::Coordinator::StartRound() {
 
     // Calculating the new psi, quantum and the minimum acceptable value for psi.
     psi = k * safeFunction->Phi(queryState->globalModel);
-    assert(safeFunction->Phi(queryState->globalModel) > 0);
-    quantum = psi / (double) (2 * k);
+//    assert(safeFunction->Phi(queryState->globalModel) > 0);
+    quantum = -1 * (psi / (double) (2 * k));
     assert(quantum > 0);
     barrier = Cfg().precision * psi;  // Cfg().precision is the epsilon psi and is usually equal to 0.01
 
@@ -129,9 +129,9 @@ oneway algorithms::fgm::Coordinator::ReceiveIncrement(IntValue inc) {
         for (auto n : nodePtr)
             psi += proxy[n].SendZeta().value;
         // CHECKME: The following condition is always FALSE ... A new subround never begins
-        if (psi >= barrier) {
+        if (psi <= barrier) {
             counter = 0;
-            quantum = psi / (double) (2 * k);
+            quantum = -1 * (psi / (double) (2 * k));
             assert(quantum > 0);
             // Send the new quantum
             for (auto n : nodePtr)
@@ -147,7 +147,7 @@ oneway algorithms::fgm::Coordinator::ReceiveIncrement(IntValue inc) {
 
 void algorithms::fgm::Coordinator::FinishRound() {
 
-    params *= pow(cnt, -1);
+//    params *= pow(cnt, -1);
 
     // New round
     queryState->UpdateEstimate(params);

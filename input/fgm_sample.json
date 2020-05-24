@@ -15,14 +15,14 @@
   "query": {
     "encoding": "UTF-8",
     "precision": 0.01,
-    "threshold": 0.999,
-    "batch_size": 32
+    "threshold": 0.00001,
+    "batch_size": 16
   },
   "hyperparameters": {
     "encoding": "UTF-8",
-    "lstm_cells": 5,
-    "rho": 10,
-    "step_size": 5e-3,
+    "lstm_cells": 10,
+    "rho": 5,
+    "step_size": 5e-2,
     "batch_size": 16,
     "max_opt_iterations": 500,
     "tolerance": 1e-8,
@@ -31,13 +31,13 @@
     "beta1": 0.9,
     "beta2": 0.99,
     "train_test_ratio": 0.3,
-    "mini_batch_size": 64
+    "mini_batch_size": 16
   },
   "data": {
     "encoding": "UTF-8",
-    "input_size": 19,
+    "input_size": 15,
     "output_size": 1,
-    "path": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/datasets/San_Francisco_Crime.csv",
+    "path": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/datasets/EEG_Eye_State.csv",
     "dataset_name": "EEG Eye State"
   }
 }

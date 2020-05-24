@@ -80,9 +80,12 @@ void algorithms::fgm::Coordinator::StartRound() {
     counter = 0;
 
     // Calculating the new psi, quantum and the minimum acceptable value for psi.
-    psi = k * safeFunction->Phi(queryState->globalModel);
-    quantum = (psi / (double) (2 * k));
-    assert(quantum > 0);
+    arma::mat zeroDrift;
+    zeroDrift.set_size(size(queryState->globalModel));
+    zeroDrift.zeros();
+    psi = k * safeFunction->Phi(zeroDrift);
+    theta = -1 * (psi / (double) (2 * k));
+    assert(theta > 0);
     barrier = Cfg().precision * psi;  // Cfg().precision is the epsilon psi and is usually equal to 0.01
 
     // Send new safezone.
@@ -91,9 +94,8 @@ void algorithms::fgm::Coordinator::StartRound() {
             proxy[n].ReceiveGlobalModel(ModelState(globalLearner->ModelParameters(), 0));
 
         nSzSent++;
-        proxy[n].Reset(Safezone(safeFunction), DoubleValue(quantum));
-        nodeBoolDrift[n] = 0;
-    }
+        proxy[n].Reset(Safezone(safeFunction), DoubleValue(theta));
+     }
 
     nRounds++;
     nSubrounds++;
@@ -123,37 +125,38 @@ oneway algorithms::fgm::Coordinator::ReceiveIncrement(IntValue inc) {
     counter += inc.value;
 
     if (counter > k) {
+
+        // Collect Phi(Xi) from all sites
         psi = 0.;
-        // Collect Zeta(Xi)
         for (auto n : nodePtr)
             psi += proxy[n].SendZeta().value;
-        // CHECKME: The following condition sucks
-        if (psi <= barrier) {
-            counter = 0;
-            quantum = -1 * (psi / (double) (2 * k));
-            assert(quantum > 0);
-            // Send the new quantum
-            for (auto n : nodePtr)
-                proxy[n].ReceiveQuantum(DoubleValue(quantum));
-            nRounds++;
-        } else {
+
+        if (psi >= barrier) {
             for (auto n : nodePtr)
                 FetchUpdates(n);
             FinishRound();
+        } else {
+
+            // Reset global counter and recalculate the quantum
+            counter = 0;
+            theta = -1 * (psi / (double) (2 * k));
+            assert(theta > 0);
+
+            // Send the new quantum
+            for (auto n : nodePtr)
+                proxy[n].ReceiveQuantum(DoubleValue(theta));
+            nSubrounds++;
         }
     }
-    nSubrounds++;
 }
 
 void algorithms::fgm::Coordinator::FinishRound() {
 
-//    params *= pow(cnt, -1);
+//    ShowProgress();
 
-    // New round
+    // Update global model and estimate and start a new round
     queryState->UpdateEstimate(params);
     globalLearner->UpdateModel(queryState->globalModel);
-
-//    ShowProgress();
     StartRound();
 }
 
@@ -197,7 +200,7 @@ algorithms::fgm::LearningNode::LearningNode(network_t *net, source_id hid, conti
                                                                                                                hid),
                                                                                                     Q(Q), coord(this),
                                                                                                     counter(0),
-                                                                                                    quantum(0),
+                                                                                                    theta(0),
                                                                                                     zeta(0) {
     coord <<= net->hub;
     InitializeLearner();
@@ -225,13 +228,12 @@ void algorithms::fgm::LearningNode::InitializeLearner() {
     }
 }
 
-
 void algorithms::fgm::LearningNode::UpdateState(arma::cube &x, arma::cube &y) {
 
     learner->TrainModelByBatch(x, y);
     datapointsPassed += x.n_cols;
 
-    size_t currentC = floor((zeta - szone(learner->ModelParameters()) / quantum));
+    size_t currentC = floor((zeta - szone(learner->ModelParameters()) / theta));
     size_t maxC = std::max(currentC, counter);
 
     if (maxC != counter) {
@@ -240,28 +242,28 @@ void algorithms::fgm::LearningNode::UpdateState(arma::cube &x, arma::cube &y) {
         counter = currentC;
     }
 }
-
+// CHECKME: what i must reset??
 oneway algorithms::fgm::LearningNode::Reset(const Safezone &newsz, DoubleValue qntm) {
 
     counter = 0;
     szone = newsz;
-    quantum = (float) qntm.value;
+    theta = (float) qntm.value;
     learner->UpdateModel(szone.GetSzone()->GlobalModel());
     zeta = szone.GetSzone()->Phi(learner->ModelParameters());
     drift = learner->ModelParameters();
 }
-
+// FIXME: define zeta by Xi (not whole model!!), phi instead szone
 oneway algorithms::fgm::LearningNode::ReceiveQuantum(DoubleValue qntm) {
     counter = 0;
-    quantum = (float) qntm.value;
+    theta = (float) qntm.value;
     zeta = szone(learner->ModelParameters());
 }
-
+// FIXME: send the drift, not whole model!!
 ModelState algorithms::fgm::LearningNode::SendDrift() {
     drift = learner->ModelParameters();
     return ModelState(drift, learner->NumberOfUpdates());
 }
-
+// FIXME: Send Xi (drift) and not model params
 DoubleValue algorithms::fgm::LearningNode::SendZeta() { return DoubleValue(szone(learner->ModelParameters())); }
 
 oneway algorithms::fgm::LearningNode::ReceiveGlobalModel(const ModelState &params) {

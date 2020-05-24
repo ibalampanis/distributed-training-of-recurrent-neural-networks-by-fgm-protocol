@@ -115,7 +115,7 @@ float P2Norm::Phi(const arma::mat &params) {
     float leftTerm, rightTerm;
 
     leftTerm = (float) ((-1 * threshold * arma::norm(globalModel)) -
-                        ((arma::dot(params, globalModel)) / arma::norm(globalModel)));
+                        (arma::dot(params,(globalModel / arma::norm(globalModel)))));
 
     rightTerm = (float) ((arma::norm((params + globalModel))) - ((1 + threshold) * arma::norm(globalModel)));
 

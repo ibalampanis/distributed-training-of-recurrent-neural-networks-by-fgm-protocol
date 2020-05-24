@@ -53,7 +53,7 @@ namespace algorithms {
             vector<node_t *> nodePtr;
 
             double psi;                         // The psi value of the functional geometric protocol.
-            double quantum;                     // The quantum of the functional geometric protocol.
+            double theta;                       // The quantum of the functional geometric protocol.
             size_t counter;                     // A counter used by the functional geometric protocol.
             double barrier;                     // The smallest number the zeta function can reach.
             size_t cnt;                         // Helping counter.
@@ -123,13 +123,11 @@ namespace algorithms {
             Query *Q;                           // The query management object.
             Safezone szone;                     // The safezone object.
             RnnLearner *learner;                // The learning algorithm.
-//            arma::mat deltaVector;
-//            arma::mat eDelta;
             arma::mat drift;
             coord_proxy_t coord;                // The proxy of the coordinator/hub.
             size_t datapointsPassed;
             size_t counter;                     // The counter used by the FGM protocol.
-            float quantum;                      // The quantum provided by the hub.
+            float theta;                        // The quantum provided by the hub.
             float zeta;                         // The value of the safezone function.
 
             LearningNode(network_t *net, source_id hid, continuous_query_t *Q);
@@ -140,7 +138,7 @@ namespace algorithms {
 
             void UpdateState(arma::cube &x, arma::cube &y);
 
-            // called at the start of a round
+            // Called at the start of each round
             oneway Reset(const Safezone &newsz, DoubleValue qntm);
 
             // Refreshing the quantum for a new subround

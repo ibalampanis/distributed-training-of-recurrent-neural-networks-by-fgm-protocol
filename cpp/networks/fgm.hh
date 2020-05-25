@@ -123,12 +123,14 @@ namespace algorithms {
             Query *Q;                           // The query management object.
             Safezone szone;                     // The safezone object.
             RnnLearner *learner;                // The learning algorithm.
-            arma::mat drift;
             coord_proxy_t coord;                // The proxy of the coordinator/hub.
-            size_t datapointsPassed;
-            size_t counter;                     // The counter used by the FGM protocol.
+            arma::mat drift;
+            arma::mat currentEstimate;          // The global estimate. It has a fixed value during a round.
+            size_t localCounter;                // The counter used by the FGM protocol.
             float theta;                        // The quantum provided by the hub.
             float zeta;                         // The value of the safezone function.
+
+            size_t datapointsPassed;
 
             LearningNode(network_t *net, source_id hid, continuous_query_t *Q);
 

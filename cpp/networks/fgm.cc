@@ -136,7 +136,6 @@ oneway algorithms::fgm::Coordinator::ReceiveIncrement(IntValue inc) {
                 FetchUpdates(n);
             FinishRound();
         } else {
-
             // Reset global counter and recalculate the quantum
             counter = 0;
             theta = -1 * (psi / (double) (2 * k));
@@ -199,7 +198,7 @@ double algorithms::fgm::Coordinator::Accuracy() { return globalLearner->MakePred
 algorithms::fgm::LearningNode::LearningNode(network_t *net, source_id hid, continuous_query_t *Q) : local_site(net,
                                                                                                                hid),
                                                                                                     Q(Q), coord(this),
-                                                                                                    counter(0),
+                                                                                                    localCounter(0),
                                                                                                     theta(0),
                                                                                                     zeta(0) {
     coord <<= net->hub;
@@ -233,38 +232,45 @@ void algorithms::fgm::LearningNode::UpdateState(arma::cube &x, arma::cube &y) {
     learner->TrainModelByBatch(x, y);
     datapointsPassed += x.n_cols;
 
-    size_t currentC = floor((zeta - szone(learner->ModelParameters()) / theta));
-    size_t maxC = std::max(currentC, counter);
+    arma::mat justTrained = learner->ModelParameters();
 
-    if (maxC != counter) {
-        size_t incr = maxC - counter;
+    drift = justTrained - currentEstimate;
+
+    size_t currentC = floor((zeta - szone(learner->ModelParameters()) / theta));
+    size_t maxC = std::max(currentC, localCounter);
+
+    if (maxC != localCounter) {
+        size_t incr = maxC - localCounter;
         coord.ReceiveIncrement(IntValue(incr));
-        counter = currentC;
+        localCounter = currentC;
     }
 }
-// CHECKME: what i must reset??
+
 oneway algorithms::fgm::LearningNode::Reset(const Safezone &newsz, DoubleValue qntm) {
 
-    counter = 0;
+    localCounter = 0;
     szone = newsz;
     theta = (float) qntm.value;
     learner->UpdateModel(szone.GetSzone()->GlobalModel());
-    zeta = szone.GetSzone()->Phi(learner->ModelParameters());
-    drift = learner->ModelParameters();
+    currentEstimate = szone.GetSzone()->GlobalModel();
+    drift.set_size(size(learner->ModelParameters()));
+    drift.zeros();
+    zeta = szone.GetSzone()->Phi(drift);
 }
-// FIXME: define zeta by Xi (not whole model!!), phi instead szone
+
 oneway algorithms::fgm::LearningNode::ReceiveQuantum(DoubleValue qntm) {
-    counter = 0;
+    localCounter = 0;
     theta = (float) qntm.value;
-    zeta = szone(learner->ModelParameters());
+    zeta = szone.GetSzone()->Phi(drift);
 }
-// FIXME: send the drift, not whole model!!
+
 ModelState algorithms::fgm::LearningNode::SendDrift() {
-    drift = learner->ModelParameters();
     return ModelState(drift, learner->NumberOfUpdates());
 }
-// FIXME: Send Xi (drift) and not model params
-DoubleValue algorithms::fgm::LearningNode::SendZeta() { return DoubleValue(szone(learner->ModelParameters())); }
+
+DoubleValue algorithms::fgm::LearningNode::SendZeta() {
+    return DoubleValue(zeta);
+}
 
 oneway algorithms::fgm::LearningNode::ReceiveGlobalModel(const ModelState &params) {
     learner->UpdateModel(params._model);

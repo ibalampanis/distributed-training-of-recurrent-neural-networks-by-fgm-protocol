@@ -14,15 +14,14 @@
   },
   "query": {
     "encoding": "UTF-8",
-    "precision": 0.01,
     "threshold": 0.01,
     "batch_size": 16
   },
   "hyperparameters": {
     "encoding": "UTF-8",
-    "lstm_cells": 5,
-    "rho": 10,
-    "step_size": 5e-3,
+    "lstm_cells": 10,
+    "rho": 5,
+    "step_size": 5e-2,
     "batch_size": 16,
     "max_opt_iterations": 500,
     "tolerance": 1e-8,

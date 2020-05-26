@@ -49,14 +49,12 @@ namespace algorithms {
 
             // Nodes indexing
             map<node_t *, size_t> nodeIndex;
-            map<node_t *, size_t> nodeBoolDrift;
             vector<node_t *> nodePtr;
 
             double psi;                         // The psi value of the functional geometric protocol.
             double theta;                       // The quantum of the functional geometric protocol.
             size_t counter;                     // A counter used by the functional geometric protocol.
             double barrier;                     // The smallest number the zeta function can reach.
-            size_t cnt;                         // Helping counter.
             arma::mat params;                   // A placeholder for the parameters send by the nodes.
 
             // Statistics
@@ -129,6 +127,7 @@ namespace algorithms {
             size_t localCounter;                // The counter used by the FGM protocol.
             float theta;                        // The quantum provided by the hub.
             float zeta;                         // The value of the safezone function.
+            float phi;
 
             size_t datapointsPassed;
 

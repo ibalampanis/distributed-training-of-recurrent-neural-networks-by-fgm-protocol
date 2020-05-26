@@ -89,7 +89,9 @@ namespace protocols {
 
         void UpdateDrift(arma::mat &drift, arma::mat &params, float mul);
 
-        virtual float Phi(const arma::mat &params) { return 0.; }
+        virtual float Phi(const arma::mat &drift) { return 0.; }
+
+        virtual float Phi(const arma::mat &drift, const arma::mat &est) { return 0.; }
 
         virtual size_t RegionAdmissibility(const size_t counter) { return 0; }
 
@@ -115,7 +117,9 @@ namespace protocols {
 
         ~P2Norm();
 
-        float Phi(const arma::mat &params) override;
+        float Phi(const arma::mat &drift) override;
+
+        float Phi(const arma::mat &drift, const arma::mat &est) override;
 
         float RegionAdmissibility(const arma::mat &mdl) override;
 

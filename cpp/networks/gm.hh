@@ -44,8 +44,8 @@ namespace algorithms {
             arma::cube testX, testY;            // Testset data points and labels
             size_t trainPoints;
             Query *Q;                           // query
-            QueryState *query;                  // current query state
-            SafeFunction *safezone;             // the safe zone wrapper
+            QueryState *queryState;             // current query state
+            SafeFunction *safeFunction;         // the safe zone wrapper
             size_t k;                           // number of sites
             map<node_t *, size_t> nodeIndex;    // index the nodes
             vector<node_t *> nodePtr;
@@ -121,6 +121,7 @@ namespace algorithms {
             query_t *Q;                         // The query management object
             Safezone szone;                     // The safezone object
             RnnLearner *learner{};              // The learning algorithm
+            arma::mat currentEstimate;
             arma::mat drift;                    // The drift of the node
             coord_proxy_t coord;                // The proxy of the coordinator/hub
             size_t datapointsPassed;

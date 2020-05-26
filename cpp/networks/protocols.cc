@@ -110,41 +110,48 @@ P2Norm::P2Norm(arma::mat GlMd, double thr, size_t batch_sz) : SafeFunction(GlMd)
 
 P2Norm::~P2Norm() = default;
 
-float P2Norm::Phi(const arma::mat &params) {
+float P2Norm::Phi(const arma::mat &drift) {
 
     float leftTerm, rightTerm;
 
     leftTerm = (float) ((-1 * threshold * arma::norm(globalModel)) -
-                        (arma::dot(params,(globalModel / arma::norm(globalModel)))));
+                        (arma::dot(drift, (globalModel / arma::norm(globalModel)))));
 
-    rightTerm = (float) ((arma::norm((params + globalModel))) - ((1 + threshold) * arma::norm(globalModel)));
+    rightTerm = (float) ((arma::norm((drift + globalModel))) - ((1 + threshold) * arma::norm(globalModel)));
 
     return std::max(leftTerm, rightTerm);
 }
 
-float P2Norm::RegionAdmissibility(const arma::mat &mdl) {
+float P2Norm::Phi(const arma::mat &drift, const arma::mat &est) {
 
-    if (globalModel.empty() || mdl.empty())
-        return -1;
+    float leftTerm, rightTerm;
 
-    float res = 0.;
+    leftTerm = (float) ((-1 * threshold * arma::norm(est)) -
+                        (arma::dot(drift, (est / arma::norm(est)))));
 
-    arma::mat subtr = globalModel - mdl;
-    res += arma::dot(subtr, subtr);
+    rightTerm = (float) ((arma::norm((drift + est))) - ((1 + threshold) * arma::norm(est)));
 
-    return float(sqrt(threshold) - sqrt(res));
+    return std::max(leftTerm, rightTerm);
 }
 
-float P2Norm::RegionAdmissibility(const arma::mat &mdl1, const arma::mat &mdl2) {
+float P2Norm::RegionAdmissibility(const arma::mat &drift) {
 
-    if (mdl1.empty() || mdl2.empty())
+    if (globalModel.empty() || drift.empty())
         return -1;
 
-    double res = 0.;
-    arma::mat subtr = mdl1 - mdl2;
-    res += arma::dot(subtr, subtr);
+    float norm = arma::norm(drift - globalModel);
 
-    return sqrt(threshold) - sqrt(res);
+    return (float) (norm - threshold);
+}
+
+float P2Norm::RegionAdmissibility(const arma::mat &drift, const arma::mat &est) {
+
+    if (drift.empty() || est.empty())
+        return -1;
+
+    float norm = arma::norm(drift - est);
+
+    return (float) (norm - threshold);
 }
 
 size_t P2Norm::byte_size() { return (1 + globalModel.n_elem) * sizeof(float) + sizeof(size_t); }

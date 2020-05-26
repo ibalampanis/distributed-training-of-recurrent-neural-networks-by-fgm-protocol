@@ -235,7 +235,7 @@ void Controller<networkType>::TrainOverNetwork() {
             if (interStats)
                 GatherIntermediateNetStats();
 
-            progressPercentage.Update();
+             progressPercentage.Update();
         }
 
         cout << " ... FINISHED." << endl;

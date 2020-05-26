@@ -60,6 +60,7 @@ void algorithms::fgm::Coordinator::WarmupGlobalLearner() {
     globalLearner->TrainModelByBatch(trainX, trainY);
     queryState->globalModel = globalLearner->ModelParameters();
     safeFunction->globalModel = queryState->globalModel;
+
 }
 
 void algorithms::fgm::Coordinator::SetupConnections() {
@@ -68,7 +69,6 @@ void algorithms::fgm::Coordinator::SetupConnections() {
 
     for (auto n : Net()->sites) {
         nodeIndex[n] = nodePtr.size();
-        nodeBoolDrift[n] = 0;
         nodePtr.push_back(n);
     }
     k = nodePtr.size();
@@ -76,7 +76,7 @@ void algorithms::fgm::Coordinator::SetupConnections() {
 
 void algorithms::fgm::Coordinator::StartRound() {
 
-    cnt = 0;
+    // Set global counter to zero
     counter = 0;
 
     // Calculating the new psi, quantum and the minimum acceptable value for psi.
@@ -86,7 +86,8 @@ void algorithms::fgm::Coordinator::StartRound() {
     psi = k * safeFunction->Phi(zeroDrift);
     theta = -1 * (psi / (double) (2 * k));
     assert(theta > 0);
-    barrier = Cfg().precision * psi;  // Cfg().precision is the epsilon psi and is usually equal to 0.01
+    // barrier: The smallest number the zeta function can reach.
+    barrier = Cfg().precision * psi;  // Cfg().precision is the epsilon psi and is usually equal to 0.01.
 
     // Send new safezone.
     for (auto n : Net()->sites) {
@@ -95,7 +96,7 @@ void algorithms::fgm::Coordinator::StartRound() {
 
         nSzSent++;
         proxy[n].Reset(Safezone(safeFunction), DoubleValue(theta));
-     }
+    }
 
     nRounds++;
     nSubrounds++;
@@ -106,11 +107,6 @@ void algorithms::fgm::Coordinator::FetchUpdates(node_t *node) {
     ModelState up = proxy[node].SendDrift();
     if (!arma::approx_equal(arma::mat(arma::size(up._model), arma::fill::zeros), up._model, "absdiff",
                             1e-6)) {
-
-        if (nodeBoolDrift[node] == 0) {
-            nodeBoolDrift[node] = 1;
-            cnt++;
-        }
 
         if (params.empty())
             params = up._model;
@@ -125,11 +121,12 @@ oneway algorithms::fgm::Coordinator::ReceiveIncrement(IntValue inc) {
     counter += inc.value;
 
     if (counter > k) {
-
         // Collect Phi(Xi) from all sites
-        psi = 0.;
-        for (auto n : nodePtr)
+        psi = 0;
+        for (auto n : nodePtr) {
+//            cout << "n: " << n << " psi_i: " << proxy[n].SendZeta().value << endl;
             psi += proxy[n].SendZeta().value;
+        }
 
         if (psi >= barrier) {
             for (auto n : nodePtr)
@@ -138,6 +135,10 @@ oneway algorithms::fgm::Coordinator::ReceiveIncrement(IntValue inc) {
         } else {
             // Reset global counter and recalculate the quantum
             counter = 0;
+
+            cout << "psi " << psi << endl;
+            assert(psi < 0);
+
             theta = -1 * (psi / (double) (2 * k));
             assert(theta > 0);
 
@@ -236,7 +237,10 @@ void algorithms::fgm::LearningNode::UpdateState(arma::cube &x, arma::cube &y) {
 
     drift = justTrained - currentEstimate;
 
-    size_t currentC = floor((zeta - szone(learner->ModelParameters()) / theta));
+    phi = szone.GetSzone()->Phi(drift, currentEstimate);
+
+    size_t currentC = floor((szone.GetSzone()->Phi(drift, currentEstimate) - zeta) / theta);
+
     size_t maxC = std::max(currentC, localCounter);
 
     if (maxC != localCounter) {
@@ -249,19 +253,21 @@ void algorithms::fgm::LearningNode::UpdateState(arma::cube &x, arma::cube &y) {
 oneway algorithms::fgm::LearningNode::Reset(const Safezone &newsz, DoubleValue qntm) {
 
     localCounter = 0;
-    szone = newsz;
     theta = (float) qntm.value;
+
+    szone = newsz;
     learner->UpdateModel(szone.GetSzone()->GlobalModel());
     currentEstimate = szone.GetSzone()->GlobalModel();
+
     drift.set_size(size(learner->ModelParameters()));
     drift.zeros();
-    zeta = szone.GetSzone()->Phi(drift);
+    zeta = szone.GetSzone()->Phi(drift, currentEstimate);
 }
 
 oneway algorithms::fgm::LearningNode::ReceiveQuantum(DoubleValue qntm) {
     localCounter = 0;
     theta = (float) qntm.value;
-    zeta = szone.GetSzone()->Phi(drift);
+    zeta = szone.GetSzone()->Phi(drift, currentEstimate);
 }
 
 ModelState algorithms::fgm::LearningNode::SendDrift() {
@@ -269,9 +275,10 @@ ModelState algorithms::fgm::LearningNode::SendDrift() {
 }
 
 DoubleValue algorithms::fgm::LearningNode::SendZeta() {
-    return DoubleValue(zeta);
+    return DoubleValue(phi);
 }
 
 oneway algorithms::fgm::LearningNode::ReceiveGlobalModel(const ModelState &params) {
     learner->UpdateModel(params._model);
+    currentEstimate = params._model;
 }

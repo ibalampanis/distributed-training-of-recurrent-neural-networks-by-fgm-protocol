@@ -22,11 +22,11 @@ algorithms::gm::Coordinator::Coordinator(network_t *nw, Query *Q) : process(nw),
                                                                     nRounds(0), nRebalances(0), nSzSent(0),
                                                                     nUpdates(0) {
     InitializeGlobalLearner();
-    query = Q->CreateQueryState();
-    safezone = query->Safezone(Cfg().cfgfile, Cfg().distributedLearningAlgorithm);
+    queryState = Q->CreateQueryState();
+    safeFunction = queryState->Safezone(Cfg().cfgfile, Cfg().distributedLearningAlgorithm);
 }
 
-algorithms::gm::Coordinator::~Coordinator() { delete query; }
+algorithms::gm::Coordinator::~Coordinator() { delete queryState; }
 
 algorithms::gm::Coordinator::network_t *
 algorithms::gm::Coordinator::Net() { return dynamic_cast<network_t *>(host::net()); }
@@ -64,16 +64,20 @@ void algorithms::gm::Coordinator::SetupConnections() {
     k = nodePtr.size();
 }
 
-void algorithms::gm::Coordinator::WarmupGlobalLearner() { globalLearner->TrainModelByBatch(trainX, trainY); }
+void algorithms::gm::Coordinator::WarmupGlobalLearner() {
+    globalLearner->TrainModelByBatch(trainX, trainY);
+    queryState->globalModel = globalLearner->ModelParameters();
+    safeFunction->globalModel = queryState->globalModel;
+}
 
 void algorithms::gm::Coordinator::StartRound() {
     // Send new safezone.
     for (auto n : Net()->sites) {
-        if (nRounds == 0) {
+        if (nRounds == 0)
             proxy[n].ReceiveGlobalParameters(ModelState(globalLearner->ModelParameters(), 0));
-        }
+
         nSzSent++;
-        proxy[n].Reset(Safezone(safezone));
+        proxy[n].Reset(Safezone(safeFunction));
     }
     nRounds++;
 }
@@ -112,7 +116,7 @@ void algorithms::gm::Coordinator::Rebalance(node_t *lvnode) {
         B.insert(n);
         for (double &i : Mean)
             i /= cnt;
-        if (safezone->RegionAdmissibility(Mean) > 0. || B.size() == k)
+        if (safeFunction->RegionAdmissibility(Mean) > 0. || B.size() == k)
             break;
         for (auto &i : Mean)
             i *= cnt;
@@ -121,15 +125,15 @@ void algorithms::gm::Coordinator::Rebalance(node_t *lvnode) {
     if (B.size() < k) {
         // Rebalancing
         for (size_t i = 0; i < Mean.size(); i++)
-            Mean.at(i) += query->globalModel.at(i);
+            Mean.at(i) += queryState->globalModel.at(i);
         for (auto n : B)
             proxy[n].ReceiveRebGlobalParameters(ModelState(Mean, 0));
         nRebalances++;
     } else {
         // New round
         numViolations = 0;
-        query->UpdateEstimate(Mean);
-        globalLearner->UpdateModel(query->globalModel);
+        queryState->UpdateEstimate(Mean);
+        globalLearner->UpdateModel(queryState->globalModel);
 //        ShowProgress();
         StartRound();
     }
@@ -142,7 +146,10 @@ void algorithms::gm::Coordinator::FetchUpdates(node_t *node) {
     if (!arma::approx_equal(arma::mat(arma::size(up._model), arma::fill::zeros), up._model, "absdiff",
                             1e-6)) {
         cnt++;
-        Mean += up._model;
+        if (Mean.empty())
+            Mean = up._model;
+        else
+            Mean += up._model;
     }
     nUpdates += up.updates;
 }
@@ -184,15 +191,15 @@ void algorithms::gm::Coordinator::ShowProgress() {
 void algorithms::gm::Coordinator::FinishRound() {
 
     // Collect all data
-    for (auto n : nodePtr) {
+    for (auto n : nodePtr)
         FetchUpdates(n);
-    }
+
     for (double &i : Mean)
         i /= cnt;
 
     // New round
-    query->UpdateEstimate(Mean);
-    globalLearner->UpdateModel(query->globalModel);
+    queryState->UpdateEstimate(Mean);
+    globalLearner->UpdateModel(queryState->globalModel);
 
 //    ShowProgress();
     StartRound();
@@ -252,29 +259,33 @@ void algorithms::gm::LearningNode::UpdateState(arma::cube &x, arma::cube &y) {
     learner->TrainModelByBatch(x, y);
     datapointsPassed += x.n_cols;
 
-    if (szone(datapointsPassed) <= 0) {
-        datapointsPassed = 0;
-        if (szone(learner->ModelParameters()) < 0.)
-            coord.LocalViolation(this);
-    }
+    arma::mat justTrained = learner->ModelParameters();
+
+    drift = justTrained - currentEstimate;
+
+    if (szone.GetSzone()->RegionAdmissibility(drift, currentEstimate) > 0.)
+        coord.LocalViolation(this);
+
 }
 
 oneway algorithms::gm::LearningNode::Reset(const Safezone &newsz) {
-    szone = newsz;       // Reset the safezone object
+    szone = newsz;
     learner->UpdateModel(szone.GetSzone()->GlobalModel()); // Updates the parameters of the local learner
+    currentEstimate = szone.GetSzone()->GlobalModel();
     datapointsPassed = 0;
 }
 
 ModelState algorithms::gm::LearningNode::SendDrift() {
-    szone(drift, learner->ModelParameters(), 1.);
     return ModelState(drift, learner->NumberOfUpdates());
 }
 
 void algorithms::gm::LearningNode::ReceiveRebGlobalParameters(const ModelState &mdl) {
     learner->UpdateModel(mdl._model);
+    currentEstimate = mdl._model;
 }
 
 void algorithms::gm::LearningNode::ReceiveGlobalParameters(const ModelState &params) {
     learner->UpdateModel(params._model);
+    currentEstimate = params._model;
 }
 

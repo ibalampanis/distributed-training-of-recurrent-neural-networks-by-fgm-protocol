@@ -288,4 +288,3 @@ void algorithms::gm::LearningNode::ReceiveGlobalParameters(const ModelState &par
     learner->UpdateModel(params._model);
     currentEstimate = params._model;
 }
-

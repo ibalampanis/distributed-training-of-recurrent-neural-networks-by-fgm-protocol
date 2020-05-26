@@ -140,7 +140,7 @@ namespace algorithms {
             void UpdateState(arma::cube &x, arma::cube &y);
 
             // Called at the start of each round
-            oneway Reset(const Safezone &newsz, DoubleValue qntm);
+            oneway ResetForNewRound(const Safezone &newsz, DoubleValue qntm);
 
             // Refreshing the quantum for a new subround
             oneway ReceiveQuantum(DoubleValue qntm);
@@ -158,7 +158,7 @@ namespace algorithms {
         struct LearningNodeProxy : remote_proxy<LearningNode> {
             typedef LearningNode node_t;
 
-            REMOTE_METHOD(node_t, Reset);
+            REMOTE_METHOD(node_t, ResetForNewRound);
             REMOTE_METHOD(node_t, ReceiveQuantum);
             REMOTE_METHOD(node_t, SendDrift);
             REMOTE_METHOD(node_t, SendZeta);

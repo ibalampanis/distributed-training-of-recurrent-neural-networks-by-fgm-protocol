@@ -102,10 +102,7 @@ namespace protocols {
         virtual size_t byte_size() { return 0; }
     };
 
-    // This safezone function implements the algorithm presented in
-    // in the paper "Communication-Efficient Distributed Online Prediction
-    // by Dynamic Model Synchronization"
-    // by Michael Kamp, Mario Boley, Assaf Schuster and Izchak Sharfman.
+
     struct P2Norm : SafeFunction {
 
 
@@ -117,10 +114,17 @@ namespace protocols {
 
         ~P2Norm();
 
+        // This is the Phi (safezone) function according to Samoladas and Garofalakis
+        // paper (Functional Geometric Monitoring for Distributed Streams).
+        // Defined in 3.0.3 (p.6)
         float Phi(const arma::mat &drift) override;
 
         float Phi(const arma::mat &drift, const arma::mat &est) override;
 
+        // This safezone function implements the algorithm presented in
+        // in the paper "Communication-Efficient Distributed Online Prediction
+        // by Dynamic Model Synchronization"
+        // by Michael Kamp, Mario Boley, Assaf Schuster and Izchak Sharfman.
         float RegionAdmissibility(const arma::mat &mdl) override;
 
         float RegionAdmissibility(const arma::mat &mdl1, const arma::mat &mdl2) override;

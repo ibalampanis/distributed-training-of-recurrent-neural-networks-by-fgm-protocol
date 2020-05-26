@@ -224,12 +224,13 @@ void Controller<networkType>::TrainOverNetwork() {
         LoopProgressPercentage progressPercentage(iterations);
 
         // In this loop, whole dataset will get crossed as well as each
-        // time point, a random node will get fit by a new point of dataset.
+        // time point, a random node will get fit by a new mini-batch of dataset.
         for (size_t i = 0; i < trainX.n_cols - mod; i += miniBatchSize) {
             size_t currentNode = uni(rng);
             arma::cube x = trainX.subcube(arma::span(), arma::span(i, (i + miniBatchSize - 1)), arma::span());
             arma::cube y = trainY.subcube(arma::span(), arma::span(i, (i + miniBatchSize - 1)), arma::span());
 
+            // Train the node with a mini-batch.
             net->TrainNode(currentNode, x, y);
 
             if (interStats)
@@ -297,7 +298,7 @@ void LoopProgressPercentage::Update() {
 
     // Update percentage each unit
     if (perc == lastPerc + 1) {
-        // erase the correct  number of characters
+        // Erase the correct number of characters
         if (perc <= 10)
             cout << "\b\b" << perc << '%';
         else if (perc > 10 and perc <= 100)

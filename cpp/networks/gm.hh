@@ -127,7 +127,7 @@ namespace algorithms {
             size_t datapointsPassed;
 
             // Constructor
-            LearningNode(network_t *net, source_id hid, query_t *_Q);
+            LearningNode(network_t *net, source_id hid, query_t *Q);
 
             const ProtocolConfig &Cfg() const;
 

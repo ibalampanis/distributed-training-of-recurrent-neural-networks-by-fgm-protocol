@@ -79,7 +79,7 @@ void algorithms::fgm::Coordinator::StartRound() {
     // Set global counter to zero
     counter = 0;
 
-    // Calculating the new psi, quantum and the minimum acceptable value for psi.
+    // Calculate the new psi, quantum and the minimum acceptable value for psi (barrier).
     arma::mat zeroDrift;
     zeroDrift.set_size(size(queryState->globalModel));
     zeroDrift.zeros();
@@ -89,13 +89,13 @@ void algorithms::fgm::Coordinator::StartRound() {
     // barrier: The smallest number the zeta function can reach.
     barrier = Cfg().precision * psi;  // Cfg().precision is the epsilon psi and is usually equal to 0.01.
 
-    // Send new safezone.
+    // Send new safezone to nodes
     for (auto n : Net()->sites) {
         if (nRounds == 0)
             proxy[n].ReceiveGlobalModel(ModelState(globalLearner->ModelParameters(), 0));
 
         nSzSent++;
-        proxy[n].Reset(Safezone(safeFunction), DoubleValue(theta));
+        proxy[n].ResetForNewRound(Safezone(safeFunction), DoubleValue(theta));
     }
 
     nRounds++;
@@ -118,9 +118,12 @@ void algorithms::fgm::Coordinator::FetchUpdates(node_t *node) {
 
 oneway algorithms::fgm::Coordinator::ReceiveIncrement(IntValue inc) {
 
+    // Add the increment to the global counter
     counter += inc.value;
 
     if (counter > k) {
+        // Here we have a global violation!
+
         // Collect Phi(Xi) from all sites
         psi = 0;
         for (auto n : nodePtr) {
@@ -129,22 +132,27 @@ oneway algorithms::fgm::Coordinator::ReceiveIncrement(IntValue inc) {
         }
 
         if (psi >= barrier) {
+            // A new round will should start.
+
+            // Take drifts from nodes and aggregate these to the global model
             for (auto n : nodePtr)
                 FetchUpdates(n);
+
             FinishRound();
         } else {
-            // Reset global counter and recalculate the quantum
+            // A new subround will should start.
+
+            // Reset global counter and recalculate the quantum.
             counter = 0;
 
-            cout << "psi " << psi << endl;
             assert(psi < 0);
-
             theta = -1 * (psi / (double) (2 * k));
             assert(theta > 0);
 
-            // Send the new quantum
+            // Send the new quantum to the nodes.
             for (auto n : nodePtr)
                 proxy[n].ReceiveQuantum(DoubleValue(theta));
+
             nSubrounds++;
         }
     }
@@ -233,40 +241,54 @@ void algorithms::fgm::LearningNode::UpdateState(arma::cube &x, arma::cube &y) {
     learner->TrainModelByBatch(x, y);
     datapointsPassed += x.n_cols;
 
+    // Get the fresh trained model
     arma::mat justTrained = learner->ModelParameters();
 
+    // Drift is the difference of the fresh trained model in respect of current estimate
     drift = justTrained - currentEstimate;
 
+    // Hold the current Phi(Xi,E) in case of violation
     phi = szone.GetSzone()->Phi(drift, currentEstimate);
 
-    size_t currentC = floor((szone.GetSzone()->Phi(drift, currentEstimate) - zeta) / theta);
+    // Calculate the new counter and take the max of this and the last updated
+    size_t currentC = floor((phi - zeta) / theta);
 
     size_t maxC = std::max(currentC, localCounter);
 
     if (maxC != localCounter) {
+        // Here we have a local violation! Ship this increment to the coordinator.
         size_t incr = maxC - localCounter;
         coord.ReceiveIncrement(IntValue(incr));
         localCounter = currentC;
     }
 }
 
-oneway algorithms::fgm::LearningNode::Reset(const Safezone &newsz, DoubleValue qntm) {
+oneway algorithms::fgm::LearningNode::ResetForNewRound(const Safezone &newsz, DoubleValue qntm) {
+    // Now, a new round begins.
 
+    // Set the local counter to zero and get theta (quantum) from coordinator
     localCounter = 0;
     theta = (float) qntm.value;
 
+    // Get the new safezone and update the current estimate
     szone = newsz;
     learner->UpdateModel(szone.GetSzone()->GlobalModel());
     currentEstimate = szone.GetSzone()->GlobalModel();
 
+    // Recalculate zeta
     drift.set_size(size(learner->ModelParameters()));
     drift.zeros();
     zeta = szone.GetSzone()->Phi(drift, currentEstimate);
 }
 
 oneway algorithms::fgm::LearningNode::ReceiveQuantum(DoubleValue qntm) {
+    // Now, a new subround begins.
+
+    // Set the local counter to zero and get theta (quantum) from coordinator
     localCounter = 0;
     theta = (float) qntm.value;
+
+    // Recalculate zeta
     zeta = szone.GetSzone()->Phi(drift, currentEstimate);
 }
 

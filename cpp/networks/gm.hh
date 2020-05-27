@@ -12,8 +12,8 @@ namespace algorithms {
 
     namespace gm {
 
-        using namespace dds;
         using namespace rnn;
+        using namespace dds;
         using namespace protocols;
 
         struct Coordinator;
@@ -70,17 +70,19 @@ namespace algorithms {
 
             const ProtocolConfig &Cfg() const;
 
-            // Initialize learner and  variables
+            // Initialize the learner model and its' variables.
             void InitializeGlobalLearner();
 
+            // Pre-train global model with a small batch to override the initial unstable situation of the distributed algorithm.
             void WarmupGlobalLearner();
 
+            // Method used by the hub to establish the connections with the nodes of the star network.
             void SetupConnections();
 
-            // Initialize a new round
+            // Start a new round.
             void StartRound();
 
-            // Rebalance algorithm by Kamp
+            // Rebalance algorithm by Kamp.
             void Rebalance(node_t *n);
 
             // Get a model of a node
@@ -89,14 +91,16 @@ namespace algorithms {
             // Remote call on host violation
             oneway LocalViolation(sender<node_t> ctx);
 
-            // Printing and saving the accuracy
+            // Printing overall stats of the training process.
             void ShowProgress();
 
+            // Stuff for finalizing a round and start a new one.
             void FinishRound();
 
-            // Getting the accuracy of the global learner
+            // Getting the accuracy of the global learner.
             double Accuracy();
 
+            // Printing overall stats of the training process.
             void ShowOverallStats();
         };
 
@@ -131,21 +135,23 @@ namespace algorithms {
 
             const ProtocolConfig &Cfg() const;
 
+            // Initialize the learner model and its' variables.
             void InitializeLearner();
 
+            // Train the local model with a batch and update protocol variables to check for violations.
             void UpdateState(arma::cube &x, arma::cube &y);
 
-            // Call at the start of a round
+            // Call at the start of each round.
             oneway Reset(const Safezone &newsz);
 
-            // Transfer data to the coordinator
+            // Transfer (drift) model to the coordinator.
             ModelState SendDrift();
 
-            // Set the drift vector (for rebalancing)
+            // Get the parameters from the hub at the start of a new round. (for rebalancing)
             void ReceiveRebGlobalParameters(const ModelState &mdl);
 
+            // Get the parameters from the hub at the start of a new round.
             void ReceiveGlobalParameters(const ModelState &params);
-
         };
 
         struct LearningNodeProxy : remote_proxy<LearningNode> {

@@ -2,10 +2,10 @@
 <project version="4">
   <component name="PublishConfigData">
     <serverData>
-      <paths name="astronomix (45890205-0f4a-470b-b91b-6b9b1d459ba0)">
+      <paths name="astronomix (63b60f60-d6f4-49a5-ae97-ca597b8ab782)">
         <serverdata>
           <mappings>
-            <mapping deploy="/tmp/tmp.bHCz2mec0W" local="$PROJECT_DIR$" />
+            <mapping deploy="/tmp/tmp.TZe1TZZzUG" local="$PROJECT_DIR$" />
           </mappings>
           <excludedPaths>
             <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug" />

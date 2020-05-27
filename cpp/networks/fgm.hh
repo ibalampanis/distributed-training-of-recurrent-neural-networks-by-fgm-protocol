@@ -12,9 +12,9 @@ namespace algorithms {
 
     namespace fgm {
 
+        using namespace rnn;
         using namespace dds;
         using namespace protocols;
-        using namespace rnn;
 
         struct Coordinator;
         struct CoordinatorProxy;
@@ -72,31 +72,33 @@ namespace algorithms {
 
             const ProtocolConfig &Cfg() const;
 
-            // Initialize the Learner and its' variables
+            // Initialize the learner model and its' variables.
             void InitializeGlobalLearner();
-
+            // Pre-train global model with a small batch to override the initial unstable situation of the distributed algorithm.
             void WarmupGlobalLearner();
 
-            // Method used by the hub to establish the connections with the nodes of the star network
+            // Method used by the hub to establish the connections with the nodes of the star network.
             void SetupConnections();
 
-            // Initialize a new round
+            // Start a new round.
             void StartRound();
 
-            // Getting the model of a node
+            // Getting the (drift) model of a node.
             void FetchUpdates(node_t *n);
 
-            // Remote call on host violation
+            // Remote call on host violation.
             oneway ReceiveIncrement(IntValue inc);
 
+            // Stuff for finalizing a round and start a new one.
             void FinishRound();
 
+            // Printing overall stats of the training process.
             void ShowOverallStats();
 
-            // Printing and saving the accuracy
+            // Printing and saving the accuracy.
             void ShowProgress();
 
-            // Getting the accuracy of the global learner
+            // Getting the accuracy of the global learner.
             double Accuracy();
         };
 
@@ -135,23 +137,25 @@ namespace algorithms {
 
             const ProtocolConfig &Cfg() const;
 
+            // Initialize the learner model and its' variables.
             void InitializeLearner();
 
+            // Train the local model with a batch and update protocol variables to check for violations.
             void UpdateState(arma::cube &x, arma::cube &y);
 
-            // Called at the start of each round
+            // Called at the start of each round.
             oneway ResetForNewRound(const Safezone &newsz, DoubleValue qntm);
 
-            // Refreshing the quantum for a new subround
+            // Refreshing the quantum for a new subround.
             oneway ReceiveQuantum(DoubleValue qntm);
 
-            // Transfer data to the coordinator
+            // Transfer (drift) model to the coordinator.
             ModelState SendDrift();
 
-            // Transfer the value of z(Xi) to the coordinator
+            // Transfer the value of Z(Xi,E) to the coordinator
             DoubleValue SendZeta();
 
-            // Loading the parameters of the hub to the local model.
+            // Get the parameters from the hub at the start of a new round.
             oneway ReceiveGlobalModel(const ModelState &params);
         };
 

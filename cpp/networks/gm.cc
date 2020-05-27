@@ -87,7 +87,7 @@ void algorithms::gm::Coordinator::Rebalance(node_t *lvnode) {
     Bcompl.clear();
     B.insert(lvnode);
 
-    // find a balancing set
+    // Find a balancing set.
     vector<node_t *> nodes;
     nodes.reserve(k);
     for (auto n:nodePtr) {
@@ -97,7 +97,7 @@ void algorithms::gm::Coordinator::Rebalance(node_t *lvnode) {
 
     assert(nodes.size() == k - 1);
 
-    // permute the order
+    // Permute the order.
     shuffle(nodes.begin(), nodes.end(), mt19937(random_device()()));
 
     assert(nodes.size() == k - 1);
@@ -116,21 +116,21 @@ void algorithms::gm::Coordinator::Rebalance(node_t *lvnode) {
         B.insert(n);
         for (double &i : Mean)
             i /= cnt;
-        if (safeFunction->RegionAdmissibility(Mean) > 0. || B.size() == k)
+        if (safeFunction->Norm(Mean) > 0. || B.size() == k)
             break;
         for (auto &i : Mean)
             i *= cnt;
     }
 
     if (B.size() < k) {
-        // Rebalancing
+        // Node rebalancing process will should start.
         for (size_t i = 0; i < Mean.size(); i++)
             Mean.at(i) += queryState->globalModel.at(i);
         for (auto n : B)
             proxy[n].ReceiveRebGlobalParameters(ModelState(Mean, 0));
         nRebalances++;
     } else {
-        // New round
+        // A new round will should start.
         numViolations = 0;
         queryState->UpdateEstimate(Mean);
         globalLearner->UpdateModel(queryState->globalModel);
@@ -159,7 +159,6 @@ oneway algorithms::gm::Coordinator::LocalViolation(sender<node_t> ctx) {
     node_t *n = ctx.value;
     numViolations++;
 
-    // Clear
     B.clear(); // Clear the balanced nodes set.
     Mean.zeros();
     cnt = 0;
@@ -190,14 +189,14 @@ void algorithms::gm::Coordinator::ShowProgress() {
 
 void algorithms::gm::Coordinator::FinishRound() {
 
-    // Collect all data
+    // Collect all data.
     for (auto n : nodePtr)
         FetchUpdates(n);
 
     for (double &i : Mean)
         i /= cnt;
 
-    // New round
+    // Time to start a new round.
     queryState->UpdateEstimate(Mean);
     globalLearner->UpdateModel(queryState->globalModel);
 
@@ -242,8 +241,7 @@ void algorithms::gm::LearningNode::InitializeLearner() {
         Json::Value root;
         ifstream cfgfile(Cfg().cfgfile);
         cfgfile >> root;
-        string temp = root["hyperparameters"].get("rho", 0).asString();
-        int rho = stoi(temp);
+        size_t rho = root["hyperparameters"].get("rho", -1).asInt();
         learner = new RnnLearner(Cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(rho));
         learner->BuildModel();
         cout << " OK." << endl;
@@ -256,28 +254,33 @@ void algorithms::gm::LearningNode::InitializeLearner() {
 
 void algorithms::gm::LearningNode::UpdateState(arma::cube &x, arma::cube &y) {
 
+    // Train local model with a mini-batch.
     learner->TrainModelByBatch(x, y);
     datapointsPassed += x.n_cols;
 
+    // Get the fresh trained model.
     arma::mat justTrained = learner->ModelParameters();
 
+    // The drift is the difference of the fresh trained model in respect of current estimate.
     drift = justTrained - currentEstimate;
 
-    if (szone.GetSzone()->RegionAdmissibility(drift, currentEstimate) > 0.)
+    if (szone.GetSzone()->Norm(drift, currentEstimate) > 0.)
+        // Here is a local violation! Keep the coordinator updated.
         coord.LocalViolation(this);
 
 }
 
 oneway algorithms::gm::LearningNode::Reset(const Safezone &newsz) {
+    // Now, a new round begins.
+
+    // Get the new safezone and update the current estimate.
     szone = newsz;
     learner->UpdateModel(szone.GetSzone()->GlobalModel()); // Updates the parameters of the local learner
     currentEstimate = szone.GetSzone()->GlobalModel();
     datapointsPassed = 0;
 }
 
-ModelState algorithms::gm::LearningNode::SendDrift() {
-    return ModelState(drift, learner->NumberOfUpdates());
-}
+ModelState algorithms::gm::LearningNode::SendDrift() { return ModelState(drift, learner->NumberOfUpdates()); }
 
 void algorithms::gm::LearningNode::ReceiveRebGlobalParameters(const ModelState &mdl) {
     learner->UpdateModel(mdl._model);

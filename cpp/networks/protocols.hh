@@ -95,9 +95,9 @@ namespace protocols {
 
         virtual size_t RegionAdmissibility(const size_t counter) { return 0; }
 
-        virtual float RegionAdmissibility(const arma::mat &mdl) { return 0.; }
+        virtual float Norm(const arma::mat &mdl) { return 0.; }
 
-        virtual float RegionAdmissibility(const arma::mat &mdl1, const arma::mat &mdl2) { return 0.; }
+        virtual float Norm(const arma::mat &mdl1, const arma::mat &mdl2) { return 0.; }
 
         virtual size_t byte_size() { return 0; }
     };
@@ -122,12 +122,11 @@ namespace protocols {
         float Phi(const arma::mat &drift, const arma::mat &est) override;
 
         // This safezone function implements the algorithm presented in
-        // in the paper "Communication-Efficient Distributed Online Prediction
-        // by Dynamic Model Synchronization"
+        // in the paper "Communication-Efficient Distributed Online Prediction by Dynamic Model Synchronization"
         // by Michael Kamp, Mario Boley, Assaf Schuster and Izchak Sharfman.
-        float RegionAdmissibility(const arma::mat &mdl) override;
+        float Norm(const arma::mat &mdl) override;
 
-        float RegionAdmissibility(const arma::mat &mdl1, const arma::mat &mdl2) override;
+        float Norm(const arma::mat &mdl1, const arma::mat &mdl2) override;
 
         size_t byte_size() override;
     };

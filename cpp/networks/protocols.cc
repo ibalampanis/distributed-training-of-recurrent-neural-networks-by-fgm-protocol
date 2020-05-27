@@ -134,7 +134,7 @@ float P2Norm::Phi(const arma::mat &drift, const arma::mat &est) {
     return std::max(leftTerm, rightTerm);
 }
 
-float P2Norm::RegionAdmissibility(const arma::mat &drift) {
+float P2Norm::Norm(const arma::mat &drift) {
 
     if (globalModel.empty() || drift.empty())
         return -1;
@@ -144,7 +144,7 @@ float P2Norm::RegionAdmissibility(const arma::mat &drift) {
     return (float) (norm - threshold);
 }
 
-float P2Norm::RegionAdmissibility(const arma::mat &drift, const arma::mat &est) {
+float P2Norm::Norm(const arma::mat &drift, const arma::mat &est) {
 
     if (drift.empty() || est.empty())
         return -1;
@@ -192,12 +192,10 @@ SafeFunction *Safezone::GetSzone() { return (szone != nullptr) ? szone : nullptr
 
 void Safezone::operator()(arma::mat drift, arma::mat params, float mul) { szone->UpdateDrift(drift, params, mul); }
 
-size_t Safezone::operator()(size_t counter) { return (szone != nullptr) ? szone->RegionAdmissibility(counter) : NAN; }
-
-float Safezone::operator()(const arma::mat &mdl) { return (szone != nullptr) ? szone->RegionAdmissibility(mdl) : NAN; }
+float Safezone::operator()(const arma::mat &mdl) { return (szone != nullptr) ? szone->Norm(mdl) : NAN; }
 
 float Safezone::operator()(const arma::mat &mdl1, const arma::mat &mdl2) {
-    return (szone != nullptr) ? szone->RegionAdmissibility(mdl1, mdl2) : NAN;
+    return (szone != nullptr) ? szone->Norm(mdl1, mdl2) : NAN;
 }
 
 size_t Safezone::byte_size() const { return (szone != nullptr) ? szone->byte_size() : 0; }

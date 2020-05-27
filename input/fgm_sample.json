@@ -7,7 +7,7 @@
   },
   "net": {
     "encoding": "UTF-8",
-    "local_nodes": 16,
+    "local_nodes": 4,
     "learning_algorithm": "RNN",
     "distributed_learning_algorithm": "FGM_RNN",
     "warmup": true
@@ -15,15 +15,15 @@
   "query": {
     "encoding": "UTF-8",
     "precision": 0.01,
-    "threshold": 0.3,
-    "batch_size": 32
+    "threshold": 0.8,
+    "batch_size": 16
   },
   "hyperparameters": {
     "encoding": "UTF-8",
     "lstm_cells": 10,
     "rho": 10,
     "step_size": 5e-2,
-    "batch_size": 32,
+    "batch_size": 16,
     "max_opt_iterations": 500,
     "tolerance": 1e-8,
     "shuffle": true,
@@ -31,7 +31,7 @@
     "beta1": 0.9,
     "beta2": 0.99,
     "train_test_ratio": 0.25,
-    "mini_batch_size": 32
+    "mini_batch_size": 16
   },
   "data": {
     "encoding": "UTF-8",

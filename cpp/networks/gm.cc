@@ -17,10 +17,9 @@ GmNet::GmNet(const set<source_id> &_hids, const string &_name, Query *_Q)
 /*********************************************
 	Coordinator
 *********************************************/
-algorithms::gm::Coordinator::Coordinator(network_t *nw, Query *Q) : process(nw), proxy(this), Q(Q), k(0),
-                                                                    numViolations(0),
-                                                                    nRounds(0), nRebalances(0), nSzSent(0),
-                                                                    nUpdates(0) {
+algorithms::gm::Coordinator::Coordinator(network_t *nw, Query *Q)
+        : process(nw), proxy(this), Q(Q), k(0),
+        numViolations(0), nRounds(0), nRebalances(0), nSzSent(0), nUpdates(0) {
     InitializeGlobalLearner();
     queryState = Q->CreateQueryState();
     safeFunction = queryState->Safezone(Cfg().cfgfile, Cfg().distributedLearningAlgorithm);
@@ -264,7 +263,7 @@ void algorithms::gm::LearningNode::UpdateState(arma::cube &x, arma::cube &y) {
     // The drift is the difference of the fresh trained model in respect of current estimate.
     drift = justTrained - currentEstimate;
 
-    if (szone.GetSzone()->Norm(drift, currentEstimate) > 0.)
+    if (szone.GetSafeFunction()->Norm(drift, currentEstimate) > 0.)
         // Here is a local violation! Keep the coordinator updated.
         coord.LocalViolation(this);
 
@@ -275,8 +274,8 @@ oneway algorithms::gm::LearningNode::Reset(const Safezone &newsz) {
 
     // Get the new safezone and update the current estimate.
     szone = newsz;
-    learner->UpdateModel(szone.GetSzone()->GlobalModel()); // Updates the parameters of the local learner
-    currentEstimate = szone.GetSzone()->GlobalModel();
+    learner->UpdateModel(szone.GetSafeFunction()->GlobalModel()); // Updates the parameters of the local learner
+    currentEstimate = szone.GetSafeFunction()->GlobalModel();
     datapointsPassed = 0;
 }
 

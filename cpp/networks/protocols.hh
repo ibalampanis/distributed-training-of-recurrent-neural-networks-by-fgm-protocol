@@ -136,7 +136,7 @@ namespace protocols {
     // but it conforms to the standard functional API. It is copyable and in addition, it
     // provides a byte_size() method, making it suitable for integration with the middleware.
     class Safezone {
-        SafeFunction *szone;        // the safezone function, if any
+        SafeFunction *safeFunction;        // the safezone function, if any
 
     public:
 
@@ -146,27 +146,17 @@ namespace protocols {
 
         ~Safezone();
 
-        // Movable
         Safezone(Safezone &&) noexcept;
 
         Safezone &operator=(Safezone &&) noexcept;
 
-        // Copyable
         Safezone(const Safezone &);
 
         Safezone &operator=(const Safezone &);
 
         void Swap(Safezone &other);
 
-        SafeFunction *GetSzone();
-
-        void operator()(arma::mat drift, arma::mat params, float mul);
-
-        size_t operator()(size_t counter);
-
-        float operator()(const arma::mat &mdl);
-
-        float operator()(const arma::mat &mdl1, const arma::mat &mdl2);
+        SafeFunction *GetSafeFunction();
 
         size_t byte_size() const;
     };

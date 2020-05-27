@@ -160,12 +160,12 @@ size_t P2Norm::byte_size() { return (1 + globalModel.n_elem) * sizeof(float) + s
 /*********************************************
 	Safezone
 *********************************************/
-Safezone::Safezone() : szone(nullptr) {}
+Safezone::Safezone() : safeFunction(nullptr) {}
 
 Safezone::~Safezone() = default;
 
 // valid safezone
-Safezone::Safezone(SafeFunction *sz) : szone(sz) {}
+Safezone::Safezone(SafeFunction *sz) : safeFunction(sz) {}
 
 // Movable
 Safezone::Safezone(Safezone &&other) noexcept { Swap(other); }
@@ -176,29 +176,21 @@ Safezone &Safezone::operator=(Safezone &&other) noexcept {
 }
 
 // Copyable
-Safezone::Safezone(const Safezone &other) { szone = other.szone; }
+Safezone::Safezone(const Safezone &other) { safeFunction = other.safeFunction; }
 
 Safezone &Safezone::operator=(const Safezone &other) {
 
-    if (szone != other.szone) {
-        szone = other.szone;
-    }
+    if (safeFunction != other.safeFunction)
+        safeFunction = other.safeFunction;
+
     return *this;
 }
 
-void Safezone::Swap(Safezone &other) { swap(szone, other.szone); }
+void Safezone::Swap(Safezone &other) { swap(safeFunction, other.safeFunction); }
 
-SafeFunction *Safezone::GetSzone() { return (szone != nullptr) ? szone : nullptr; }
+SafeFunction *Safezone::GetSafeFunction() { return (safeFunction != nullptr) ? safeFunction : nullptr; }
 
-void Safezone::operator()(arma::mat drift, arma::mat params, float mul) { szone->UpdateDrift(drift, params, mul); }
-
-float Safezone::operator()(const arma::mat &mdl) { return (szone != nullptr) ? szone->Norm(mdl) : NAN; }
-
-float Safezone::operator()(const arma::mat &mdl1, const arma::mat &mdl2) {
-    return (szone != nullptr) ? szone->Norm(mdl1, mdl2) : NAN;
-}
-
-size_t Safezone::byte_size() const { return (szone != nullptr) ? szone->byte_size() : 0; }
+size_t Safezone::byte_size() const { return (safeFunction != nullptr) ? safeFunction->byte_size() : 0; }
 
 
 /*********************************************

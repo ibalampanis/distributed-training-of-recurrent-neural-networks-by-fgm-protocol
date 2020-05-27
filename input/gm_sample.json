@@ -7,7 +7,7 @@
   },
   "net": {
     "encoding": "UTF-8",
-    "local_nodes": 64,
+    "local_nodes": 4,
     "learning_algorithm": "RNN",
     "distributed_learning_algorithm": "GM_RNN",
     "warmup": true

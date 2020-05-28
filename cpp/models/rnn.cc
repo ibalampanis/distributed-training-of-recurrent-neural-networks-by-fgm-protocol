@@ -26,9 +26,14 @@ RnnLearner::RnnLearner(const string &cfg, const RNN<MeanSquaredError<>, HeInitia
         beta1 = root["hyperparameters"].get("beta1", 0).asDouble();
         beta2 = root["hyperparameters"].get("beta2", 0).asDouble();
         trainTestRatio = root["hyperparameters"].get("train_test_ratio", 0).asDouble();
+        vocabSize = root["data"].get("vocab_size", -1).asInt();
+        embedSize = root["data"].get("embed_size", -1).asInt();
         inputSize = root["data"].get("input_size", 0).asInt();
         outputSize = root["data"].get("output_size", 0).asInt();
+        datasetType = root["data"].get("type", "").asString();
         datasetPath = root["data"].get("path", "").asString();
+        featsPath = root["data"].get("feat_path", "").asString();
+        labelsPath = root["data"].get("labels_path", "").asString();
     } catch (...) {}
     numberOfUpdates = 0;
     usedTimes = 0;
@@ -43,6 +48,14 @@ void RnnLearner::CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cu
         X.subcube(arma::span(), arma::span(i), arma::span()) = dataset.submat(arma::span(), arma::span(i, i + rho - 1));
         y.subcube(arma::span(), arma::span(i), arma::span()) = dataset.submat(
                 arma::span(dataset.n_rows - 1, dataset.n_rows - 1), arma::span(i + 1, i + rho));
+    }
+}
+
+void RnnLearner::CreateTimeSeriesData(arma::mat feats, arma::mat labels, arma::cube &X, arma::cube &y, size_t rho) {
+    for (size_t i = 0; i < feats.n_cols - rho; i++) {
+        X.subcube(arma::span(), arma::span(i), arma::span()) = feats.submat(arma::span(), arma::span(i, i + rho - 1));
+        y.subcube(arma::span(), arma::span(i), arma::span()) = labels.submat(
+                arma::span(labels.n_rows - 1, labels.n_rows - 1), arma::span(i + 1, i + rho));
     }
 }
 
@@ -61,24 +74,42 @@ void RnnLearner::UpdateModel(arma::mat params) { model.Parameters() = move(param
 double RnnLearner::ModelAccuracy() const { return modelAccuracy; }
 
 void RnnLearner::CentralizedDataPreparation() {
-    arma::mat dataset;
-    // In Armadillo rows represent features, columns represent data points.
-    cout << "Reading dataset ...";
-    data::Load(datasetPath, dataset, true);
-    cout << " OK." << endl;
 
-    // Scale all data into the range (0, 1) for increased numerical stability.
-    data::MinMaxScaler scale;
-    scale.Fit(dataset);
-    scale.Transform(dataset, dataset);
-
-    // We need to represent the input data for RNN in an arma::cube (3D matrix).
-    // The 3rd dimension is rho, the number of past data records the RNN uses for learning.
     arma::cube X, y;
-    X.set_size(inputSize, dataset.n_cols - rho + 1, rho);
-    y.set_size(outputSize, dataset.n_cols - rho + 1, rho);
 
-    CreateTimeSeriesData(dataset, X, y, rho);
+    if (datasetType != "nlp") {
+        arma::mat dataset;
+        // In Armadillo rows represent features, columns represent data points.
+//        cout << "Reading dataset ...";
+        data::Load(datasetPath, dataset, true);
+//        cout << " OK." << endl;
+
+        // Scale all data into the range (0, 1) for increased numerical stability.
+        data::MinMaxScaler scale;
+        scale.Fit(dataset);
+        scale.Transform(dataset, dataset);
+
+        // We need to represent the input data for RNN in an arma::cube (3D matrix).
+        // The 3rd dimension is rho, the number of past data records the RNN uses for learning.
+        X.set_size(inputSize, dataset.n_cols - rho + 1, rho);
+        y.set_size(outputSize, dataset.n_cols - rho + 1, rho);
+
+        CreateTimeSeriesData(dataset, X, y, rho);
+    } else {
+        arma::mat features, labels;
+
+//        cout << "Reading dataset ...";
+        data::Load(featsPath, features, true);
+        data::Load(labelsPath, labels, true);
+//        cout << " OK." << endl;
+
+        // We need to represent the input data for RNN in an arma::cube (3D matrix).
+        // The 3rd dimension is rho, the number of past data records the RNN uses for learning.
+        X.set_size(inputSize, features.n_cols - rho + 1, rho);
+        y.set_size(outputSize, labels.n_cols - rho + 1, rho);
+
+        CreateTimeSeriesData(features, labels, X, y, rho);
+    }
 
     // Split the data into training and testing sets.
     size_t trainingSize = (1 - trainTestRatio) * X.n_cols;
@@ -92,17 +123,32 @@ void RnnLearner::BuildModel() {
     // Model definition
     model = RNN<MeanSquaredError<>, HeInitialization>(rho);
 
-    // Model building 
-    model.Add<IdentityLayer<> >();
-    model.Add<LSTM<> >(inputSize, lstmCells, maxRho);
-    model.Add<Dropout<> >(0.5);
-    model.Add<ReLULayer<> >();
-    model.Add<LSTM<> >(lstmCells, lstmCells, maxRho);
-    model.Add<Dropout<> >(0.5);
-    model.Add<ReLULayer<> >();
-    model.Add<LSTM<> >(lstmCells, lstmCells, maxRho);
-    model.Add<ReLULayer<> >();
-    model.Add<Linear<> >(lstmCells, outputSize);
+    if (datasetType != "nlp") {
+        // Model building
+        model.Add<IdentityLayer<> >();
+        model.Add<LSTM<> >(inputSize, lstmCells, maxRho);
+        model.Add<Dropout<> >(0.5);
+        model.Add<ReLULayer<> >();
+//        model.Add<LSTM<> >(lstmCells, lstmCells, maxRho);
+//        model.Add<Dropout<> >(0.5);
+//        model.Add<ReLULayer<> >();
+//        model.Add<LSTM<> >(lstmCells, lstmCells, maxRho);
+//        model.Add<ReLULayer<> >();
+        model.Add<Linear<> >(lstmCells, outputSize);
+    } else {
+        // Model building
+        model.Add<IdentityLayer<> >();
+        model.Add<Lookup<> >(vocabSize, embedSize);
+        model.Add<LSTM<> >(inputSize, lstmCells, maxRho);
+        model.Add<Dropout<> >(0.5);
+        model.Add<ReLULayer<> >();
+//        model.Add<LSTM<> >(lstmCells, lstmCells, maxRho);
+//        model.Add<Dropout<> >(0.5);
+//        model.Add<ReLULayer<> >();
+//        model.Add<LSTM<> >(lstmCells, lstmCells, maxRho);
+//        model.Add<ReLULayer<> >();
+        model.Add<Linear<> >(lstmCells, outputSize);
+    }
 
     // Define and set parameters for the Stochastic Gradient Descent (SGD) optimizer. 
     optimizer = SGD<AdamUpdate>(stepSize, batchSize, maxOptIterations, tolerance, bShuffle,

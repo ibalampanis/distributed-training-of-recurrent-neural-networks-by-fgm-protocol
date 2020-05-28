@@ -37,7 +37,7 @@ const ProtocolConfig &algorithms::fgm::Coordinator::Cfg() const { return Q->conf
 
 void algorithms::fgm::Coordinator::InitializeGlobalLearner() {
 
-    cout << "\n\t\t[+]Coordinator's neural net ...";
+//    cout << "\n\t\t[+]Coordinator's neural net ...";
     try {
         Json::Value root;
         ifstream cfgfile(Cfg().cfgfile);
@@ -46,10 +46,10 @@ void algorithms::fgm::Coordinator::InitializeGlobalLearner() {
         globalLearner = new RnnLearner(Cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(rho));
         globalLearner->BuildModel();
 
-        cout << " OK." << endl;
+//        cout << " OK." << endl;
 
     } catch (...) {
-        cout << " ERROR." << endl;
+//        cout << " ERROR." << endl;
     }
 }
 
@@ -217,7 +217,7 @@ const ProtocolConfig &algorithms::fgm::LearningNode::Cfg() const { return Q->con
 
 void algorithms::fgm::LearningNode::InitializeLearner() {
 
-    cout << "\t\t[+]Node's local neural net ...";
+//    cout << "\t\t[+]Node's local neural net ...";
     try {
         Json::Value root;
         ifstream cfgfile(Cfg().cfgfile);
@@ -226,10 +226,10 @@ void algorithms::fgm::LearningNode::InitializeLearner() {
         int rho = stoi(temp);
         learner = new RnnLearner(Cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(rho));
         learner->BuildModel();
-        cout << " OK." << endl;
+//        cout << " OK." << endl;
     }
     catch (...) {
-        cout << " ERROR." << endl;
+//        cout << " ERROR." << endl;
         throw;
     }
 }

@@ -228,7 +228,7 @@ size_t QueryState::byte_size() const { return (1 + globalModel.n_elem) * sizeof(
 	Query
 *********************************************/
 Query::Query(const string &cfg, string nm) {
-    cout << "\t[+]Initializing the query ...";
+//    cout << "\t[+]Initializing the query ...";
     try {
         Json::Value root;
         ifstream cfgfl(cfg);
@@ -239,9 +239,9 @@ Query::Query(const string &cfg, string nm) {
         config.precision = root[config.distributedLearningAlgorithm].get("precision", 0.01).asFloat();
         config.cfgfile = cfg;
 
-        cout << " OK." << endl;
+//        cout << " OK." << endl;
     } catch (...) {
-        cout << " ERROR." << endl;
+//        cout << " ERROR." << endl;
     }
 
 }

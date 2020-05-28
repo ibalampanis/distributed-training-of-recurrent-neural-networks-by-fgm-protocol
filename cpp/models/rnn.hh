@@ -33,6 +33,11 @@ namespace rnn {
         size_t inputSize;                                   // Number of neurons at the input layer
         size_t outputSize;                                  // Number of neurons at the output layer
         string datasetPath;                                 // Path for finding dataset file
+        size_t vocabSize;
+        size_t embedSize;
+        string featsPath;
+        string labelsPath;
+        string datasetType;
         double trainTestRatio;                              // Testing data is taken from the dataset in this ratio
 
         RNN<MeanSquaredError<>, HeInitialization> model;    // RNN model
@@ -65,6 +70,8 @@ namespace rnn {
         ~RnnLearner();
 
         static void CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y, size_t rho);
+
+        static void CreateTimeSeriesData(arma::mat feats, arma::mat labels, arma::cube &X, arma::cube &y, size_t rho);
 
         static double CalculateMSPE(arma::cube &pred, arma::cube &Y);
 

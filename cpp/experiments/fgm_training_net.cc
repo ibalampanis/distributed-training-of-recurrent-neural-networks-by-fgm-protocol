@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
 
     Controller<FgmNet> sv(cfg);
     sv.InitializeSimulation();
-    sv.ShowNetworkInfo();
+//    sv.ShowNetworkInfo();
     sv.TrainOverNetwork();
 
     return 0;

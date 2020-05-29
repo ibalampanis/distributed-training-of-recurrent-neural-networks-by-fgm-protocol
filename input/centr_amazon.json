@@ -20,8 +20,8 @@
     "embed_size": 200,
     "input_size": 200,
     "output_size": 1,
-    "feat_path": "/home/ibalampanis/Documents/Notebooks/features.csv",
-    "labels_path": "/home/ibalampanis/Documents/Notebooks/labels.csv",
+    "feat_path": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/datasets/Amazon_Features.csv",
+    "labels_path": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/datasets/Amazon_Labels.csv",
     "dataset_name": "Amazon Reviews"
   }
 }

@@ -103,12 +103,16 @@ void RnnLearner::CentralizedDataPreparation() {
         data::Load(labelsPath, labels, true);
 //        cout << " OK." << endl;
 
+
         // We need to represent the input data for RNN in an arma::cube (3D matrix).
         // The 3rd dimension is rho, the number of past data records the RNN uses for learning.
         X.set_size(inputSize, features.n_cols - rho + 1, rho);
         y.set_size(outputSize, labels.n_cols - rho + 1, rho);
 
         CreateTimeSeriesData(features, labels, X, y, rho);
+
+        features.clear();
+        labels.clear();
     }
 
     // Split the data into training and testing sets.
@@ -138,7 +142,7 @@ void RnnLearner::BuildModel() {
     } else {
         // Model building
         model.Add<IdentityLayer<> >();
-        model.Add<Lookup<> >(vocabSize, embedSize);
+        model.Add<Embedding<> >(vocabSize, embedSize);
         model.Add<LSTM<> >(inputSize, lstmCells, maxRho);
         model.Add<Dropout<> >(0.5);
         model.Add<ReLULayer<> >();

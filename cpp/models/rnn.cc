@@ -127,32 +127,14 @@ void RnnLearner::BuildModel() {
     // Model definition
     model = RNN<MeanSquaredError<>, HeInitialization>(rho);
 
-    if (datasetType != "nlp") {
-        // Model building
-        model.Add<IdentityLayer<> >();
-        model.Add<LSTM<> >(inputSize, lstmCells, maxRho);
-        model.Add<Dropout<> >(0.5);
-        model.Add<ReLULayer<> >();
-//        model.Add<LSTM<> >(lstmCells, lstmCells, maxRho);
-//        model.Add<Dropout<> >(0.5);
-//        model.Add<ReLULayer<> >();
-//        model.Add<LSTM<> >(lstmCells, lstmCells, maxRho);
-//        model.Add<ReLULayer<> >();
-        model.Add<Linear<> >(lstmCells, outputSize);
-    } else {
-        // Model building
-        model.Add<IdentityLayer<> >();
-        model.Add<Embedding<> >(vocabSize, embedSize);
-        model.Add<LSTM<> >(inputSize, lstmCells, maxRho);
-        model.Add<Dropout<> >(0.5);
-        model.Add<ReLULayer<> >();
-//        model.Add<LSTM<> >(lstmCells, lstmCells, maxRho);
-//        model.Add<Dropout<> >(0.5);
-//        model.Add<ReLULayer<> >();
-//        model.Add<LSTM<> >(lstmCells, lstmCells, maxRho);
-//        model.Add<ReLULayer<> >();
-        model.Add<Linear<> >(lstmCells, outputSize);
-    }
+    // Model building
+    model.Add<IdentityLayer<> >();
+//    if (datasetType == "nlp")
+//        model.Add<Embedding<> >(vocabSize, embedSize);
+    model.Add<LSTM<> >(inputSize, lstmCells, maxRho);
+    model.Add<Dropout<> >(0.5);
+    model.Add<ReLULayer<> >();
+    model.Add<Linear<> >(lstmCells, outputSize);
 
     // Define and set parameters for the Stochastic Gradient Descent (SGD) optimizer. 
     optimizer = SGD<AdamUpdate>(stepSize, batchSize, maxOptIterations, tolerance, bShuffle,
@@ -161,6 +143,7 @@ void RnnLearner::BuildModel() {
 }
 
 void RnnLearner::TrainModel() {
+
 
     cout << "Training ..." << endl;
     cout << "===========================================" << endl;

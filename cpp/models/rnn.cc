@@ -14,22 +14,23 @@ RnnLearner::RnnLearner(const string &cfg, const RNN<MeanSquaredError<>, HeInitia
     try {
         ifstream cfgfile(cfg);
         cfgfile >> root;
-        trainingEpochs = root["hyperparameters"].get("training_epochs", 0).asInt();
-        lstmCells = root["hyperparameters"].get("lstm_cells", 0).asInt();
-        rho = root["hyperparameters"].get("rho", 0).asInt();
-        stepSize = root["hyperparameters"].get("step_size", 0).asDouble();
-        batchSize = root["hyperparameters"].get("batch_size", 0).asInt();
-        maxOptIterations = root["hyperparameters"].get("max_opt_iterations", 0).asInt();
-        tolerance = root["hyperparameters"].get("tolerance", 0).asDouble();
+        trainingEpochs = root["hyperparameters"].get("training_epochs", -1).asInt();
+        lstmCells = root["hyperparameters"].get("lstm_cells", -1).asInt();
+        lstmLayers = root["hyperparameters"].get("lstm_layers", -1).asInt();
+        rho = root["hyperparameters"].get("rho", -1).asInt();
+        stepSize = root["hyperparameters"].get("step_size", -1).asDouble();
+        batchSize = root["hyperparameters"].get("batch_size", -1).asInt();
+        maxOptIterations = root["hyperparameters"].get("max_opt_iterations", -1).asInt();
+        tolerance = root["hyperparameters"].get("tolerance", -1).asDouble();
         bShuffle = root["hyperparameters"].get("shuffle", 0).asBool();
-        epsilon = root["hyperparameters"].get("epsilon", 0).asDouble();
-        beta1 = root["hyperparameters"].get("beta1", 0).asDouble();
-        beta2 = root["hyperparameters"].get("beta2", 0).asDouble();
-        trainTestRatio = root["hyperparameters"].get("train_test_ratio", 0).asDouble();
+        epsilon = root["hyperparameters"].get("epsilon", -1).asDouble();
+        beta1 = root["hyperparameters"].get("beta1", -1).asDouble();
+        beta2 = root["hyperparameters"].get("beta2", -1).asDouble();
+        trainTestRatio = root["hyperparameters"].get("train_test_ratio", -1).asDouble();
         vocabSize = root["data"].get("vocab_size", -1).asInt();
         embedSize = root["data"].get("embed_size", -1).asInt();
-        inputSize = root["data"].get("input_size", 0).asInt();
-        outputSize = root["data"].get("output_size", 0).asInt();
+        inputSize = root["data"].get("input_size", -1).asInt();
+        outputSize = root["data"].get("output_size", -1).asInt();
         datasetType = root["data"].get("type", "").asString();
         datasetPath = root["data"].get("path", "").asString();
         featsPath = root["data"].get("feat_path", "").asString();
@@ -131,9 +132,11 @@ void RnnLearner::BuildModel() {
     model.Add<IdentityLayer<> >();
 //    if (datasetType == "nlp")
 //        model.Add<Embedding<> >(vocabSize, embedSize);
-    model.Add<LSTM<> >(inputSize, lstmCells, maxRho);
-    model.Add<Dropout<> >(0.5);
-    model.Add<ReLULayer<> >();
+    for (int k = 0; k < lstmLayers; k++) {
+        model.Add<LSTM<> >(inputSize, lstmCells, maxRho);
+        model.Add<Dropout<> >(0.5);
+        model.Add<ReLULayer<> >();
+    }
     model.Add<Linear<> >(lstmCells, outputSize);
 
     // Define and set parameters for the Stochastic Gradient Descent (SGD) optimizer. 
@@ -146,13 +149,13 @@ void RnnLearner::TrainModel() {
 
 
     cout << "Training ..." << endl;
-    cout << "===========================================" << endl;
 
     auto begin_train_time = chrono::high_resolution_clock::now();
 
+    cout << "lstm size: " << lstmCells << " layers: " << lstmLayers << " learn rate: " << stepSize << endl;
+
     // Run EPOCH number of cycles for optimizing the solution
     for (size_t epoch = 1; epoch <= trainingEpochs; epoch++) {
-
         // Train neural network. If this is the first iteration, weights are random,
         // using current values as starting point otherwise.
         model.Train(trainX, trainY, optimizer);
@@ -170,12 +173,14 @@ void RnnLearner::TrainModel() {
         modelAccuracy = 100 - testMSE;
 
         // Print stats during training
-        if (epoch % 10 == 0 || epoch == 1)
-            cout << "|=== [Epoch: " << epoch << "\t|\tAccuracy: " << setprecision(2) << fixed << (100 - testMSE)
-                 << " %] ===|" << endl;
+        if ((trainingEpochs > 10 && epoch % 10 == 0) || epoch == 1)
+            cout << "Epoch: " << epoch << "/" << trainingEpochs << "\t|\tAccuracy: " << setprecision(2) << fixed
+                 << (100 - testMSE) << " %" << endl;
+        else
+            cout << "Epoch " << epoch << " from " << trainingEpochs << "\t|\tAccuracy: " << setprecision(2) << fixed
+                 << (100 - testMSE) << " %" << endl;
     }
 
-    cout << "===========================================" << endl;
     // End of measuring training time
     auto end_train_time = chrono::high_resolution_clock::now();
     auto train_time = end_train_time - begin_train_time;
@@ -199,10 +204,10 @@ void RnnLearner::TrainModelByBatch(arma::cube &x, arma::cube &y) {
 void RnnLearner::MakePrediction() {
 
     arma::cube predOut;
-    cout << "Predicting ...";
+//    cout << "Predicting ...";
     // Get predictions on test data points.
     model.Predict(testX, predOut);
-    cout << " OK." << endl;
+//    cout << " OK." << endl;
     // Calculate MSE on prediction.
     double testMSEPred = CalculateMSPE(predOut, testY);
     cout << "Prediction Accuracy: " << setprecision(2) << fixed << (100 - testMSEPred) << " %" << endl;

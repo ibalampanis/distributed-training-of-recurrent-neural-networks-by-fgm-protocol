@@ -45,7 +45,8 @@ namespace rnn {
 
         //  Model and Optimizer parameters 
         size_t trainingEpochs;                              // Number of optimization epochs
-        size_t lstmCells;                                   // Number of hidden layers
+        size_t lstmCells;                                   // LSTM Size
+        size_t lstmLayers;                                  // Number of LSTM layers
         size_t rho;                                         // Number of time steps to look backward for in the RNN
         size_t maxRho = rho;                                // Max Rho for LSTM
         double stepSize;                                    // Step size of an optimizer

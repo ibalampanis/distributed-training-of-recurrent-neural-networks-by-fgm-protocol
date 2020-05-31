@@ -19,6 +19,7 @@
   },
   "hyperparameters": {
     "lstm_cells": 15,
+    "lstm_layers": 1,
     "rho": 5,
     "step_size": 0.001,
     "batch_size": 16,
@@ -35,7 +36,7 @@
     "encoding": "UTF-8",
     "input_size": 15,
     "output_size": 1,
-    "path": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/datasets/EEG_Eye_State.csv",
+    "path": "/home/ibalampanis/datasets/EEG_Eye_State.csv",
     "dataset_name": "EEG_Eye_State"
   }
 }

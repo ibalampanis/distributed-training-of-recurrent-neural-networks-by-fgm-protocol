@@ -22,11 +22,14 @@ Controller<networkType>::Controller(string cfg) : configFile(move(cfg)) {
     ifstream cfgfile(configFile);
     cfgfile >> root;
 
-    datasetPath = root["data"].get("path", "").asString();
-    datasetName = root["data"].get("dataset_name", "").asString();
-    trainTestRatio = root["hyperparameters"].get("train_test_ratio", -1).asDouble();
     inputSize = root["data"].get("input_size", -1).asInt();
     outputSize = root["data"].get("output_size", -1).asInt();
+    datasetType = root["data"].get("type", "").asString();
+    datasetPath = root["data"].get("path", "").asString();
+    featsPath = root["data"].get("feat_path", "").asString();
+    labelsPath = root["data"].get("labels_path", "").asString();
+    datasetName = root["data"].get("dataset_name", "").asString();
+    trainTestRatio = root["hyperparameters"].get("train_test_ratio", -1).asDouble();
     rho = root["hyperparameters"].get("rho", -1).asInt();
     warmup = root["net"].get("warmup", false).asBool();
     miniBatchSize = root["hyperparameters"].get("mini_batch_size", -1).asInt();
@@ -98,8 +101,7 @@ void Controller<networkType>::ShowNetworkInfo() const {
 }
 
 template<typename networkType>
-void Controller<networkType>::CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y) {
-
+void Controller<networkType>::CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y, size_t rho) {
     for (size_t i = 0; i < dataset.n_cols - rho; i++) {
         X.subcube(arma::span(), arma::span(i), arma::span()) = dataset.submat(arma::span(), arma::span(i, i + rho - 1));
         y.subcube(arma::span(), arma::span(i), arma::span()) = dataset.submat(
@@ -108,37 +110,60 @@ void Controller<networkType>::CreateTimeSeriesData(arma::mat dataset, arma::cube
 }
 
 template<typename networkType>
+void Controller<networkType>::CreateTimeSeriesData(arma::mat feats, arma::mat labels, arma::cube &X, arma::cube &y,
+                                                   size_t rho) {
+    for (size_t i = 0; i < feats.n_cols - rho; i++) {
+        X.subcube(arma::span(), arma::span(i), arma::span()) = feats.submat(arma::span(), arma::span(i, i + rho - 1));
+        y.subcube(arma::span(), arma::span(i), arma::span()) = labels.submat(
+                arma::span(labels.n_rows - 1, labels.n_rows - 1), arma::span(i + 1, i + rho));
+    }
+}
+
+template<typename networkType>
 void Controller<networkType>::DataPreparation() {
 
-    arma::mat dataset;
-    // In Armadillo rows represent features, columns represent data points.
-//    cout << "\t[+]Reading dataset ...";
+    arma::cube X, y;
 
-    try {
+    if (datasetType != "sep") {
+        arma::mat dataset;
+        // In Armadillo rows represent features, columns represent data points.
+//        cout << "Reading dataset ...";
         data::Load(datasetPath, dataset, true);
 //        cout << " OK." << endl;
-    } catch (...) {
-//        cout << " ERROR." << endl;
-    }
 
-    // Scale all data into the range (0, 1) for increased numerical stability.
-    data::MinMaxScaler scale;
-    scale.Fit(dataset);
-    scale.Transform(dataset, dataset);
+        // Scale all data into the range (0, 1) for increased numerical stability.
+        data::MinMaxScaler scale;
+        scale.Fit(dataset);
+        scale.Transform(dataset, dataset);
 
+        // We need to represent the input data for RNN in an arma::cube (3D matrix).
+        // The 3rd dimension is rho, the number of past data records the RNN uses for learning.
+        X.set_size(inputSize, dataset.n_cols - rho + 1, rho);
+        y.set_size(outputSize, dataset.n_cols - rho + 1, rho);
 
-    // We need to represent the input data for RNN in an arma::cube (3D matrix).
-    // The 3rd dimension is rho, the number of past data records the RNN uses for learning.
-    arma::cube X, y;
-    X.set_size(inputSize, dataset.n_cols - rho + 1, rho);
-    y.set_size(outputSize, dataset.n_cols - rho + 1, rho);
+        CreateTimeSeriesData(dataset, X, y, rho);
 
-//    cout << "\t[+]Creating time-series data ...";
-    try {
-        CreateTimeSeriesData(dataset, X, y);
+        dataset.clear();
+
+    } else {
+        arma::mat features, labels;
+
+        // In Armadillo rows represent features, columns represent data points.
+//        cout << "Reading dataset ...";
+        data::Load(featsPath, features, true);
+        data::Load(labelsPath, labels, true);
 //        cout << " OK." << endl;
-    } catch (...) {
-//        cout << " ERROR." << endl;
+
+
+        // We need to represent the input data for RNN in an arma::cube (3D matrix).
+        // The 3rd dimension is rho, the number of past data records the RNN uses for learning.
+        X.set_size(inputSize, features.n_cols - rho + 1, rho);
+        y.set_size(outputSize, labels.n_cols - rho + 1, rho);
+
+        CreateTimeSeriesData(features, labels, X, y, rho);
+
+        features.clear();
+        labels.clear();
     }
 
 //    cout << "\t[+]Splitting the data into train and test set ...";
@@ -236,7 +261,7 @@ void Controller<networkType>::TrainOverNetwork() {
             if (interStats)
                 GatherIntermediateNetStats();
 
-             progressPercentage.Update();
+            progressPercentage.Update();
         }
 
         cout << " ... FINISHED." << endl;

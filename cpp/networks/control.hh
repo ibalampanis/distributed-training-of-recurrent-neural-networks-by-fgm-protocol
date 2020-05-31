@@ -35,7 +35,10 @@ namespace controller {
         size_t inputSize;                           // Number of neurons at the input layer
         size_t outputSize;                          // Number of neurons at the output layer
         string datasetPath;                         // Path for finding dataset file
-        string datasetName;                         // The name of the dataset we use
+        string featsPath;
+        string labelsPath;
+        string datasetType;
+        string datasetName;
         double trainTestRatio;                      // Testing data is taken from the dataset in this ratio
         size_t rho;                                 // Number of time steps to look backward for in the RNN
         bool warmup;                                // Define if hub warmup is needed
@@ -59,7 +62,9 @@ namespace controller {
         // This method prints the star learning network for debbuging purposes. 
         void ShowNetworkInfo() const;
 
-        void CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y);
+        void CreateTimeSeriesData(arma::mat dataset, arma::cube &X, arma::cube &y, size_t rho);
+
+        void CreateTimeSeriesData(arma::mat feats, arma::mat labels, arma::cube &X, arma::cube &y, size_t rho);
 
         void DataPreparation();
 

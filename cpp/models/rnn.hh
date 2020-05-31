@@ -33,8 +33,8 @@ namespace rnn {
         size_t inputSize;                                   // Number of neurons at the input layer
         size_t outputSize;                                  // Number of neurons at the output layer
         string datasetPath;                                 // Path for finding dataset file
-        size_t vocabSize;
-        size_t embedSize;
+        size_t vocabSize;                                   // Vocabulary size in case of a NLP dataset
+        size_t embedSize;                                   // Embedding size in case of a NLP dataset
         string featsPath;
         string labelsPath;
         string datasetType;

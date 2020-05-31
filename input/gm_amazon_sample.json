@@ -15,22 +15,22 @@
   "query": {
     "encoding": "UTF-8",
     "threshold": 0.8,
-    "batch_size": 32
+    "batch_size": 64
   },
   "hyperparameters": {
-    "encoding": "UTF-8",
     "lstm_cells": 256,
-    "rho": 5,
-    "step_size": 0.001,
-    "batch_size": 32,
-    "max_opt_iterations": 500,
+    "lstm_layers": 1,
+    "rho": 3,
+    "step_size": 0.005,
+    "batch_size": 64,
+    "max_opt_iterations": 1000,
     "tolerance": 1e-8,
     "shuffle": true,
-    "epsilon": 2e-8,
+    "epsilon": 0.5e-9,
     "beta1": 0.9,
     "beta2": 0.99,
     "train_test_ratio": 0.25,
-    "mini_batch_size": 32
+    "mini_batch_size": 64
   },
   "data": {
     "encoding": "UTF-8",
@@ -39,8 +39,8 @@
     "embed_size": 200,
     "input_size": 200,
     "output_size": 1,
-    "feat_path": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/datasets/Amazon_Features.csv",
-    "labels_path": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/datasets/Amazon_Labels.csv",
+    "feat_path": "/home/ibalampanis/datasets/Amazon_Features.csv",
+    "labels_path": "/home/ibalampanis/datasets/Amazon_Labels.csv",
     "dataset_name": "Amazon Reviews"
   }
 }

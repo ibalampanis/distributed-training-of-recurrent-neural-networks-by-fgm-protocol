@@ -96,6 +96,9 @@ void RnnLearner::CentralizedDataPreparation() {
         y.set_size(outputSize, dataset.n_cols - rho + 1, rho);
 
         CreateTimeSeriesData(dataset, X, y, rho);
+
+        dataset.clear();
+
     } else {
         arma::mat features, labels;
 
@@ -178,7 +181,7 @@ void RnnLearner::TrainModel() {
             cout << "Epoch: " << epoch << "/" << trainingEpochs << "\t|\tAccuracy: " << setprecision(2) << fixed
                  << (100 - testMSE) << " %" << endl;
         else
-            cout << "Epoch " << epoch << " from " << trainingEpochs << "\t|\tAccuracy: " << setprecision(2) << fixed
+            cout << "Epoch: " << epoch << "/" << trainingEpochs << "\t|\tAccuracy: " << setprecision(2) << fixed
                  << (100 - testMSE) << " %" << endl;
     }
 

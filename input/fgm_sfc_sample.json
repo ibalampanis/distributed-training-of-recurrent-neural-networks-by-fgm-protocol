@@ -20,9 +20,9 @@
   },
   "hyperparameters": {
     "encoding": "UTF-8",
-    "lstm_cells": 10,
-    "rho": 10,
-    "step_size": 5e-2,
+    "lstm_cells": 19,
+    "rho": 5,
+    "step_size": 0.001,
     "batch_size": 32,
     "max_opt_iterations": 500,
     "tolerance": 1e-8,

@@ -19,7 +19,7 @@
   },
   "hyperparameters": {
     "encoding": "UTF-8",
-    "lstm_cells": 10,
+    "lstm_cells": 256,
     "rho": 5,
     "step_size": 0.001,
     "batch_size": 32,
@@ -34,9 +34,13 @@
   },
   "data": {
     "encoding": "UTF-8",
-    "input_size": 15,
+    "type": "sep",
+    "vocab_size": 240772,
+    "embed_size": 200,
+    "input_size": 200,
     "output_size": 1,
-    "path": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/datasets/EEG_Eye_State.csv",
-    "dataset_name": "EEG_Eye_State"
+    "feat_path": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/datasets/Amazon_Features.csv",
+    "labels_path": "/home/ibalampanis/CLionProjects/distributed-training-of-recurrent-neural-networks-by-fgm-protocol/datasets/Amazon_Labels.csv",
+    "dataset_name": "Amazon Reviews"
   }
 }

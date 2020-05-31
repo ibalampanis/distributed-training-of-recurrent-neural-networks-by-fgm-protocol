@@ -78,7 +78,7 @@ void RnnLearner::CentralizedDataPreparation() {
 
     arma::cube X, y;
 
-    if (datasetType != "nlp") {
+    if (datasetType != "sep") {
         arma::mat dataset;
         // In Armadillo rows represent features, columns represent data points.
 //        cout << "Reading dataset ...";
@@ -99,6 +99,7 @@ void RnnLearner::CentralizedDataPreparation() {
     } else {
         arma::mat features, labels;
 
+        // In Armadillo rows represent features, columns represent data points.
 //        cout << "Reading dataset ...";
         data::Load(featsPath, features, true);
         data::Load(labelsPath, labels, true);
@@ -218,6 +219,3 @@ double RnnLearner::MakePrediction(arma::cube &tX, arma::cube &tY) {
     model.Predict(tX, predOut);
     return (100 - CalculateMSPE(predOut, tY));
 }
-
-
-

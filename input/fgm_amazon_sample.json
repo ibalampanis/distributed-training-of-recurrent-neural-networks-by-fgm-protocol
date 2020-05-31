@@ -1,17 +1,37 @@
 {
+  "simulations": {
+    "encoding": "UTF-8",
+    "net_name": "FGM Net",
+    "expID": "sample",
+    "inter_stats": true
+  },
+  "net": {
+    "encoding": "UTF-8",
+    "local_nodes": 4,
+    "learning_algorithm": "RNN",
+    "distributed_learning_algorithm": "FGM_RNN",
+    "warmup": true
+  },
+  "query": {
+    "encoding": "UTF-8",
+    "precision": 0.01,
+    "threshold": 0.5,
+    "batch_size": 32
+  },
   "hyperparameters": {
-    "training_epochs": 5,
+    "encoding": "UTF-8",
     "lstm_cells": 256,
     "rho": 5,
     "step_size": 0.001,
-    "batch_size": 500,
-    "max_opt_iterations": 1000,
+    "batch_size": 32,
+    "max_opt_iterations": 500,
     "tolerance": 1e-8,
     "shuffle": true,
     "epsilon": 2e-8,
     "beta1": 0.9,
     "beta2": 0.99,
-    "train_test_ratio": 0.3
+    "train_test_ratio": 0.25,
+    "mini_batch_size": 32
   },
   "data": {
     "encoding": "UTF-8",

@@ -1,16 +1,18 @@
 # Distributed Training of Recurrent Neural Networks by FGM protocol #
 
-To resolve all project dependencies, in the root of the folder, open a terminal and type:
+To resolve all project dependencies, firstly, you must have installed anaconda in your system. 
+
+So, in the root of the folder, open a terminal and type:
 
 ```bash
-cd bash/
-chmod a+x *.bash
-sudo bash setup-project-dependencies.bash
+cd conda/
+conda env create -f environment.yml
 ```
 
-After that, in the same folder, to generate cmake files and compile the custom library, type:
+After that, in the bash/ folder, to generate cmake files and compile the custom library, type:
 
 ```bash
+cd ../bash
 bash setup-project.bash
 ```
 

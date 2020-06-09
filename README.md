@@ -13,6 +13,7 @@ After that, in the bash/ folder, to generate cmake files and compile the custom 
 
 ```bash
 cd ../bash
+chmod a+x *.bash
 bash setup-project.bash
 ```
 

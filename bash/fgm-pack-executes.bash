@@ -4,7 +4,7 @@ mkdir out
 
 cd ../
 
-for ((i=1; i<=5; i++)); do
+for ((i=1; i<=10; i++)); do
     ./cmake-build-debug/bin/GMLearn /home/ibalampanis/tests/simulation/gm-set-1/gm_set1_1.json >> bash/out/exp1_iter${i}.txt
     ./cmake-build-debug/bin/GMLearn /home/ibalampanis/tests/simulation/gm-set-1/gm_set1_2.json >> bash/out/exp2_iter${i}.txt
     ./cmake-build-debug/bin/GMLearn /home/ibalampanis/tests/simulation/gm-set-1/gm_set1_3.json >> bash/out/exp3_iter${i}.txt

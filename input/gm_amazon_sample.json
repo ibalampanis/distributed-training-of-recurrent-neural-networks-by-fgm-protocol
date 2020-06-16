@@ -34,7 +34,7 @@
   },
   "data": {
     "encoding": "UTF-8",
-    "type": "sep",
+    "type": "nl",
     "vocab_size": 240772,
     "embed_size": 200,
     "input_size": 200,

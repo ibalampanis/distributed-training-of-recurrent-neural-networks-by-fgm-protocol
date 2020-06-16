@@ -78,7 +78,7 @@ void RnnLearner::CentralizedDataPreparation() {
 
     arma::cube X, y;
 
-    if (datasetType != "sep") {
+    if (datasetType != "nlp") {
         arma::mat dataset;
         // In Armadillo rows represent features, columns represent data points.
 //        cout << "Reading dataset ...";
@@ -134,8 +134,8 @@ void RnnLearner::BuildModel() {
 
     // Model building
     model.Add<IdentityLayer<> >();
-//    if (datasetType == "nlp")
-//        model.Add<Embedding<> >(vocabSize, embedSize);
+    if (datasetType == "nlp")
+        model.Add<Embedding<> >(vocabSize, embedSize);
     for (int k = 0; k < lstmLayers; k++) {
         model.Add<LSTM<> >(inputSize, lstmCells, maxRho);
         model.Add<Dropout<> >(0.5);

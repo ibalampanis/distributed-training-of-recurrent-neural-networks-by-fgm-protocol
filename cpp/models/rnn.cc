@@ -134,8 +134,8 @@ void RnnLearner::BuildModel() {
 
     // Model building
     model.Add<IdentityLayer<> >();
-    if (datasetType == "nlp")
-        model.Add<Embedding<> >(vocabSize, embedSize);
+//    if (datasetType == "nlp")
+//        model.Add<Embedding<> >(vocabSize, embedSize);
     for (int k = 0; k < lstmLayers; k++) {
         model.Add<LSTM<> >(inputSize, lstmCells, maxRho);
         model.Add<Dropout<> >(0.5);

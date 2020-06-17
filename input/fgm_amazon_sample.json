@@ -19,12 +19,12 @@
     "batch_size": 32
   },
   "hyperparameters": {
-    "lstm_cells": 256,
+    "lstm_cells": 128,
     "lstm_layers": 1,
     "rho": 3,
     "step_size": 0.005,
     "batch_size": 64,
-    "max_opt_iterations": 1000,
+    "max_opt_iterations": 500,
     "tolerance": 1e-8,
     "shuffle": true,
     "epsilon": 0.5e-9,
@@ -35,7 +35,7 @@
   },
   "data": {
     "encoding": "UTF-8",
-    "type": "nl",
+    "type": "nlp",
     "vocab_size": 240772,
     "embed_size": 200,
     "input_size": 200,

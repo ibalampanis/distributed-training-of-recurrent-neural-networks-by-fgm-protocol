@@ -124,7 +124,7 @@ void Controller<networkType>::DataPreparation() {
 
     arma::cube X, y;
 
-    if (datasetType != "sep") {
+    if (datasetType != "nlp") {
         arma::mat dataset;
         // In Armadillo rows represent features, columns represent data points.
 //        cout << "Reading dataset ...";

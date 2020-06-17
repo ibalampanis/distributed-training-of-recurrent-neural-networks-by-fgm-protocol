@@ -39,8 +39,10 @@
     "embed_size": 200,
     "input_size": 200,
     "output_size": 1,
-    "feat_path": "/home/ibalampanis/datasets/Amazon_Features.csv",
-    "labels_path": "/home/ibalampanis/datasets/Amazon_Labels.csv",
+    "feat_path1": "/home/ibalampanis/datasets/Amazon_Features1.csv",
+    "labels_path1": "/home/ibalampanis/datasets/Amazon_Labels1.csv",
+    "feat_path2": "/home/ibalampanis/datasets/Amazon_Features2.csv",
+    "labels_path2": "/home/ibalampanis/datasets/Amazon_Labels2.csv",
     "dataset_name": "Amazon Reviews"
   }
 }

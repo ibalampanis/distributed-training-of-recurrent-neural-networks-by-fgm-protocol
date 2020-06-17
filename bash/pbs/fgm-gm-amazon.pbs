@@ -1,0 +1,22 @@
+#PBS -N fgm-gm-amazon-17-17
+
+#PBS -l nodes=1:ppn=4,mem=16gb
+
+#PBS -l walltime=24:00:00
+
+#PBS -q tuc
+
+#PBS -m abe -M something@example.com
+
+#PBS -k oe
+
+export PATH=/storage/tuclocal/ibalampanis/anaconda3/bin:$PATH
+
+source /storage/tuclocal/ibalampanis/anaconda3/etc/profile.d/conda.sh
+
+conda activate base
+
+source /storage/tuclocal/ibalampanis/.bashrc
+
+./FGMLearn /storage/tuclocal/ibalampanis/simulation/fgm/amazon/17.json >> /storage/tuclocal/ibalampanis/exp-results/fgm-amazon/exp17_iter1.txt
+./GMLearn /storage/tuclocal/ibalampanis/simulation/gm/amazon/2.json >> /storage/tuclocal/ibalampanis/exp-results/gm-amazon/exp17_iter1.txt

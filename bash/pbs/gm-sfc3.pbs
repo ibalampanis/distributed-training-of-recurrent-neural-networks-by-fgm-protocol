@@ -1,0 +1,24 @@
+#PBS -N gm-sfc-9-12
+
+#PBS -l nodes=1:ppn=4,mem=16gb
+
+#PBS -l walltime=48:00:00
+
+#PBS -q tuc
+
+#PBS -m abe -M something@example.com
+
+#PBS -k oe
+
+export PATH=/storage/tuclocal/ibalampanis/anaconda3/bin:$PATH
+
+source /storage/tuclocal/ibalampanis/anaconda3/etc/profile.d/conda.sh
+
+conda activate base
+
+source /storage/tuclocal/ibalampanis/.bashrc
+
+./GMLearn /storage/tuclocal/ibalampanis/simulation/gm/sfc/9.json >> /storage/tuclocal/ibalampanis/exp-results/gm-sfc/exp9_iter1.txt
+./GMLearn /storage/tuclocal/ibalampanis/simulation/gm/sfc/10.json >> /storage/tuclocal/ibalampanis/exp-results/gm-sfc/exp10_iter1.txt
+./GMLearn /storage/tuclocal/ibalampanis/simulation/gm/sfc/11.json >> /storage/tuclocal/ibalampanis/exp-results/gm-sfc/exp11_iter1.txt
+./GMLearn /storage/tuclocal/ibalampanis/simulation/gm/sfc/12.json >> /storage/tuclocal/ibalampanis/exp-results/gm-sfc/exp12_iter1.txt

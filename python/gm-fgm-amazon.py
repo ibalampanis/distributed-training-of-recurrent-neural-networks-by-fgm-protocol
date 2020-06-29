@@ -25,48 +25,48 @@ _sorted_gm = gm_subdf.sort_values('threshold')
 
 x = _sorted_fgm['threshold']
 
-
 # Accuracy
 y_fgm = _sorted_fgm['accuracy']
 y_gm = _sorted_gm['accuracy']
 y_centr = [98.37, 98.37, 98.37, 98.37, 98.37, 98.37, 98.37]
-plt.figure(figsize=(18, 10))
-plt.plot(x, y_fgm, label="fgm", marker='x')
-plt.plot(x, y_gm, label="gm", marker='x')
+plt.figure(figsize=(16, 12))
+plt.plot(x, y_fgm, label="fgm", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="gm", marker='D', linewidth=4)
 plt.plot(x, y_centr, label="centralized")
-plt.xlabel('Threshold')
-plt.ylabel('Accuracy')
-plt.legend(loc='best')
+plt.xlabel('Threshold', fontsize='x-large')
+plt.ylabel('Accuracy', fontsize='x-large')
+plt.legend(loc='best', fontsize='x-large')
 plt.grid(True)
-plt.xticks(x)
+plt.xticks(x, fontsize='x-large')
+plt.yticks(fontsize='x-large')
 plt.savefig("exp_Fig_1_1")
-
 
 # Rounds
 y_fgm = _sorted_fgm['rounds']
 y_gm = _sorted_gm['rounds']
-plt.figure(figsize=(18, 10))
-plt.plot(x, y_fgm, label="fgm", marker='x')
-plt.plot(x, y_gm, label="gm", marker='x')
-plt.xlabel('Threshold')
-plt.ylabel('Rounds')
-plt.legend(loc='best')
+plt.figure(figsize=(16, 12))
+plt.plot(x, y_fgm, label="fgm", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="gm", marker='D', linewidth=4)
+plt.xlabel('Threshold', fontsize='x-large')
+plt.ylabel('Rounds', fontsize='x-large')
+plt.legend(loc='best', fontsize='x-large')
 plt.grid(True)
-plt.xticks(x)
+plt.xticks(x, fontsize='x-large')
+plt.yticks(fontsize='x-large')
 plt.savefig("exp_Fig_1_2")
-
 
 # Traffic
 y_fgm = _sorted_fgm['traffic']
 y_gm = _sorted_gm['traffic']
-plt.figure(figsize=(18, 10))
-plt.plot(x, y_fgm, label="fgm", marker='x')
-plt.plot(x, y_gm, label="gm", marker='x')
-plt.xlabel('Threshold')
-plt.ylabel('Traffic')
-plt.legend(loc='best')
+plt.figure(figsize=(16, 12))
+plt.plot(x, y_fgm, label="fgm", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="gm", marker='D', linewidth=4)
+plt.xlabel('Threshold', fontsize='x-large')
+plt.ylabel('Traffic', fontsize='x-large')
+plt.legend(loc='best', fontsize='x-large')
 plt.grid(True)
-plt.xticks(x)
+plt.xticks(x, fontsize='x-large')
+plt.yticks(fontsize='x-large')
 plt.savefig("exp_Fig_1_3")
 
 # #### Model accuracy and rounds for various **batch sizes** ####
@@ -83,47 +83,48 @@ _sorted_gm = gm_subdf.sort_values('batch-size')
 
 x = _sorted_fgm['batch-size']
 
-
 # Accuracy
 y_fgm = _sorted_fgm['accuracy']
 y_gm = _sorted_gm['accuracy']
 y_centr = [98.37, 98.37, 98.37, 98.37, 98.37, 98.37]
-plt.figure(figsize=(18, 10))
-plt.plot(x, y_fgm, label="fgm", marker='x')
-plt.plot(x, y_gm, label="gm", marker='x')
+plt.figure(figsize=(16, 12))
+plt.plot(x, y_fgm, label="fgm", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="gm", marker='D', linewidth=4)
 plt.plot(x, y_centr, label="centralized")
-plt.xlabel('Batch size')
-plt.ylabel('Accuracy')
-plt.legend(loc='best')
+plt.xlabel('Threshold', fontsize='x-large')
+plt.ylabel('Accuracy', fontsize='x-large')
+plt.legend(loc='best', fontsize='x-large')
 plt.grid(True)
-plt.xticks(x)
+plt.xticks(x, fontsize='x-large')
+plt.yticks(fontsize='x-large')
 plt.savefig("exp_Fig_2_1")
 
 # Rounds
 y_fgm = _sorted_fgm['rounds']
 y_gm = _sorted_gm['rounds']
-plt.figure(figsize=(18, 10))
-plt.plot(x, y_fgm, label="fgm", marker='x')
-plt.plot(x, y_gm, label="gm", marker='x')
-plt.xlabel('Batch size')
-plt.ylabel('Rounds')
-plt.legend(loc='best')
+plt.figure(figsize=(16, 12))
+plt.plot(x, y_fgm, label="fgm", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="gm", marker='D', linewidth=4)
+plt.xlabel('Threshold', fontsize='x-large')
+plt.ylabel('Rounds', fontsize='x-large')
+plt.legend(loc='best', fontsize='x-large')
 plt.grid(True)
-plt.xticks(x)
+plt.xticks(x, fontsize='x-large')
+plt.yticks(fontsize='x-large')
 plt.savefig("exp_Fig_2_2")
-
 
 # Traffic
 y_fgm = _sorted_fgm['traffic']
 y_gm = _sorted_gm['traffic']
-plt.figure(figsize=(18, 10))
-plt.plot(x, y_fgm, label="fgm", marker='x')
-plt.plot(x, y_gm, label="gm", marker='x')
-plt.xlabel('Batch size')
-plt.ylabel('Traffic')
-plt.legend(loc='best')
+plt.figure(figsize=(16, 12))
+plt.plot(x, y_fgm, label="fgm", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="gm", marker='D', linewidth=4)
+plt.xlabel('Threshold', fontsize='x-large')
+plt.ylabel('Traffic', fontsize='x-large')
+plt.legend(loc='best', fontsize='x-large')
 plt.grid(True)
-plt.xticks(x)
+plt.xticks(x, fontsize='x-large')
+plt.yticks(fontsize='x-large')
 plt.savefig("exp_Fig_2_3")
 
 # #### Model accuracy and rounds for various **sites** ####
@@ -140,46 +141,46 @@ _sorted_gm = gm_subdf.sort_values('sites')
 
 x = _sorted_fgm['sites']
 
-
 # Accuracy
 y_fgm = _sorted_fgm['accuracy']
 y_gm = _sorted_gm['accuracy']
 y_centr = [98.37, 98.37, 98.37, 98.37, 98.37, 98.37]
-plt.figure(figsize=(18, 10))
-plt.plot(x, y_fgm, label="fgm", marker='x')
-plt.plot(x, y_gm, label="gm", marker='x')
+plt.figure(figsize=(16, 12))
+plt.plot(x, y_fgm, label="fgm", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="gm", marker='D', linewidth=4)
 plt.plot(x, y_centr, label="centralized")
-plt.xlabel('Sites')
-plt.ylabel('Accuracy')
-plt.legend(loc='best')
+plt.xlabel('Threshold', fontsize='x-large')
+plt.ylabel('Accuracy', fontsize='x-large')
+plt.legend(loc='best', fontsize='x-large')
 plt.grid(True)
-plt.xticks(x)
+plt.xticks(x, fontsize='x-large')
+plt.yticks(fontsize='x-large')
 plt.savefig("exp_Fig_3_1")
-
 
 # Rounds
 y_fgm = _sorted_fgm['rounds']
 y_gm = _sorted_gm['rounds']
-plt.figure(figsize=(18, 10))
-plt.plot(x, y_fgm, label="fgm", marker='x')
-plt.plot(x, y_gm, label="gm", marker='x')
-plt.xlabel('Sites')
-plt.ylabel('Rounds')
-plt.legend(loc='best')
+plt.figure(figsize=(16, 12))
+plt.plot(x, y_fgm, label="fgm", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="gm", marker='D', linewidth=4)
+plt.xlabel('Threshold', fontsize='x-large')
+plt.ylabel('Rounds', fontsize='x-large')
+plt.legend(loc='best', fontsize='x-large')
 plt.grid(True)
-plt.xticks(x)
+plt.xticks(x, fontsize='x-large')
+plt.yticks(fontsize='x-large')
 plt.savefig("exp_Fig_3_2")
-
 
 # Traffic
 y_fgm = _sorted_fgm['traffic']
 y_gm = _sorted_gm['traffic']
-plt.figure(figsize=(18, 10))
-plt.plot(x, y_fgm, label="fgm", marker='x')
-plt.plot(x, y_gm, label="gm", marker='x')
-plt.xlabel('Sites')
-plt.ylabel('Traffic')
-plt.legend(loc='best')
+plt.figure(figsize=(16, 12))
+plt.plot(x, y_fgm, label="fgm", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="gm", marker='D', linewidth=4)
+plt.xlabel('Threshold', fontsize='x-large')
+plt.ylabel('Traffic', fontsize='x-large')
+plt.legend(loc='best', fontsize='x-large')
 plt.grid(True)
-plt.xticks(x)
+plt.xticks(x, fontsize='x-large')
+plt.yticks(fontsize='x-large')
 plt.savefig("exp_Fig_3_3")

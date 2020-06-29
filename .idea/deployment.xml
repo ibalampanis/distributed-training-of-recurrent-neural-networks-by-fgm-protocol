@@ -2,15 +2,11 @@
 <project version="4">
   <component name="PublishConfigData">
     <serverData>
-      <paths name="astronomix (bb5f7b66-c217-4f35-b6ad-51c79842af77)">
+      <paths name="astronomix (70b0a533-d22c-4332-a5de-bdf80ed16535)">
         <serverdata>
           <mappings>
-            <mapping deploy="/tmp/tmp.pVRYztUzEt" local="$PROJECT_DIR$" />
+            <mapping deploy="/tmp/distributed-training-of-recurrent-neural-networks-by-fgm-protocol" local="$PROJECT_DIR$" />
           </mappings>
-          <excludedPaths>
-            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug" />
-            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug" />
-          </excludedPaths>
         </serverdata>
       </paths>
     </serverData>

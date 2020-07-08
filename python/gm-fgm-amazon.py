@@ -43,7 +43,7 @@ plt.legend(loc='best', fontsize=FONT_SIZE)
 plt.grid(True)
 plt.xticks(x, fontsize=FONT_SIZE)
 plt.yticks(fontsize=FONT_SIZE)
-plt.savefig("figs/exp_Fig_1_1")
+plt.savefig('../results/plots/exp_Fig_1_1')
 
 # Rounds
 y_fgm = _sorted_fgm['rounds']
@@ -57,7 +57,7 @@ plt.legend(loc='best', fontsize=FONT_SIZE)
 plt.grid(True)
 plt.xticks(x, fontsize=FONT_SIZE)
 plt.yticks(fontsize=FONT_SIZE)
-plt.savefig("figs/exp_Fig_1_2")
+plt.savefig("../results/plots/exp_Fig_1_2")
 
 # Traffic
 y_fgm = _sorted_fgm['traffic']
@@ -71,7 +71,7 @@ plt.legend(loc='best', fontsize=FONT_SIZE)
 plt.grid(True)
 plt.xticks(x, fontsize=FONT_SIZE)
 plt.yticks(fontsize=FONT_SIZE)
-plt.savefig("figs/exp_Fig_1_3")
+plt.savefig("../results/plots/exp_Fig_1_3")
 
 # #### Model accuracy and rounds for various **batch sizes** ####
 # - Threshold: 0.5
@@ -101,7 +101,7 @@ plt.legend(loc='best', fontsize=FONT_SIZE)
 plt.grid(True)
 plt.xticks(x, fontsize=FONT_SIZE)
 plt.yticks(fontsize=FONT_SIZE)
-plt.savefig("figs/exp_Fig_2_1")
+plt.savefig("../results/plots/exp_Fig_2_1")
 
 # Rounds
 y_fgm = _sorted_fgm['rounds']
@@ -115,7 +115,7 @@ plt.legend(loc='best', fontsize=FONT_SIZE)
 plt.grid(True)
 plt.xticks(x, fontsize=FONT_SIZE)
 plt.yticks(fontsize=FONT_SIZE)
-plt.savefig("figs/exp_Fig_2_2")
+plt.savefig("../results/plots/exp_Fig_2_2")
 
 # Traffic
 y_fgm = _sorted_fgm['traffic']
@@ -129,7 +129,7 @@ plt.legend(loc='best', fontsize=FONT_SIZE)
 plt.grid(True)
 plt.xticks(x, fontsize=FONT_SIZE)
 plt.yticks(fontsize=FONT_SIZE)
-plt.savefig("figs/exp_Fig_2_3")
+plt.savefig("../results/plots/exp_Fig_2_3")
 
 # #### Model accuracy and rounds for various **sites** ####
 # - Threshold: 0.5
@@ -159,7 +159,7 @@ plt.legend(loc='best', fontsize=FONT_SIZE)
 plt.grid(True)
 plt.xticks(x, fontsize=FONT_SIZE)
 plt.yticks(fontsize=FONT_SIZE)
-plt.savefig("figs/exp_Fig_3_1")
+plt.savefig("../results/plots/exp_Fig_3_1")
 
 # Rounds
 y_fgm = _sorted_fgm['rounds']
@@ -173,7 +173,7 @@ plt.legend(loc='best', fontsize=FONT_SIZE)
 plt.grid(True)
 plt.xticks(x, fontsize=FONT_SIZE)
 plt.yticks(fontsize=FONT_SIZE)
-plt.savefig("figs/exp_Fig_3_2")
+plt.savefig("../results/plots/exp_Fig_3_2")
 
 # Traffic
 y_fgm = _sorted_fgm['traffic']
@@ -187,4 +187,4 @@ plt.legend(loc='best', fontsize=FONT_SIZE)
 plt.grid(True)
 plt.xticks(x, fontsize=FONT_SIZE)
 plt.yticks(fontsize=FONT_SIZE)
-plt.savefig("figs/exp_Fig_3_3")
+plt.savefig("../results/plots/exp_Fig_3_3")

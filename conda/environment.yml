@@ -171,7 +171,7 @@ dependencies:
   - mkl-service=2.3.0=py37he904b0f_0
   - mkl_fft=1.0.14=py37ha843d7b_0
   - mkl_random=1.1.0=py37hd6b4f25_0
-  - mlpack=3.2.2=py37hd7eaafb_0
+  - mlpack=2.2.5=py37hd7eaafb_0
   - mock=3.0.5=py37_0
   - more-itertools=7.2.0=py37_0
   - mpc=1.1.0=h10f8cd9_1

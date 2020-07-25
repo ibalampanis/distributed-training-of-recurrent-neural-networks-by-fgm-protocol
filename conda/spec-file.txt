@@ -324,7 +324,7 @@ https://conda.anaconda.org/anaconda/linux-64/pywavelets-1.0.3-py37hdd07704_1.tar
 https://conda.anaconda.org/anaconda/linux-64/scipy-1.3.1-py37h7c811a0_0.tar.bz2
 https://conda.anaconda.org/anaconda/linux-64/bkcharts-0.2-py37_0.tar.bz2
 https://conda.anaconda.org/anaconda/noarch/dask-2.5.2-py_0.tar.bz2
-https://conda.anaconda.org/conda-forge/linux-64/mlpack-3.2.2-py37hd7eaafb_0.tar.bz2
+https://conda.anaconda.org/conda-forge/linux-64/mlpack-2.2.5-py37hd7eaafb_0.tar.bz2
 https://conda.anaconda.org/anaconda/linux-64/patsy-0.5.1-py37_0.tar.bz2
 https://conda.anaconda.org/anaconda/linux-64/pytables-3.5.2-py37h71ec239_1.tar.bz2
 https://conda.anaconda.org/anaconda/linux-64/pytest-astropy-0.5.0-py37_0.tar.bz2

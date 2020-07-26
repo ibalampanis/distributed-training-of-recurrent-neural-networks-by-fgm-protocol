@@ -39,7 +39,6 @@ Controller<networkType>::Controller(string cfg) : configFile(move(cfg)) {
 template<typename networkType>
 void Controller<networkType>::InitializeSimulation() {
 
-//    cout << "\n[+]Initializing the star network ..." << endl;
     try {
         Json::Value root;
         ifstream cfgfile(configFile); // Parse from JSON file.
@@ -63,23 +62,16 @@ void Controller<networkType>::InitializeSimulation() {
         }
 
 
-//        cout << "\t[+]Initializing RNNs ...";
         try {
             net = new networkType(nodeIDs, netName, query);
             net->hub->SetupConnections();
 
-//            cout << "\t[+]Initializing RNNs ... OK.";
-        } catch (...) {
-//            cout << "\t[-]Initializing RNNs ... ERROR.";
-        }
+        } catch (...) {}
 
         stats = chan_frame(net);
         msgs = 0;
         bts = 0;
-//        cout << "\n[+]Initializing the star network ... OK." << endl;
-    } catch (...) {
-//        cout << "\n[-]Initializing the star network ... ERROR." << endl;
-    }
+    } catch (...) {}
 }
 
 template<typename networkType>
@@ -127,9 +119,7 @@ void Controller<networkType>::DataPreparation() {
     if (datasetType != "nlp") {
         arma::mat dataset;
         // In Armadillo rows represent features, columns represent data points.
-//        cout << "Reading dataset ...";
         data::Load(datasetPath, dataset, true);
-//        cout << " OK." << endl;
 
         // Scale all data into the range (0, 1) for increased numerical stability.
         data::MinMaxScaler scale;
@@ -149,10 +139,8 @@ void Controller<networkType>::DataPreparation() {
         arma::mat features, labels;
 
         // In Armadillo rows represent features, columns represent data points.
-//        cout << "Reading dataset ...";
         data::Load(featsPath, features, true);
         data::Load(labelsPath, labels, true);
-//        cout << " OK." << endl;
 
 
         // We need to represent the input data for RNN in an arma::cube (3D matrix).
@@ -166,7 +154,6 @@ void Controller<networkType>::DataPreparation() {
         labels.clear();
     }
 
-//    cout << "\t[+]Splitting the data into train and test set ...";
     try {
         if (!warmup) {
             // Split the data into training and testing set.
@@ -206,32 +193,21 @@ void Controller<networkType>::DataPreparation() {
             net->hub->trainPoints = trainX.n_cols;
 
         }
-//        cout << " OK." << endl;
-    } catch (...) {
-//        cout << " ERROR." << endl;
-    }
+    } catch (...) {}
 }
 
 template<typename networkType>
 void Controller<networkType>::TrainOverNetwork() {
 
-//    cout << "\n[+]Preparing data ..." << endl;
     try {
         DataPreparation();
-//        cout << "[+]Preparing data ... OK." << endl;
-    } catch (...) {
-//        cout << "[-]Preparing data ... ERROR." << endl;
-    }
+    } catch (...) {}
 
     try {
         if (warmup) {
-//            cout << "\n[+]Warming up the network ...";
             net->WarmupNetwork();
-//            cout << " OK." << endl;
         }
-    } catch (...) {
-//        cout << " ERROR." << endl;
-    }
+    } catch (...) {}
 
     cout << "\n[+]Training ... ";
     try {

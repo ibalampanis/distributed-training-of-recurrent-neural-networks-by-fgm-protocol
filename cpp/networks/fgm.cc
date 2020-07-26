@@ -19,7 +19,7 @@ FgmNet::FgmNet(const set<source_id> &_hids, const string &_name, Query *Q)
 *********************************************/
 algorithms::fgm::Coordinator::Coordinator(network_t *nw, Query *Q)
         : process(nw), proxy(this), Q(Q), nRounds(0),
-        nSubrounds(0), nSzSent(0), nUpdates(0) {
+          nSubrounds(0), nSzSent(0), nUpdates(0) {
     InitializeGlobalLearner();
     queryState = Q->CreateQueryState();
     safeFunction = queryState->Safezone(Cfg().cfgfile, Cfg().distributedLearningAlgorithm);
@@ -37,7 +37,6 @@ const ProtocolConfig &algorithms::fgm::Coordinator::Cfg() const { return Q->conf
 
 void algorithms::fgm::Coordinator::InitializeGlobalLearner() {
 
-//    cout << "\n\t\t[+]Coordinator's neural net ...";
     try {
         Json::Value root;
         ifstream cfgfile(Cfg().cfgfile);
@@ -46,11 +45,7 @@ void algorithms::fgm::Coordinator::InitializeGlobalLearner() {
         globalLearner = new RnnLearner(Cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(rho));
         globalLearner->BuildModel();
 
-//        cout << " OK." << endl;
-
-    } catch (...) {
-//        cout << " ERROR." << endl;
-    }
+    } catch (...) {}
 }
 
 void algorithms::fgm::Coordinator::WarmupGlobalLearner() {
@@ -217,7 +212,6 @@ const ProtocolConfig &algorithms::fgm::LearningNode::Cfg() const { return Q->con
 
 void algorithms::fgm::LearningNode::InitializeLearner() {
 
-//    cout << "\t\t[+]Node's local neural net ...";
     try {
         Json::Value root;
         ifstream cfgfile(Cfg().cfgfile);
@@ -226,10 +220,8 @@ void algorithms::fgm::LearningNode::InitializeLearner() {
         int rho = stoi(temp);
         learner = new RnnLearner(Cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(rho));
         learner->BuildModel();
-//        cout << " OK." << endl;
     }
     catch (...) {
-//        cout << " ERROR." << endl;
         throw;
     }
 }

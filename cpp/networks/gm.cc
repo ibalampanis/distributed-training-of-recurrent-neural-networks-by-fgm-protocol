@@ -19,7 +19,7 @@ GmNet::GmNet(const set<source_id> &_hids, const string &_name, Query *_Q)
 *********************************************/
 algorithms::gm::Coordinator::Coordinator(network_t *nw, Query *Q)
         : process(nw), proxy(this), Q(Q), k(0),
-        numViolations(0), nRounds(0), nRebalances(0), nSzSent(0), nUpdates(0) {
+          numViolations(0), nRounds(0), nRebalances(0), nSzSent(0), nUpdates(0) {
     InitializeGlobalLearner();
     queryState = Q->CreateQueryState();
     safeFunction = queryState->Safezone(Cfg().cfgfile, Cfg().distributedLearningAlgorithm);
@@ -34,7 +34,6 @@ const ProtocolConfig &algorithms::gm::Coordinator::Cfg() const { return Q->confi
 
 void algorithms::gm::Coordinator::InitializeGlobalLearner() {
 
-//    cout << "\n\t\t[+]Coordinator's neural net ...";
     try {
         Json::Value root;
         ifstream cfgfile(Cfg().cfgfile);
@@ -43,12 +42,7 @@ void algorithms::gm::Coordinator::InitializeGlobalLearner() {
         int rho = stoi(temp);
         globalLearner = new RnnLearner(Cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(rho));
         globalLearner->BuildModel();
-
-//        cout << " OK." << endl;
-
-    } catch (...) {
-//        cout << " ERROR." << endl;
-    }
+    } catch (...) {}
 }
 
 void algorithms::gm::Coordinator::SetupConnections() {
@@ -235,7 +229,6 @@ algorithms::gm::LearningNode::LearningNode(algorithms::gm::LearningNode::network
 const ProtocolConfig &algorithms::gm::LearningNode::Cfg() const { return Q->config; }
 
 void algorithms::gm::LearningNode::InitializeLearner() {
-//    cout << "\t\t[+]Node's local neural net ...";
     try {
         Json::Value root;
         ifstream cfgfile(Cfg().cfgfile);
@@ -243,10 +236,8 @@ void algorithms::gm::LearningNode::InitializeLearner() {
         size_t rho = root["hyperparameters"].get("rho", -1).asInt();
         learner = new RnnLearner(Cfg().cfgfile, RNN<MeanSquaredError<>, HeInitialization>(rho));
         learner->BuildModel();
-//        cout << " OK." << endl;
     }
     catch (...) {
-//        cout << " ERROR." << endl;
         throw;
     }
 }

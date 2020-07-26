@@ -95,7 +95,6 @@ void SafeFunction::UpdateDrift(arma::mat &drift, arma::mat &params, float mul) {
             return;
     }
 
-
     mat dr;
     dr = mul * (params - globalModel);
     drift += dr;
@@ -228,7 +227,6 @@ size_t QueryState::byte_size() const { return (1 + globalModel.n_elem) * sizeof(
 	Query
 *********************************************/
 Query::Query(const string &cfg, string nm) {
-//    cout << "\t[+]Initializing the query ...";
     try {
         Json::Value root;
         ifstream cfgfl(cfg);
@@ -238,11 +236,7 @@ Query::Query(const string &cfg, string nm) {
         config.networkName = root["simulations"].get("net_name", "trash").asString();
         config.precision = root[config.distributedLearningAlgorithm].get("precision", 0.01).asFloat();
         config.cfgfile = cfg;
-
-//        cout << " OK." << endl;
-    } catch (...) {
-//        cout << " ERROR." << endl;
-    }
+    } catch (...) {}
 
 }
 

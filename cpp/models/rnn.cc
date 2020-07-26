@@ -81,9 +81,7 @@ void RnnLearner::CentralizedDataPreparation() {
     if (datasetType != "nlp") {
         arma::mat dataset;
         // In Armadillo rows represent features, columns represent data points.
-//        cout << "Reading dataset ...";
         data::Load(datasetPath, dataset, true);
-//        cout << " OK." << endl;
 
         // Scale all data into the range (0, 1) for increased numerical stability.
         data::MinMaxScaler scale;
@@ -103,11 +101,8 @@ void RnnLearner::CentralizedDataPreparation() {
         arma::mat features, labels;
 
         // In Armadillo rows represent features, columns represent data points.
-//        cout << "Reading dataset ...";
         data::Load(featsPath, features, true);
         data::Load(labelsPath, labels, true);
-//        cout << " OK." << endl;
-
 
         // We need to represent the input data for RNN in an arma::cube (3D matrix).
         // The 3rd dimension is rho, the number of past data records the RNN uses for learning.
@@ -208,10 +203,9 @@ void RnnLearner::TrainModelByBatch(arma::cube &x, arma::cube &y) {
 void RnnLearner::MakePrediction() {
 
     arma::cube predOut;
-//    cout << "Predicting ...";
     // Get predictions on test data points.
     model.Predict(testX, predOut);
-//    cout << " OK." << endl;
+
     // Calculate MSE on prediction.
     double testMSEPred = CalculateMSPE(predOut, testY);
     cout << "Prediction Accuracy: " << setprecision(2) << fixed << (100 - testMSEPred) << " %" << endl;

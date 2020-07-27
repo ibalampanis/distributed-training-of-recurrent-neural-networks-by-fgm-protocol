@@ -18,7 +18,7 @@ plt.rc('font', size=(FONT_SIZE - 8))
 # #### Model accuracy and rounds for various **thresholds** ####
 # - ***Threshold: { 0.01, 0.1, 0.3, 0.5, 0.7, 0.9, 1 }***
 # - Batch size: 16
-# - Sites: 8
+# - Workers: 8
 # 
 # (Note! Experiment executes: 30) 
 fgm_subdf = fgm_df[(fgm_df['id'] >= 1) & (fgm_df['id'] <= 7)]
@@ -76,7 +76,7 @@ plt.savefig("../results/plots/exp_Fig_1_3")
 # #### Model accuracy and rounds for various **batch sizes** ####
 # - Threshold: 0.5
 # - ***Batch size: {1, 4, 16, 32, 64, 128}***
-# - Sites: 8
+# - Workers: 8
 #
 # (Note! Experiment executes: 30)
 fgm_subdf = fgm_df[(fgm_df['id'] >= 8) & (fgm_df['id'] <= 13)]
@@ -134,7 +134,7 @@ plt.savefig("../results/plots/exp_Fig_2_3")
 # #### Model accuracy and rounds for various **sites** ####
 # - Threshold: 0.5
 # - Batch size: 16
-# - ***Sites: {4, 8, 16, 32, 64, 128}***
+# - ***Workers: {4, 8, 16, 32, 64, 128}***
 #
 # (Note! Experiment executes: 30)
 fgm_subdf = fgm_df[(fgm_df['id'] >= 14) & (fgm_df['id'] <= 19)]
@@ -153,7 +153,7 @@ plt.figure(figsize=(16, 12))
 plt.plot(x, y_fgm, label="fgm", marker='D', linewidth=4)
 plt.plot(x, y_gm, label="gm", marker='D', linewidth=4)
 plt.plot(x, y_centr, label="centralized", linewidth=4)
-plt.xlabel('Sites', fontsize=FONT_SIZE)
+plt.xlabel('Workers', fontsize=FONT_SIZE)
 plt.ylabel('Accuracy', fontsize=FONT_SIZE)
 plt.legend(loc='best', fontsize=FONT_SIZE)
 plt.grid(True)
@@ -167,7 +167,7 @@ y_gm = _sorted_gm['rounds']
 plt.figure(figsize=(16, 12))
 plt.plot(x, y_fgm, label="fgm", marker='D', linewidth=4)
 plt.plot(x, y_gm, label="gm", marker='D', linewidth=4)
-plt.xlabel('Sites', fontsize=FONT_SIZE)
+plt.xlabel('Workers', fontsize=FONT_SIZE)
 plt.ylabel('Rounds', fontsize=FONT_SIZE)
 plt.legend(loc='best', fontsize=FONT_SIZE)
 plt.grid(True)
@@ -181,7 +181,7 @@ y_gm = _sorted_gm['traffic']
 plt.figure(figsize=(16, 12))
 plt.plot(x, y_fgm, label="fgm", marker='D', linewidth=4)
 plt.plot(x, y_gm, label="gm", marker='D', linewidth=4)
-plt.xlabel('Sites', fontsize=FONT_SIZE)
+plt.xlabel('Workers', fontsize=FONT_SIZE)
 plt.ylabel('Traffic', fontsize=FONT_SIZE)
 plt.legend(loc='best', fontsize=FONT_SIZE)
 plt.grid(True)

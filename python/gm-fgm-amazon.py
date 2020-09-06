@@ -4,12 +4,12 @@ import matplotlib.pyplot as plt
 fgm_headers = ['id', 'threshold', 'batch-size', 'sites',
                'rounds', 'subrounds', 'accuracy', 'traffic']
 
-fgm_df = pd.read_csv('../results/fgm-amazon.csv', usecols=fgm_headers)
+fgm_df = pd.read_csv('../results/SF2_fgm-amazon.csv', usecols=fgm_headers)
 
 gm_headers = ['id', 'threshold', 'batch-size', 'sites',
               'rounds', 'rebalances', 'accuracy', 'traffic']
 
-gm_df = pd.read_csv('../results/gm-amazon.csv', usecols=gm_headers)
+gm_df = pd.read_csv('../results/SF1_gm-amazon.csv', usecols=gm_headers)
 
 FONT_SIZE = 30
 plt.rc('font', size=(FONT_SIZE - 8))

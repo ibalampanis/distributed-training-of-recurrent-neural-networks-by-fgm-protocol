@@ -1,2 +1,2 @@
-.ipynb linguist-documentation
-.pbs linguist-language=Shell
+*.ipynb linguist-documentation
+*.pbs linguist-language=Shell

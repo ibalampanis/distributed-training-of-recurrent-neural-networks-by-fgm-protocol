@@ -11,7 +11,7 @@ gm_headers = ['id', 'threshold', 'batch-size', 'sites',
 
 gm_df = pd.read_csv('../results/SF1_gm-amazon.csv', usecols=gm_headers)
 
-FONT_SIZE = 30
+FONT_SIZE = 28
 plt.rc('font', size=(FONT_SIZE - 8))
 
 
@@ -34,8 +34,8 @@ y_fgm = _sorted_fgm['accuracy']
 y_gm = _sorted_gm['accuracy']
 y_centr = [98.37, 98.37, 98.37, 98.37, 98.37, 98.37, 98.37]
 plt.figure(figsize=(16, 12))
-plt.plot(x, y_fgm, label="fgm", marker='D', linewidth=4)
-plt.plot(x, y_gm, label="gm", marker='D', linewidth=4)
+plt.plot(x, y_fgm, label="FGM", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="GM", marker='D', linewidth=4)
 plt.plot(x, y_centr, label="centralized", linewidth=4)
 plt.xlabel('Threshold', fontsize=FONT_SIZE)
 plt.ylabel('Accuracy', fontsize=FONT_SIZE)
@@ -49,8 +49,8 @@ plt.savefig('../results/amazon-plots/exp_Fig_1_1')
 y_fgm = _sorted_fgm['rounds']
 y_gm = _sorted_gm['rounds']
 plt.figure(figsize=(16, 12))
-plt.plot(x, y_fgm, label="fgm", marker='D', linewidth=4)
-plt.plot(x, y_gm, label="gm", marker='D', linewidth=4)
+plt.plot(x, y_fgm, label="FGM", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="GM", marker='D', linewidth=4)
 plt.xlabel('Threshold', fontsize=FONT_SIZE)
 plt.ylabel('Rounds', fontsize=FONT_SIZE)
 plt.legend(loc='best', fontsize=FONT_SIZE)
@@ -63,8 +63,8 @@ plt.savefig("../results/amazon-plots/exp_Fig_1_2")
 y_fgm = _sorted_fgm['traffic']
 y_gm = _sorted_gm['traffic']
 plt.figure(figsize=(16, 12))
-plt.plot(x, y_fgm, label="fgm", marker='D', linewidth=4)
-plt.plot(x, y_gm, label="gm", marker='D', linewidth=4)
+plt.plot(x, y_fgm, label="FGM", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="GM", marker='D', linewidth=4)
 plt.xlabel('Threshold', fontsize=FONT_SIZE)
 plt.ylabel('Traffic', fontsize=FONT_SIZE)
 plt.legend(loc='best', fontsize=FONT_SIZE)
@@ -92,8 +92,8 @@ y_fgm = _sorted_fgm['accuracy']
 y_gm = _sorted_gm['accuracy']
 y_centr = [98.37, 98.37, 98.37, 98.37, 98.37, 98.37]
 plt.figure(figsize=(16, 12))
-plt.plot(x, y_fgm, label="fgm", marker='D', linewidth=4)
-plt.plot(x, y_gm, label="gm", marker='D', linewidth=4)
+plt.plot(x, y_fgm, label="FGM", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="GM", marker='D', linewidth=4)
 plt.plot(x, y_centr, label="centralized", linewidth=4)
 plt.xlabel('Batch Size', fontsize=FONT_SIZE)
 plt.ylabel('Accuracy', fontsize=FONT_SIZE)
@@ -107,8 +107,8 @@ plt.savefig("../results/amazon-plots/exp_Fig_2_1")
 y_fgm = _sorted_fgm['rounds']
 y_gm = _sorted_gm['rounds']
 plt.figure(figsize=(16, 12))
-plt.plot(x, y_fgm, label="fgm", marker='D', linewidth=4)
-plt.plot(x, y_gm, label="gm", marker='D', linewidth=4)
+plt.plot(x, y_fgm, label="FGM", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="GM", marker='D', linewidth=4)
 plt.xlabel('Batch Size', fontsize=FONT_SIZE)
 plt.ylabel('Rounds', fontsize=FONT_SIZE)
 plt.legend(loc='best', fontsize=FONT_SIZE)
@@ -121,8 +121,8 @@ plt.savefig("../results/amazon-plots/exp_Fig_2_2")
 y_fgm = _sorted_fgm['traffic']
 y_gm = _sorted_gm['traffic']
 plt.figure(figsize=(16, 12))
-plt.plot(x, y_fgm, label="fgm", marker='D', linewidth=4)
-plt.plot(x, y_gm, label="gm", marker='D', linewidth=4)
+plt.plot(x, y_fgm, label="FGM", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="GM", marker='D', linewidth=4)
 plt.xlabel('Batch size', fontsize=FONT_SIZE)
 plt.ylabel('Traffic', fontsize=FONT_SIZE)
 plt.legend(loc='best', fontsize=FONT_SIZE)
@@ -150,8 +150,8 @@ y_fgm = _sorted_fgm['accuracy']
 y_gm = _sorted_gm['accuracy']
 y_centr = [98.37, 98.37, 98.37, 98.37, 98.37, 98.37]
 plt.figure(figsize=(16, 12))
-plt.plot(x, y_fgm, label="fgm", marker='D', linewidth=4)
-plt.plot(x, y_gm, label="gm", marker='D', linewidth=4)
+plt.plot(x, y_fgm, label="FGM", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="GM", marker='D', linewidth=4)
 plt.plot(x, y_centr, label="centralized", linewidth=4)
 plt.xlabel('Workers', fontsize=FONT_SIZE)
 plt.ylabel('Accuracy', fontsize=FONT_SIZE)
@@ -165,8 +165,8 @@ plt.savefig("../results/amazon-plots/exp_Fig_3_1")
 y_fgm = _sorted_fgm['rounds']
 y_gm = _sorted_gm['rounds']
 plt.figure(figsize=(16, 12))
-plt.plot(x, y_fgm, label="fgm", marker='D', linewidth=4)
-plt.plot(x, y_gm, label="gm", marker='D', linewidth=4)
+plt.plot(x, y_fgm, label="FGM", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="GM", marker='D', linewidth=4)
 plt.xlabel('Workers', fontsize=FONT_SIZE)
 plt.ylabel('Rounds', fontsize=FONT_SIZE)
 plt.legend(loc='best', fontsize=FONT_SIZE)
@@ -179,8 +179,8 @@ plt.savefig("../results/amazon-plots/exp_Fig_3_2")
 y_fgm = _sorted_fgm['traffic']
 y_gm = _sorted_gm['traffic']
 plt.figure(figsize=(16, 12))
-plt.plot(x, y_fgm, label="fgm", marker='D', linewidth=4)
-plt.plot(x, y_gm, label="gm", marker='D', linewidth=4)
+plt.plot(x, y_fgm, label="FGM", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="GM", marker='D', linewidth=4)
 plt.xlabel('Workers', fontsize=FONT_SIZE)
 plt.ylabel('Traffic', fontsize=FONT_SIZE)
 plt.legend(loc='best', fontsize=FONT_SIZE)

@@ -10,7 +10,6 @@ gm_headers = ['id', 'threshold', 'batch-size', 'sites', 'rounds', 'rebalances', 
 
 sf1_fgm_df = pd.read_csv('../results/SF1_fgm-sfc.csv', usecols=fgm_headers)
 sf2_fgm_df = pd.read_csv('../results/SF2_fgm-sfc.csv', usecols=fgm_headers)
-
 sf1_gm_df = pd.read_csv('../results/SF1_gm-sfc.csv', usecols=gm_headers)
 sf2_gm_df = pd.read_csv('../results/SF2_gm-sfc.csv', usecols=gm_headers)
 
@@ -24,7 +23,6 @@ sf2_gm_df = pd.read_csv('../results/SF2_gm-sfc.csv', usecols=gm_headers)
 # - Workers: 8
 fgm_subdf = sf2_fgm_df[(sf2_fgm_df['id'] >= 1) & (sf2_fgm_df['id'] <= 7)]
 _sorted_fgm = fgm_subdf.sort_values('threshold')
-
 gm_subdf = sf2_gm_df[(sf2_gm_df['id'] >= 1) & (sf2_gm_df['id'] <= 7)]
 _sorted_gm = gm_subdf.sort_values('threshold')
 
@@ -83,7 +81,6 @@ plt.savefig('../results/sfc-plots/exp_Fig_1_3')
 # - Workers: 8
 fgm_subdf = sf2_fgm_df[(sf2_fgm_df['id'] >= 8) & (sf2_fgm_df['id'] <= 13)]
 _sorted_fgm = fgm_subdf.sort_values('batch-size')
-
 gm_subdf = sf2_gm_df[(sf2_gm_df['id'] >= 8) & (sf2_gm_df['id'] <= 13)]
 _sorted_gm = gm_subdf.sort_values('batch-size')
 
@@ -142,7 +139,6 @@ plt.savefig('../results/sfc-plots/exp_Fig_2_3')
 # - Workers: {4, 8, 16, 32, 64, 128}
 fgm_subdf = sf2_fgm_df[(sf2_fgm_df['id'] >= 14) & (sf2_fgm_df['id'] <= 19)]
 _sorted_fgm = fgm_subdf.sort_values('sites')
-
 gm_subdf = sf2_gm_df[(sf2_gm_df['id'] >= 14) & (sf2_gm_df['id'] <= 19)]
 _sorted_gm = gm_subdf.sort_values('sites')
 
@@ -198,7 +194,6 @@ plt.savefig('../results/sfc-plots/exp_Fig_3_3')
 # Amazon Fine Food Reviews Dataset
 sf1_fgm_df = pd.read_csv('../results/SF1_fgm-amazon.csv', usecols=fgm_headers)
 sf2_fgm_df = pd.read_csv('../results/SF2_fgm-amazon.csv', usecols=fgm_headers)
-
 sf1_gm_df = pd.read_csv('../results/SF1_gm-amazon.csv', usecols=gm_headers)
 sf2_gm_df = pd.read_csv('../results/SF2_gm-amazon.csv', usecols=gm_headers)
 
@@ -208,7 +203,6 @@ sf2_gm_df = pd.read_csv('../results/SF2_gm-amazon.csv', usecols=gm_headers)
 # - Workers: 8
 fgm_subdf = sf2_fgm_df[(sf2_fgm_df['id'] >= 1) & (sf2_fgm_df['id'] <= 7)]
 _sorted_fgm = fgm_subdf.sort_values('threshold')
-
 gm_subdf = sf2_gm_df[(sf2_gm_df['id'] >= 1) & (sf2_gm_df['id'] <= 7)]
 _sorted_gm = gm_subdf.sort_values('threshold')
 
@@ -267,7 +261,6 @@ plt.savefig('../results/amazon-plots/exp_Fig_1_3')
 # - Workers: 8
 fgm_subdf = sf2_fgm_df[(sf2_fgm_df['id'] >= 8) & (sf2_fgm_df['id'] <= 13)]
 _sorted_fgm = fgm_subdf.sort_values('batch-size')
-
 gm_subdf = sf2_gm_df[(sf2_gm_df['id'] >= 8) & (sf2_gm_df['id'] <= 13)]
 _sorted_gm = gm_subdf.sort_values('batch-size')
 
@@ -326,7 +319,6 @@ plt.savefig('../results/amazon-plots/exp_Fig_2_3')
 # - Workers: {4, 8, 16, 32, 64, 128}
 fgm_subdf = sf2_fgm_df[(sf2_fgm_df['id'] >= 14) & (sf2_fgm_df['id'] <= 19)]
 _sorted_fgm = fgm_subdf.sort_values('sites')
-
 gm_subdf = sf2_gm_df[(sf2_gm_df['id'] >= 14) & (sf2_gm_df['id'] <= 19)]
 _sorted_gm = gm_subdf.sort_values('sites')
 
@@ -391,7 +383,6 @@ sf2_fgm_df = pd.read_csv('../results/SF2_fgm-sfc.csv', usecols=fgm_headers)
 # - Workers: 8
 sf1_fgm_subdf = sf1_fgm_df[(sf1_fgm_df['id'] >= 1) & (sf1_fgm_df['id'] <= 7)]
 _sorted_fgm = sf1_fgm_subdf.sort_values('threshold')
-
 sf2_fgm_subdf = sf2_fgm_df[(sf2_fgm_df['id'] >= 1) & (sf2_fgm_df['id'] <= 7)]
 _sorted_gm = sf2_fgm_subdf.sort_values('threshold')
 
@@ -447,7 +438,6 @@ plt.savefig('../results/sf-comp/exp_Fig_1_3')
 # - Workers: 8
 sf1_fgm_subdf = sf1_fgm_df[(sf1_fgm_df['id'] >= 8) & (sf1_fgm_df['id'] <= 13)]
 _sorted_fgm = sf1_fgm_subdf.sort_values('batch-size')
-
 sf2_fgm_subdf = sf2_fgm_df[(sf2_fgm_df['id'] >= 8) & (sf2_fgm_df['id'] <= 13)]
 _sorted_gm = sf2_fgm_subdf.sort_values('batch-size')
 
@@ -503,7 +493,6 @@ plt.savefig('../results/sf-comp/exp_Fig_2_3')
 # - Workers: {4, 8, 16, 32, 64, 128}
 sf1_fgm_subdf = sf1_fgm_df[(sf1_fgm_df['id'] >= 14) & (sf1_fgm_df['id'] <= 19)]
 _sorted_fgm = sf1_fgm_subdf.sort_values('sites')
-
 sf2_fgm_subdf = sf2_fgm_df[(sf2_fgm_df['id'] >= 14) & (sf2_fgm_df['id'] <= 19)]
 _sorted_gm = sf2_fgm_subdf.sort_values('sites')
 

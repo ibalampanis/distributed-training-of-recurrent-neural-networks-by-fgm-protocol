@@ -24,7 +24,3 @@ for ((i=1; i<=10; i++)); do
     ./FGMLearn /tmp/simulation/fgm-set-1/fgm_set1_23.json >> out/fgm_exp23_iter${i}.txt &
     wait
 done
-
-
-
-

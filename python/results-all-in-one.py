@@ -13,7 +13,11 @@ sf2_fgm_df = pd.read_csv('../results/SF2_fgm-sfc.csv', usecols=fgm_headers)
 sf1_gm_df = pd.read_csv('../results/SF1_gm-sfc.csv', usecols=gm_headers)
 sf2_gm_df = pd.read_csv('../results/SF2_gm-sfc.csv', usecols=gm_headers)
 
+####################################################################################################
+####################################################################################################
+
 # Comparison between protocols using the 2nd type of safe function (spherical cap)
+
 
 # San Fransisco Crime Classification Dataset
 
@@ -190,6 +194,71 @@ plt.title('SFCC Dataset')
 plt.xticks(x, fontsize=FONT_SIZE)
 plt.yticks(fontsize=FONT_SIZE)
 plt.savefig('../results/sfc-plots/exp_Fig_3_3')
+
+# Model accuracy and rounds for various sites
+# - Threshold: 0.1
+# - Batch size: 16
+# - Workers: {4, 8, 16, 32, 64, 128}
+
+sf2_gm_compl_df = pd.read_csv('../results/SF2_gm-fgm-sfc-complementary.csv', usecols=fgm_headers)
+sf2_fgm_compl_df = pd.read_csv('../results/SF2_gm-fgm-sfc-complementary.csv', usecols=fgm_headers)
+
+gm_subdf = sf2_gm_compl_df[(sf2_gm_compl_df['id'] >= 1) & (sf2_gm_compl_df['id'] <= 6)]
+_sorted_gm = gm_subdf.sort_values('sites')
+fgm_subdf = sf2_fgm_compl_df[(sf2_fgm_compl_df['id'] >= 7) & (sf2_fgm_compl_df['id'] <= 12)]
+_sorted_fgm = fgm_subdf.sort_values('sites')
+
+x = _sorted_fgm['sites']
+
+# Accuracy
+y_fgm = _sorted_fgm['accuracy']
+y_gm = _sorted_gm['accuracy']
+y_centr = [99.59, 99.59, 99.59, 99.59, 99.59, 99.59]
+plt.figure(figsize=(16, 12))
+plt.plot(x, y_fgm, label="FGM", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="GM", marker='D', linewidth=4)
+plt.plot(x, y_centr, label="Centralized", linewidth=4)
+plt.xlabel('Workers', fontsize=FONT_SIZE)
+plt.ylabel('Accuracy', fontsize=FONT_SIZE)
+plt.legend(loc='best', fontsize=FONT_SIZE)
+plt.grid(True)
+plt.title('SFCC Dataset')
+plt.xticks(x, fontsize=FONT_SIZE)
+plt.yticks(fontsize=FONT_SIZE)
+plt.savefig('../results/sfc-plots/exp_Fig_3_5')
+
+# Rounds
+y_fgm = _sorted_fgm['rounds']
+y_gm = _sorted_gm['rounds']
+plt.figure(figsize=(16, 12))
+plt.plot(x, y_fgm, label="FGM", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="GM", marker='D', linewidth=4)
+plt.xlabel('Workers', fontsize=FONT_SIZE)
+plt.ylabel('Rounds', fontsize=FONT_SIZE)
+plt.legend(loc='best', fontsize=FONT_SIZE)
+plt.grid(True)
+plt.title('SFCC Dataset')
+plt.xticks(x, fontsize=FONT_SIZE)
+plt.yticks(fontsize=FONT_SIZE)
+plt.savefig('../results/sfc-plots/exp_Fig_3_6')
+
+# Traffic
+y_fgm = _sorted_fgm['traffic']
+y_gm = _sorted_gm['traffic']
+plt.figure(figsize=(16, 12))
+plt.plot(x, y_fgm, label="FGM", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="GM", marker='D', linewidth=4)
+plt.xlabel('Workers', fontsize=FONT_SIZE)
+plt.ylabel('Traffic', fontsize=FONT_SIZE)
+plt.legend(loc='best', fontsize=FONT_SIZE)
+plt.grid(True)
+plt.title('SFCC Dataset')
+plt.xticks(x, fontsize=FONT_SIZE)
+plt.yticks(fontsize=FONT_SIZE)
+plt.savefig('../results/sfc-plots/exp_Fig_3_7')
+
+####################################################################################################
+####################################################################################################
 
 # Amazon Fine Food Reviews Dataset
 sf1_fgm_df = pd.read_csv('../results/SF1_fgm-amazon.csv', usecols=fgm_headers)
@@ -370,6 +439,9 @@ plt.title('AFFR Dataset')
 plt.xticks(x, fontsize=FONT_SIZE)
 plt.yticks(fontsize=FONT_SIZE)
 plt.savefig('../results/amazon-plots/exp_Fig_3_3')
+
+####################################################################################################
+####################################################################################################
 
 # Comparison between safe functions over the same protocol
 fgm_headers = ['id', 'threshold', 'batch-size', 'sites', 'rounds', 'subrounds', 'accuracy', 'traffic']

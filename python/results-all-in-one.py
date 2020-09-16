@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-FONT_SIZE = 28
+FONT_SIZE = 32
 plt.rc('font', size=(FONT_SIZE - 8))
 plt.rc('figure', max_open_warning=0)
 
@@ -225,7 +225,7 @@ plt.grid(True)
 plt.title('SFCC Dataset')
 plt.xticks(x, fontsize=FONT_SIZE)
 plt.yticks(fontsize=FONT_SIZE)
-plt.savefig('../results/sfc-plots/exp_Fig_3_5')
+plt.savefig('../results/sfc-plots/exp_Fig_3_4')
 
 # Rounds
 y_fgm = _sorted_fgm['rounds']
@@ -240,7 +240,7 @@ plt.grid(True)
 plt.title('SFCC Dataset')
 plt.xticks(x, fontsize=FONT_SIZE)
 plt.yticks(fontsize=FONT_SIZE)
-plt.savefig('../results/sfc-plots/exp_Fig_3_6')
+plt.savefig('../results/sfc-plots/exp_Fig_3_5')
 
 # Traffic
 y_fgm = _sorted_fgm['traffic']
@@ -255,7 +255,86 @@ plt.grid(True)
 plt.title('SFCC Dataset')
 plt.xticks(x, fontsize=FONT_SIZE)
 plt.yticks(fontsize=FONT_SIZE)
-plt.savefig('../results/sfc-plots/exp_Fig_3_7')
+plt.savefig('../results/sfc-plots/exp_Fig_3_6')
+
+# Model accuracy and rounds for various sites
+# - Threshold: 0.1 , 0.5
+# - Batch size: 16
+# - Workers: {4, 8, 16, 32, 64, 128}
+fgm_subdf = sf2_fgm_df[(sf2_fgm_df['id'] >= 14) & (sf2_fgm_df['id'] <= 19)]
+_sorted_fgm = fgm_subdf.sort_values('sites')
+gm_subdf = sf2_gm_df[(sf2_gm_df['id'] >= 14) & (sf2_gm_df['id'] <= 19)]
+_sorted_gm = gm_subdf.sort_values('sites')
+
+sf2_gm_compl_df = pd.read_csv('../results/SF2_gm-fgm-sfc-complementary.csv', usecols=fgm_headers)
+sf2_fgm_compl_df = pd.read_csv('../results/SF2_gm-fgm-sfc-complementary.csv', usecols=fgm_headers)
+
+gm_subdf = sf2_gm_compl_df[(sf2_gm_compl_df['id'] >= 1) & (sf2_gm_compl_df['id'] <= 6)]
+_sorted_gm_2 = gm_subdf.sort_values('sites')
+fgm_subdf = sf2_fgm_compl_df[(sf2_fgm_compl_df['id'] >= 7) & (sf2_fgm_compl_df['id'] <= 12)]
+_sorted_fgm_2 = fgm_subdf.sort_values('sites')
+
+x = _sorted_fgm['sites']
+
+# Accuracy
+y_fgm = _sorted_fgm['accuracy']
+y_gm = _sorted_gm['accuracy']
+y_fgm_2 = _sorted_fgm_2['accuracy']
+y_gm_2 = _sorted_gm_2['accuracy']
+y_centr = [99.59, 99.59, 99.59, 99.59, 99.59, 99.59]
+plt.figure(figsize=(16, 12))
+plt.plot(x, y_fgm, label="FGM, E=0.5", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="GM, E=0.5", marker='D', linewidth=4)
+plt.plot(x, y_fgm_2, label="FGM, E=0.1", marker='D', linewidth=4)
+plt.plot(x, y_gm_2, label="GM, E=0.1", marker='D', linewidth=4)
+plt.plot(x, y_centr, label="Centralized", linewidth=4)
+plt.xlabel('Workers', fontsize=FONT_SIZE)
+plt.ylabel('Accuracy', fontsize=FONT_SIZE)
+plt.legend(loc='best', fontsize=FONT_SIZE)
+plt.grid(True)
+plt.title('SFCC Dataset')
+plt.xticks(x, fontsize=FONT_SIZE)
+plt.yticks(fontsize=FONT_SIZE)
+plt.savefig('../results/sfc-plots/exp_Fig_3_1_b')
+
+# Rounds
+y_fgm = _sorted_fgm['rounds']
+y_gm = _sorted_gm['rounds']
+y_fgm_2 = _sorted_fgm_2['rounds']
+y_gm_2 = _sorted_gm_2['rounds']
+plt.figure(figsize=(16, 12))
+plt.plot(x, y_fgm, label="FGM, E=0.5", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="GM, E=0.5", marker='D', linewidth=4)
+plt.plot(x, y_fgm_2, label="FGM, E=0.1", marker='D', linewidth=4)
+plt.plot(x, y_gm_2, label="GM, E=0.1", marker='D', linewidth=4)
+plt.xlabel('Workers', fontsize=FONT_SIZE)
+plt.ylabel('Rounds', fontsize=FONT_SIZE)
+plt.legend(loc='best', fontsize=FONT_SIZE)
+plt.grid(True)
+plt.title('SFCC Dataset')
+plt.xticks(x, fontsize=FONT_SIZE)
+plt.yticks(fontsize=FONT_SIZE)
+plt.savefig('../results/sfc-plots/exp_Fig_3_2_b')
+
+# Traffic
+y_fgm = _sorted_fgm['traffic']
+y_gm = _sorted_gm['traffic']
+y_fgm_2 = _sorted_fgm_2['traffic']
+y_gm_2 = _sorted_gm_2['traffic']
+plt.figure(figsize=(16, 12))
+plt.plot(x, y_fgm, label="FGM, E=0.5", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="GM, E=0.5", marker='D', linewidth=4)
+plt.plot(x, y_fgm_2, label="FGM, E=0.1", marker='D', linewidth=4)
+plt.plot(x, y_gm_2, label="GM, E=0.1", marker='D', linewidth=4)
+plt.xlabel('Workers', fontsize=FONT_SIZE)
+plt.ylabel('Traffic', fontsize=FONT_SIZE)
+plt.legend(loc='best', fontsize=FONT_SIZE)
+plt.grid(True)
+plt.title('SFCC Dataset')
+plt.xticks(x, fontsize=FONT_SIZE)
+plt.yticks(fontsize=FONT_SIZE)
+plt.savefig('../results/sfc-plots/exp_Fig_3_3_b')
+
 
 ####################################################################################################
 ####################################################################################################

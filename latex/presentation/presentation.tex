@@ -1,0 +1,130 @@
+% Copyright 2004 by Till Tantau <tantau@users.sourceforge.net>.
+%
+% In principle, this file can be redistributed and/or modified under
+% the terms of the GNU Public License, version 2.
+%
+% However, this file is supposed to be a template to be modified
+% for your own needs. For this reason, if you use this file as a
+% template and not specifically distribute it as part of a another
+% package/program, I grant the extra permission to freely copy and
+% modify this file as you see fit and even to delete this copyright
+% notice.
+
+\documentclass{beamer}
+
+\usetheme{Boadilla}
+
+\usepackage{subfigure}
+\usepackage{tikz}
+\usepackage[export]{adjustbox}
+\usepackage{wrapfig}
+\usepackage{comment}
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\usetikzlibrary{datavisualization}
+\usetikzlibrary{shapes,arrows,backgrounds}
+\usetikzlibrary{intersections}
+\usetikzlibrary{patterns}
+
+\title[Diploma Thesis Presentation]{Distributed Training of Recurrent Neural Networks by FGM Protocol}
+
+\author{Ilias Balampanis}
+
+\institute[TUC]{ % (optional, but mostly needed)
+School of Electrical and Computer Engineering \\
+Technical University of Crete}
+
+\pgfdeclareimage[height=1cm,width=1cm]{tuc-logo}{images/tuc_logo}
+\logo{\pgfuseimage{tuc-logo}}
+
+% Delete this block if you do not want the table of contents to pop up at the beginning of each subsection.
+\AtBeginSection[]{
+\begin{frame}
+    <beamer>{Outline}
+    \tableofcontents[currentsection,currentsubsection]
+\end{frame}
+}
+
+% Let's get started
+\begin{document}
+
+    \begin{frame}
+        \titlepage
+    \end{frame}
+
+    \begin{frame}{Outline}
+        \tableofcontents
+        % You might wish to add the option [pausesections]
+    \end{frame}
+
+    % Section and subsections will appear in the presentation overview and table of contents.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+    \section{Theoretical Background}\label{sec:theoretical-background}
+
+    \subsection{Machine Learning}\label{subsec:machine-learning}
+
+    \subsection{Geometric Monitoring Methods}\label{subsec:geometric-monitoring-methods}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+    \section{Implementation}\label{sec:implementation}
+
+    \subsection{Deep Learning using GM protocol}\label{subsec:deep-learning-using-gm-protocol}
+
+    \subsection{Deep Learning using FGM protocol}\label{subsec:deep-learning-using-fgm-protocol}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+    \section{Experimental Results}\label{sec:experimental-results}
+
+    \subsection{Protocols comparison}\label{subsec:protocols-comparison}
+
+    \subsection{Safe functions comparison}\label{subsec:safe-functions-comparison}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+    \section{Conclusion}\label{sec:conclusion}
+
+    \subsection{Contribution}\label{subsec:contribution}
+
+    \subsection{Future Work}\label{subsec:future-work}
+
+    \begin{frame}{Future work}
+        \setbeamertemplate{itemize items}[square]
+        \begin{itemize}
+            \item{Implement an actual system that uses FGM to train RNNs.}
+            \vspace{1cm}
+            \item{Use the rebalancing version of FGM to train RNNs.}
+            \vspace{1cm}
+            \item{Convert the type of learning to online, taking into consideration the Concept Drift.}
+        \end{itemize}
+    \end{frame}
+
+    \begin{frame}{Questions?}
+        \centering
+        \includegraphics[width=6cm,height=7cm]{images/question-mark.png}
+    \end{frame}
+
+\end{document}
+

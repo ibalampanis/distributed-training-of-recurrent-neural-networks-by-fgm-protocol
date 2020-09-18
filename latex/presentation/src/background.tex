@@ -1,0 +1,111 @@
+\subsection{Machine Learning}\label{subsec:machine-learning}
+
+\begin{frame}{Machine Learning (ML)}
+    \setbeamertemplate{itemize items}[square]
+    \begin{itemize}
+        \item{It is computational process for improving performance based on experience.}
+        \vspace{0.4cm}
+        \item{ML is a subfield of Artificial Intelligence (AI) and is primarily related to Data Analysis.}
+        \vspace{0.4cm}
+        \item{ML approaches are commonly divided into three ($3$) broad categories:
+        \setbeamertemplate{enumerate items}[circle]
+        \begin{enumerate}
+            \item Supervised Learning %(correct answers for each training point)
+            \item Unsupervised Learning %("just make sense of the data")
+            \item Reinforcement Learning %(reward sequence, no correct answers)
+        \end{enumerate}}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Neural Networks (NN)}
+    \setbeamertemplate{itemize items}[square]
+    \begin{itemize}
+        \item{A dominant class of ML algorithms.}
+        \vspace{0.2cm}
+        \item{Inspired by the neurophysiological experiments conducted by Hubel \& Wiesel in 1962.}
+        \vspace{0.2cm}
+        \item{Can approach highly complex functions and decision regions.}
+        \vspace{0.5cm}
+%        \item[]{\includegraphics[width=6cm,height=2.8cm,center]{images/dnn.png}}
+        \item[]{
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=8cm,height=3.8cm]{images/dnn.png}
+            \caption{a Deep Neural Network.}
+            \label{fig:dnn}
+        \end{figure}}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{NN learning process}
+    \setbeamertemplate{itemize items}[square]
+    \begin{itemize}
+        \item{Assume a set $D=\{(x,y)\:|\:x\in\mathbb{R}^n,y\in\mathbb{N}\}$ of training data points.}
+        \vspace{0.3cm}
+        \item{A NN is a non-linear function $f$ parameterized by $w\in\mathbb{R}^D$.}
+        \vspace{0.3cm}
+        \item{Consider a globally continuous and differentiable \textbf{loss function} $\mathcal{L}:\mathcal{F}\times\mathcal{X}\times\mathcal{Y}\rightarrow\mathbb{R}_+$.}
+        \vspace{0.3cm}
+        \item{Training is performed by the mini-batch Gradient Descent (GD) algorithm
+        \begin{itemize}
+            \item[]{
+            \begin{algorithm}[H]
+                \begin{algorithmic}[1]
+                    \WHILE{does not \emph{converge}}
+                    \STATE \textbf{pick} randomly a mini-batch $\beta=\{(x_1,y_1),\dots,(x_m,y_m)\} \subset D$
+                    \STATE \textbf{update} $w_{t+1}=w_t-\alpha\frac{1}{m}\sum_{i=1}^m\nabla_w\mathcal{L}(y_i,\hat{y_i})$
+                    \ENDWHILE
+                \end{algorithmic}
+                \label{alg:gd}
+            \end{algorithm}
+            }
+        \end{itemize}
+        with $|\beta| \ll |D|$.}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Recurrent Neural Networks (RNN)}
+    \setbeamertemplate{itemize items}[square]
+    \begin{itemize}
+        \item{Introduced by David Rumelhart in 1986.}
+        \vspace{0.2cm}
+        \item{Can handle sequential data.}
+        \vspace{0.2cm}
+        \item{Considers the current input and also the previously received inputs.}
+        \vspace{0.2cm}
+        \item{Can memorize previous inputs due to its internal memory.}
+        \vspace{0.2cm}
+        \item[]{
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=7cm,height=3.5cm]{images/rnn-vs-fnn.png}
+            \caption{a Recurrent Neural Network vs a Feed-forward one.}
+            \label{fig:rnn-vs-fnn}
+        \end{figure}
+        }
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{LSTM Networks}
+    \begin{columns}
+        \column{0.55\textwidth}
+        \setbeamertemplate{itemize items}[square]
+        \begin{itemize}
+            \item{LSTM for Long Short Term Memory}
+            \vspace{0.2cm}
+            \item{Not fundamentally different\\from RNN}
+            \vspace{0.2cm}
+            \item{Use different functions to\\compute hidden state}
+            \vspace{0.2cm}
+            \item{Cells decide what to keep in memory}
+            \vspace{0.2cm}
+            \item{Very effective in capturing\\long term dependencies}
+        \end{itemize}
+        \column{0.45\textwidth}
+        \begin{figure}
+            \subfigure[RNN]{\includegraphics[width=5cm,height=3cm]{images/rnn.png}}
+            \subfigure[LSTM]{\includegraphics[width=5cm,height=3cm]{images/lstm.png}}
+            \label{fig:rnn-vs-lstm}
+        \end{figure}
+    \end{columns}
+\end{frame}

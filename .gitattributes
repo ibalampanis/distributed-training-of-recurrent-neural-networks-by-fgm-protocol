@@ -1,2 +1,3 @@
 *.ipynb linguist-documentation
+*.cmake linguist-documentation
 *.pbs linguist-language=Shell

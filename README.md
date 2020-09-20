@@ -29,4 +29,4 @@ and to run this target, type:
 ./cmake-build-debug/bin/FGMLearn absolute/path/to/input/gm_sample.json
 ```
 
-For more information about this work, check [here](latex/proposal/proposal.pdf) the thesis proposal.
+For more information about this work, please check [here](latex/proposal/proposal.pdf) the thesis proposal.

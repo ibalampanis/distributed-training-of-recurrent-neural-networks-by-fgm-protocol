@@ -22,11 +22,12 @@
     \begin{itemize}
         \item{A dominant class of ML algorithms.}
         \vspace{0.2cm}
+        \item{ML with NN $\implies$ Deep Learning (DL)}
+        \vspace{0.2cm}
         \item{Inspired by the neurophysiological experiments conducted by Hubel \& Wiesel in 1962.}
         \vspace{0.2cm}
         \item{Can approach highly complex functions and decision regions.}
-        \vspace{0.5cm}
-%        \item[]{\includegraphics[width=6cm,height=2.8cm,center]{images/dnn.png}}
+        \vspace{0.2cm}
         \item[]{
         \begin{figure}[H]
             \centering
@@ -42,7 +43,7 @@
     \begin{itemize}
         \item{Assume a set $D=\{(x,y)\:|\:x\in\mathbb{R}^n,y\in\mathbb{N}\}$ of training data points.}
         \vspace{0.3cm}
-        \item{A NN is a non-linear function $f$ parameterized by $w\in\mathbb{R}^D$.}
+        \item{A NN is a non-linear function $f$ parameterized by $w\in\mathbb{R}^d$.}
         \vspace{0.3cm}
         \item{Consider a globally continuous and differentiable \textbf{loss function} $\mathcal{L}:\mathcal{F}\times\mathcal{X}\times\mathcal{Y}\rightarrow\mathbb{R}_+$.}
         \vspace{0.3cm}
@@ -91,21 +92,68 @@
         \column{0.55\textwidth}
         \setbeamertemplate{itemize items}[square]
         \begin{itemize}
-            \item{LSTM for Long Short Term Memory}
+            \item{LSTM for Long Short Term Memory.}
             \vspace{0.2cm}
-            \item{Not fundamentally different\\from RNN}
+            \item{Not fundamentally different\\from RNN.}
             \vspace{0.2cm}
-            \item{Use different functions to\\compute hidden state}
+            \item{Use different functions to\\compute hidden state.}
             \vspace{0.2cm}
-            \item{Cells decide what to keep in memory}
+            \item{Cells decide what to keep in memory.}
             \vspace{0.2cm}
-            \item{Very effective in capturing\\long term dependencies}
+            \item{Very effective in capturing\\long term dependencies.}
         \end{itemize}
         \column{0.45\textwidth}
         \begin{figure}
-            \subfigure[RNN]{\includegraphics[width=5cm,height=3cm]{images/rnn.png}}
-            \subfigure[LSTM]{\includegraphics[width=5cm,height=3cm]{images/lstm.png}}
+            \subfigure[\tiny{The repeating module in a standard RNN contains a single layer.}]{\includegraphics[width=3.8cm,height=2.5cm]{images/rnn.png}}
+            \subfigure[\tiny{The repeating module in an LSTM contains four interacting layers.}]{\includegraphics[width=3.8cm,height=2.5cm]{images/lstm.png}}
             \label{fig:rnn-vs-lstm}
         \end{figure}
     \end{columns}
+\end{frame}
+
+\subsection{Distributed Deep Learning}\label{subsec:distributed-deep-learning}
+
+\begin{frame}{Network Architecture}
+    \begin{columns}
+        \column{0.5\textwidth}
+        \setbeamertemplate{itemize items}[square]
+        \begin{itemize}
+            \item{A \textbf{star network} topology with
+            \setbeamertemplate{itemize items}[circle]
+            \begin{itemize}
+                \item a \emph{parameter server}
+                \item $n$ remote \emph{workers}
+            \end{itemize}}
+            \vspace{0.2cm}
+            \item{Each worker $i \in [\,1,n]\,$ has a chunk $D_i$ of the whole training set $D$.}
+            \vspace{0.2cm}
+            \item{Each worker has a \textbf{replica} of the DL model.}
+        \end{itemize}
+        \column{0.5\textwidth}
+        \begin{figure}
+            \includegraphics[width=8.5cm,height=6cm,center]{images/parameter-server.png}\label{fig:param-server}
+        \end{figure}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Parameter Server (PS) model}
+    \setbeamertemplate{itemize items}[square]
+    \begin{itemize}
+        \item{The most known model for distributed DL.}
+        \vspace{0.2}
+        \item{\textbf{Pseudo algorithm}}
+        \vspace{0.1}
+        \item[]{
+        \begin{algorithm}[H]
+            \begin{algorithmic}[1]
+                \STATE The PS initializes the parameters of the DL model.
+                \STATE The PS broadcasts the model parameters to each worker.
+                \STATE Each worker fits a mini-batch, taken from its chunk, using the mini-batch GD algorithm.
+                \STATE When \textbf{step 3} is done, all workers send their model parameters\\to the PS where is getting the aggregation.
+                \STATE While each chunk is got empty, go to \textbf{step 2}, otherwise \textbf{all done}.
+            \end{algorithmic}
+            \label{alg:param-server}
+        \end{algorithm}
+        }
+    \end{itemize}
 \end{frame}

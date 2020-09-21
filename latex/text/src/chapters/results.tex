@@ -46,7 +46,7 @@ Regarding the hyperparameters, again based on this repository~\cite{cnn_rnn_repo
     \label{fig:dl_class_model}
 \end{figure}
 
-For this work, I selected the \textbf{San Francisco Crime Classification (SFCC} dataset~\cite{sfc_dataset}.
+For this work, I selected the \textbf{San Francisco Crime Classification (SFCC)} dataset~\cite{sfc_dataset}.
 
 This dataset contains incidents derived from SFPD Crime Incident Reporting system.
 The data ranges from 1/1/2003 to 5/13/2015.
@@ -71,6 +71,7 @@ In other words, the training samples were approximately 746,340 while the testin
 The load that got each worker was equal.
 
 The goal is predict the category of crime that occurred, given the time and location and the rest of variables.
+The number of crime categories is $39$ which is the number of classes.
 
 \subsection{Natural Language Processing problem}\label{subsec:natural-language-processing-problem}
 
@@ -117,7 +118,7 @@ Regarding the hyperparameters, again based on this article~\cite{rushabhwadkar_2
     \item \textbf{Adam's beta2:} $0.99$
 \end{itemize}
 
-For this work, I selected the \textbf{Amazon Fine Food Reviews (AFFR} dataset~\cite{amazon_dataset}.
+For this work, I selected the \textbf{Amazon Fine Food Reviews (AFFR)} dataset~\cite{amazon_dataset}.
 
 This dataset consists of reviews of fine foods from Amazon.
 The data span a period of more than ten (10) years, including all $500,000$ reviews up to October 2012.
@@ -219,7 +220,7 @@ It is also notable that both curves about the number of rounds and traffic follo
 
 \newpage
 
-Before a worker calculates its new drift vector, it fits to the local model a batch of sample.
+Before a worker calculates its new drift vector, it fits to the local model a batch of samples.
 In this subgroup, the variable that changes is the batch size.
 It is very interesting that the accuracy in SFCC is precisely the same (Fig.~\ref{fig:sfcc-affr_2_1} A).
 In AFFR (Fig.~\ref{fig:sfcc-affr_2_1} B), the FGM is better than GM, but the difference is just $0.5\%$ which is a negligible amount.

@@ -1,3 +1,47 @@
 \subsection{Protocols comparison}\label{subsec:protocols-comparison}
 
-\subsection{Safe functions comparison}\label{subsec:safe-functions-comparison}
+\begin{frame}{Experiment Setup}
+    \setbeamertemplate{itemize items}[square]
+    \begin{itemize}
+        \item{We compare the two protocols in \textbf{two} distinct ML problems using the \emph{same} safe function (\textbf{spherical cap}).}
+        \item{Problem 1 - Classification
+        \setbeamertemplate{itemize items}[triangle]
+        \begin{itemize}
+            \item{\textbf{Dataset:} San Francisco Crime Classification (SFCC)}
+            \item{\textbf{Features:} $9$}
+            \item{\textbf{Classes:} $39$}
+            \item{\textbf{Dataset size:} $878,049$ data points}
+            \item{The \textbf{goal} is predict the category of crime that occurred, given the time and location and the rest of
+            variables.}
+        \end{itemize}
+        }
+        \item{Problem 2 - Natural Language Processing (NLP)
+        \setbeamertemplate{itemize items}[triangle]
+        \begin{itemize}
+            \item{\textbf{Dataset:} Amazon Fine Food Reviews (AFFR)}
+            \item{\textbf{Max input words:} $200$}
+            \item{\textbf{Classes:} $2$}
+            \item{\textbf{Dataset size:} $568,454$ data points}
+            \item{The \textbf{goal} is predict if the given review is positive or negative\\\textbf{(Sentiment Analysis)}.}
+        \end{itemize}
+        }
+    \end{itemize}
+\end{frame}
+
+\subsection{Safe Functions Comparison}\label{subsec:safe-functions-comparison}
+
+\begin{frame}{Experiment Setup}
+    \setbeamertemplate{itemize items}[square]
+    \begin{itemize}
+        \item{This time, we compare the two safe functions\\using the \emph{same} protocol (\textbf{FGM}).}
+        \item{\textbf{Recall},}
+        \item[]{
+        \begin{block}{Safe Function 1 (SF1) - \emph{'Simple norm'}}
+            $\phi(\pmb{X_i},\pmb{E}) = ||\pmb{X_i}-\pmb{E}||_2^2 - T$
+        \end{block}}
+        \vspace{0.1cm}
+        \begin{block}{Safe Function 2 (SF2) - \emph{'Spherical cap'}}
+            $\phi(\pmb{X_i},\pmb{E}) = \max\{-T||\pmb{E}|| - \pmb{X_i}\frac{\pmb{E}}{\pmb{||E||}}, ||\pmb{X_i}+\pmb{E}|| - (1+T)||\pmb{E}||\}$
+        \end{block}
+    \end{itemize}
+\end{frame}

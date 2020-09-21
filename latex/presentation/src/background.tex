@@ -53,8 +53,8 @@
             \begin{algorithm}[H]
                 \begin{algorithmic}[1]
                     \WHILE{does not \emph{converge}}
-                    \STATE \textbf{pick} randomly a mini-batch $\beta=\{(x_1,y_1),\dots,(x_m,y_m)\} \subset D$
-                    \STATE \textbf{update} $w_{t+1}=w_t-\alpha\frac{1}{m}\sum_{i=1}^m\nabla_w\mathcal{L}(y_i,\hat{y_i})$
+                    \STATE \textbf{pick} randomly a mini-batch $\beta=\{(x_1,y_1),\dots,(x_{|\beta|},y_{|\beta|})\} \subset D$
+                    \STATE \textbf{update} $w_{t+1}=w_t-\alpha\frac{1}{|\beta|}\sum_{i=1}^{|\beta|}\nabla_w\mathcal{L}(y_i,\hat{y_i})$
                     \ENDWHILE
                 \end{algorithmic}
                 \label{alg:gd}
@@ -149,8 +149,8 @@
                 \STATE The PS initializes the parameters of the DL model.
                 \STATE The PS broadcasts the model parameters to each worker.
                 \STATE Each worker fits a mini-batch, taken from its chunk, using the mini-batch GD algorithm.
-                \STATE When \textbf{step 3} is done, all workers send their model parameters\\to the PS where is getting the aggregation.
-                \STATE While each chunk is got empty, go to \textbf{step 2}, otherwise \textbf{all done}.
+                \STATE When \textbf{step 3} is done, all workers send their model parameters\\to the PS where the aggregation takes place.
+                \STATE While each chunk is not empty, go to \textbf{step 2}, otherwise \textbf{all done}.
             \end{algorithmic}
             \label{alg:param-server}
         \end{algorithm}

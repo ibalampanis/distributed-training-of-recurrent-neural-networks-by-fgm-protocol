@@ -9,7 +9,7 @@
             \setbeamertemplate{itemize items}[circle]
             \begin{itemize}
                 \item $n$ workers with a \textbf{replica} of the DL model, $\pmb{W}_i$.
-                \item a coordinator that holds $\pmb{E}\in\mathbb{R}^d$ an estimate of $\pmb{W}(t)=\frac{1}{k}\sum_{i=1}^k\pmb{W}_i(t)$.
+                \item a coordinator that holds $\pmb{E}\in\mathbb{R}^d$ an estimate of $\pmb{W}(t)=\frac{1}{n}\sum_{i=1}^n\pmb{W}_i(t)$.
             \end{itemize}}
             \vspace{0.1cm}
             \item{Each worker $i \in [\,1,n]\,$ has a chunk $D_i$ of the whole training set $D$.}
@@ -34,7 +34,7 @@
         \begin{itemize}
             \item[]{
             \begin{block}{Model parameters Estimate}
-                $\pmb{E}=\frac{1}{k}\sum\pmb{W}_i(t)$
+                $\pmb{E}=\frac{1}{n}\sum\pmb{W}_i(t)$
             \end{block}
             \begin{block}{Admissible region}
                 $A=\{\pmb{W}\in\mathbb{R}^d\:\:|\:\:||\pmb{W}-\pmb{E}||_2^2 - T\leq 0\}$
@@ -43,17 +43,17 @@
                 $A$ is \textbf{convex}
             \end{block}
             \begin{block}{Safe function for $A$}
-                $\phi(\pmb{W},\pmb{E}) = ||\pmb{W}-\pmb{E}||_2^2 - T)$\\
+                $\phi(\pmb{W},\pmb{E}) = ||\pmb{W}-\pmb{E}||_2^2 - T$\\
                 We can call this function as \textbf{simple norm}.
             \end{block}
             }
         \end{itemize}
-        \column{0.5\textwidth}
-        \vspace{-0.5cm}\hspace{0.3cm}
-        \begin{block}{Local model parameters (Drift Vector)}
+        \column{0.45\textwidth}
+        \vspace{-0.5cm}
+        \begin{block}{Local model parameters\\(Drift Vector)}
             $\pmb{X}_i(t)=\pmb{\Delta W}_i(t)+\pmb{E}$
         \end{block}
-        \hspace{0.8cm}
+        \hspace{0.75cm}
         \begin{tikzpicture}
             \filldraw[color=red!60, fill=gray!50, fill opacity=0.3, very thick](0,0) circle (2);
             \coordinate (E) at (0,0);
@@ -70,7 +70,7 @@
             \draw [fill] (x) circle (0.2em) node [anchor=south] {$\vec{W}$};
             \draw [red,dashed] (E)--(2,0) node [pos=0.5, anchor=south] {$\sqrt{T}$};
         \end{tikzpicture}
-        \vspace{-0.6cm}\hspace{1cm}$\forall i,\pmb{X}_i\in A \Rightarrow\pmb{W}\in A$
+        \vspace{-0.5cm}\hspace{1cm}$\forall i,\pmb{X}_i\in A \Rightarrow\pmb{W}\in A$
     \end{columns}
 \end{frame}
 
@@ -121,7 +121,7 @@
         A function $\phi :\mathbb{R}^d\rightarrow \mathbb{R}$ such that, for every $n$, and every $\pmb{X}_i$, i \in [\,1,n]\,\\
         \vspace{0.1cm}
         \begin{center}
-            $\sum_{i=1}^k\phi (\pmb{X}_i) \leq 0$\hspace{0.4cm}$\Longrightarrow$\hspace{0.4cm}$\frac{1}{n}\sum_{i=1}^n\pmb{X}_i\in A$
+            $\sum_{i=1}^n\phi (\pmb{X}_i) \leq 0$\hspace{0.4cm}$\Longrightarrow$\hspace{0.4cm}$\frac{1}{n}\sum_{i=1}^n\pmb{X}_i\in A$
         \end{center}
         We can call this function as \textbf{spherical cap}.
     \end{block}
@@ -164,14 +164,14 @@
         \item{Samoladas et al. constructed the concave function $\phi:\mathbb{R}^d\rightarrow\mathbb{R}$ that is safe for $A$ as
         \newline
         \begin{center}
-            $\phi(\pmb{X_i},\pmb{E}) = max\{[-T\norm{\pmb{E}} - \pmb{X_i}\frac{\pmb{E}}{\norm{\pmb{E}}}], [\norm{\pmb{X_i}+\pmb{E}} - (1+T)\norm{\pmb{E}}]\}$
+            $\phi(\pmb{X_i},\pmb{E}) = \max\{-T||\pmb{E}|| - \pmb{X_i}\frac{\pmb{E}}{\pmb{||E||}}, ||\pmb{X_i}+\pmb{E}|| - (1+T)||\pmb{E}||\}$
         \end{center}
         }
         \vspace{0.4cm}
         \item{Finally, the coordinator monitors the condition,
         \newline
         \begin{center}
-            $\sum_{i=1}^k\phi(\pmb{X}_i,\pmb{E}) \leq 0$
+            $\sum_{i=1}^n\phi(\pmb{X}_i,\pmb{E}) \leq 0$
         \end{center}
         }
     \end{itemize}
@@ -211,11 +211,11 @@
     \begin{itemize}
         \item{The coordinator monitors the following condition,\\
         \begin{center}
-            $\psi = \sum_{i=1}^k\phi(\pmb{X}_i,\pmb{E}) \leq 0$
+            $\psi = \sum_{i=1}^n\phi(\pmb{X}_i,\pmb{E}) \leq 0$
         \end{center}
         }
         \item{If $\psi\approx0$, the round ends and a new begins, otherwise a new subround begins.}
-        \item{The goal of each subround is to check the condition $\psi \leq 0$ coarsely, with a precision of $\theta = -\frac{\psi}{2k}$ (\emph{quantum}), achieving
+        \item{The \textbf{goal} of each subround is to check the condition $\psi \leq 0$ coarsely, with a precision of $\theta = -\frac{\psi}{2n}$ (\emph{quantum}), achieving
         this with as little communication as possible.}
     \end{itemize}
 \end{frame}

@@ -5,7 +5,8 @@ Initially, I will refer to the libraries and the tools that helped me to impleme
 Next, I will define the DL model.
 Finally, I will explain how this model attached to the stream monitoring protocols.
 
-As I said in section~\ref{sec:related-work-and-motivation}, both GM and FGM do not follow the classic parameter server model. At first glance, the coordinator seems to have this functionality. 
+As I said in section~\ref{sec:related-work-and-motivation}, both GM and FGM do not follow the classic parameter server model.
+At first glance, the coordinator seems to have this functionality.
 Although, the way that decides to make the synchronizations differs from the classic model.
 The parameter server synchronizes the workers after some discrete steps while the stream monitoring methods synchronize when a condition is violated.
 It leads to a more efficient training process regarding the communication between workers and the coordinator.
@@ -15,7 +16,7 @@ The goal of this thesis is to prove that FGM is more efficient than GM in respec
 I achieved this by tracking the communication cost (bytes) between the network workers.
 
 
-\section{Libraries and tools}\label{sec:libraries-and-tools}
+\section{Libraries and Tools}\label{sec:libraries-and-tools}
 
 This project is developed mostly in \emph{C++} and rarely in \emph{Python}.
 The library that I handled to track the communication over the workers

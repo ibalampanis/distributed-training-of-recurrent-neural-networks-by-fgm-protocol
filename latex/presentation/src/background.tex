@@ -1,24 +1,25 @@
 \subsection{Machine Learning}\label{subsec:machine-learning}
 
 \begin{frame}{Machine Learning (ML)}
-    \setbeamertemplate{itemize items}[square]
+    \setbeamertemplate{itemize items}[circle]
     \begin{itemize}
         \item{It is computational process for improving performance based on experience.}
-        \vspace{0.4cm}
+        \vspace{0.3cm}
         \item{ML is a subfield of Artificial Intelligence (AI) and is primarily related to Data Analysis.}
-        \vspace{0.4cm}
+        \vspace{0.3cm}
         \item{ML approaches are commonly divided into three ($3$) broad categories:
-        \setbeamertemplate{enumerate items}[circle]
-        \begin{enumerate}
+        \setbeamertemplate{itemize items}[square]
+        \begin{itemize}
             \item Supervised Learning %(correct answers for each training point)
             \item Unsupervised Learning %("just make sense of the data")
             \item Reinforcement Learning %(reward sequence, no correct answers)
-        \end{enumerate}}
+        \end{itemize}
+        }
     \end{itemize}
 \end{frame}
 
 \begin{frame}{Neural Networks (NN)}
-    \setbeamertemplate{itemize items}[square]
+    \setbeamertemplate{itemize items}[circle]
     \begin{itemize}
         \item{A dominant class of ML algorithms.}
         \vspace{0.2cm}
@@ -39,7 +40,7 @@
 \end{frame}
 
 \begin{frame}{NN learning process}
-    \setbeamertemplate{itemize items}[square]
+    \setbeamertemplate{itemize items}[circle]
     \begin{itemize}
         \item{Assume a set $D=\{(x,y)\:|\:x\in\mathbb{R}^n,y\in\mathbb{N}\}$ of training data points.}
         \vspace{0.3cm}
@@ -66,7 +67,7 @@
 \end{frame}
 
 \begin{frame}{Recurrent Neural Networks (RNN)}
-    \setbeamertemplate{itemize items}[square]
+    \setbeamertemplate{itemize items}[circle]
     \begin{itemize}
         \item{Introduced by David Rumelhart in 1986.}
         \vspace{0.2cm}
@@ -90,7 +91,7 @@
 \begin{frame}{LSTM Networks}
     \begin{columns}
         \column{0.55\textwidth}
-        \setbeamertemplate{itemize items}[square]
+        \setbeamertemplate{itemize items}[circle]
         \begin{itemize}
             \item{LSTM for Long Short Term Memory.}
             \vspace{0.2cm}
@@ -116,13 +117,13 @@
 \begin{frame}{Network Architecture}
     \begin{columns}
         \column{0.5\textwidth}
-        \setbeamertemplate{itemize items}[square]
+        \setbeamertemplate{itemize items}[circle]
         \begin{itemize}
             \item{A \textbf{star network} topology with
-            \setbeamertemplate{itemize items}[circle]
+            \setbeamertemplate{itemize items}[square]
             \begin{itemize}
                 \item a \emph{parameter server}
-                \item $n$ remote \emph{workers}
+                \item $n$ \emph{workers}
             \end{itemize}}
             \vspace{0.2cm}
             \item{Each worker $i \in [\,1,n]\,$ has a chunk $D_i$ of the whole training set $D$.}
@@ -137,23 +138,135 @@
 \end{frame}
 
 \begin{frame}{Parameter Server (PS) model}
-    \setbeamertemplate{itemize items}[square]
+    \setbeamertemplate{itemize items}[circle]
     \begin{itemize}
         \item{The most known model for distributed DL.}
-        \vspace{0.2}
-        \item{\textbf{Pseudo algorithm}}
-        \vspace{0.1}
-        \item[]{
-        \begin{algorithm}[H]
-            \begin{algorithmic}[1]
-                \STATE The PS initializes the parameters of the DL model.
-                \STATE The PS broadcasts the model parameters to each worker.
-                \STATE Each worker fits a mini-batch, taken from its chunk, using the mini-batch GD algorithm.
-                \STATE When \textbf{step 3} is done, all workers send their model parameters\\to the PS where the aggregation takes place.
-                \STATE While each chunk is not empty, go to \textbf{step 2}, otherwise \textbf{all done}.
-            \end{algorithmic}
-            \label{alg:param-server}
-        \end{algorithm}
-        }
+        \vspace{0.2cm}
+        \item{\textbf{Pseudo algorithm:}}
+    \end{itemize}
+    \vspace{0.1cm}
+    \begin{algorithm}[H]
+        \begin{algorithmic}[1]
+            \STATE The PS initializes the parameters of the DL model.
+            \STATE The PS broadcasts the model parameters to each worker.
+            \STATE Each worker fits a mini-batch, taken from its chunk, using the mini-batch GD algorithm.
+            \STATE When \textbf{step 3} is done, all workers send their model parameters\\to the PS where the aggregation takes place.
+            \STATE While each chunk is not empty, go to \textbf{step 2}, otherwise \textbf{all done}.
+        \end{algorithmic}
+        \label{alg:param-server}
+    \end{algorithm}
+\end{frame}
+
+\begin{frame}{The environment of the GM protocol}
+    \begin{columns}
+        \column{0.5\textwidth}
+        \setbeamertemplate{itemize items}[circle]
+        \begin{itemize}
+            \item{A \textbf{star network} topology with
+            \setbeamertemplate{itemize items}[square]
+            \begin{itemize}
+                \item $n$ workers with a \textbf{replica} of the DL model, $\pmb{W}_i$.
+                \item a coordinator that holds $\pmb{E}\in\mathbb{R}^d$ an estimate of $\pmb{W}(t)=\frac{1}{n}\sum_{i=1}^n\pmb{W}_i(t)$.
+            \end{itemize}}
+            \vspace{0.1cm}
+            \item{Each worker $i \in [\,1,n]\,$ has a chunk $D_i$ of the whole training set $D$.}
+            \vspace{0.1cm}
+            \item{It is surely more efficient than the PS classic model regarding the network traffic.}
+        \end{itemize}
+        \column{0.5\textwidth}
+        \begin{figure}
+            \includegraphics[width=8cm,height=6.5cm,center]{images/ml-fgm.png}\label{fig:ml-gm}
+        \end{figure}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{The GM Protocol (1)}
+    \setbeamertemplate{itemize items}[circle]
+    \begin{itemize}
+        \item{Introduced for DL purposes by Michael Kamp et al. (2014).}
+    \end{itemize}
+    \begin{columns}
+        \column{0.5\textwidth}
+        \setbeamertemplate{itemize items}[square]
+        \begin{itemize}
+            \item[]{
+            \begin{block}{Model parameters Estimate}
+                $\pmb{E}=\frac{1}{n}\sum\pmb{W}_i(t)$
+            \end{block}
+            \begin{block}{Admissible region}
+                $A=\{\pmb{W}\in\mathbb{R}^d\:\:|\:\:||\pmb{W}-\pmb{E}||_2^2 - T\leq 0\}$
+                \centering
+                \newline
+                $A$ is \textbf{convex}
+            \end{block}
+            \begin{block}{Safe function for $A$}
+                $\phi(\pmb{W},\pmb{E}) = ||\pmb{W}-\pmb{E}||_2^2 - T$\\
+                We can call this function as \textbf{'simple norm'}.
+            \end{block}
+            }
+        \end{itemize}
+        \column{0.45\textwidth}
+        \vspace{-0.5cm}
+        \begin{block}{Local model parameters\\(Drift Vector)}
+            $\pmb{X}_i(t)=\pmb{\Delta W}_i(t)+\pmb{E}$
+        \end{block}
+        \hspace{0.75cm}
+        \begin{tikzpicture}
+            \filldraw[color=red!60, fill=gray!50, fill opacity=0.3, very thick](0,0) circle (2);
+            \coordinate (E) at (0,0);
+            \coordinate (u1) at (0.3,-0.5);
+            \coordinate (u2) at (-1.4,1.0);
+            \coordinate (u3) at (-1.2,-1.1);
+            \draw [fill] (E) circle (0.2em) node [anchor=south] {$\vec{E}$};
+            \draw [->,thin] (-2,-2)--(u1)  node [anchor=north]{$\vec{X}_1$};
+            \draw [->,thin] (-2,-2)--(u2) node [anchor=south west] {$\vec{X}_2$};
+            \draw [->,thin] (-2,-2)--(u3) node [anchor=south]
+            {$\vec{X}_3$};
+            \coordinate (x) at (-0.76,-0.2);
+            \draw [blue,dashed] (E)--(x);
+            \draw [fill] (x) circle (0.2em) node [anchor=south] {$\vec{W}$};
+            \draw [red,dashed] (E)--(2,0) node [pos=0.5, anchor=south] {$\sqrt{T}$};
+        \end{tikzpicture}
+        \vspace{-0.5cm}\hspace{1cm}$\forall i,\pmb{X}_i\in A \Rightarrow\pmb{W}\in A$
+    \end{columns}
+\end{frame}
+
+\begin{frame}{The GM Protocol (2)}
+    \setbeamertemplate{itemize items}[circle]
+    \begin{itemize}
+        \item{At the \textbf{beginning} of a round,
+        \setbeamertemplate{itemize items}[square]
+        \begin{itemize}
+            \item{The coordinator knows the model parameters from all workers $\pmb{W}_i$.}
+            \item{The coordinator sends the estimate $\pmb{E}$ to all workers.}
+            \item{Each worker initializes the parameters $\pmb{W}_i=\pmb{E}$.}
+        \end{itemize}}
+        \item{\textbf{During} a round
+        \setbeamertemplate{itemize items}[square]
+        \begin{itemize}
+            \item{Each worker updates $\pmb{W}_i$ by fitting a batch of samples.}
+            \item{Next, each worker calculates its drift vector $\pmb{X}_i$.}
+            \item{Each worker checks that $\pmb{X}_i\in A\Rightarrow||\pmb{X}_i(t)-\pmb{E}||_2^2 - T \leq 0$.}
+            \item{If $\pmb{X}_i\not\in A$ occurs at a worker, then sends a \textbf{local violation} message to the coordinator.}
+        \end{itemize}}
+        \item{At the \textbf{end} of a round (\emph{the coordinator receives a local violation message})
+        \setbeamertemplate{itemize items}[square]
+        \begin{itemize}
+            \item{The coordinator receives from each worker for the current $\pmb{X}_i$.}
+            \item{The coordinator calculates the new estimate ($\pmb{E}$).}
+        \end{itemize}}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{The GM Protocol (3)}
+    \setbeamertemplate{itemize items}[circle]
+    \begin{itemize}
+        \item{Uses the conditions which introduced by Sharfman et al. (2006).}
+        \vspace{0.4cm}
+        \item{The protocol totally monitors the \textbf{variance} of the distributed parameter vectors,
+        \[\frac{1}{n}\sum_{i=1}^n||\pmb{X}_i(t)-\pmb{W}(t)||_2^2 \leq \frac{1}{n}\sum_{i=1}^n||\pmb{X}_i(t)-\pmb{E}||_2^2 - T \leq 0.\]}
+        \vspace{-0.4cm}
+        \item{Each worker checks its \textbf{local condition},
+        \[\forall i,||\pmb{X}_i(t)-\pmb{E}||_2^2 - T \leq 0.\]}
     \end{itemize}
 \end{frame}

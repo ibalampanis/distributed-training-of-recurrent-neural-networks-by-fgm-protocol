@@ -1,28 +1,72 @@
-\subsection{Protocols comparison}\label{subsec:protocols-comparison}
+\subsection{Protocols Comparison}\label{subsec:protocols-comparison}
 
-\begin{frame}{Experiment Setup}
-    \setbeamertemplate{itemize items}[square]
+\begin{frame}{Experiments Setup}
+    \setbeamertemplate{itemize items}[circle]
     \begin{itemize}
-        \item{We compare the two protocols in \textbf{two} distinct ML problems using the \emph{same} safe function (\textbf{spherical cap}).}
-        \item{Problem 1 - Classification
-        \setbeamertemplate{itemize items}[triangle]
+        \item{\textbf{Quantities} that we care for
+        \setbeamertemplate{itemize items}[square]
+        \begin{itemize}
+            \item{ML model prediction \textbf{accuracy}}
+            \item{number of \textbf{rounds} of each protocol}
+            \item{network \textbf{traffic} in bytes that each protocol needed to perform}
+        \end{itemize}
+        }
+        \vspace{0.2cm}
+        \item{The experiments conducted for \textbf{various}
+        \setbeamertemplate{itemize items}[square]
+        \begin{itemize}
+            \item{thresholds ($\pmb{T}$)}
+            \item{mini-batch sizes ($\pmb{|\beta|}$)}
+            \item{number of workers ($\pmb{n}$)}
+        \end{itemize}
+        }
+        \vspace{0.2cm}
+        \item{Both datasets cut into $\pmb{n}$ chunks.}
+        \vspace{0.2cm}
+        \item{The working load allocated \textbf{uniformly} to each worker.}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Machine Learning Problems (1)}
+    \setbeamertemplate{itemize items}[circle]
+    \begin{itemize}
+        \item{We compare the two protocols in \textbf{two} distinct ML problems using the \textbf{same safe function} (\textbf{spherical cap}).}
+        \vspace{0.3cm}
+        \item{\textbf{Problem 1} - Classification
+        \vspace{0.1cm}
+        \setbeamertemplate{itemize items}[square]
         \begin{itemize}
             \item{\textbf{Dataset:} San Francisco Crime Classification (SFCC)}
+            \vspace{0.1cm}
             \item{\textbf{Features:} $9$}
+            \vspace{0.1cm}
             \item{\textbf{Classes:} $39$}
+            \vspace{0.1cm}
             \item{\textbf{Dataset size:} $878,049$ data points}
-            \item{The \textbf{goal} is predict the category of crime that occurred, given the time and location and the rest of
+            \vspace{0.1cm}
+            \item{The \textbf{goal} is to predict the category of crime that occurred, given the time and location and the rest of
             variables.}
         \end{itemize}
         }
-        \item{Problem 2 - Natural Language Processing (NLP)
-        \setbeamertemplate{itemize items}[triangle]
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Machine Learning Problems (2)}
+    \setbeamertemplate{itemize items}[circle]
+    \begin{itemize}
+        \item{\textbf{Problem 2} - Natural Language Processing (NLP)
+        \vspace{0.1cm}
+        \setbeamertemplate{itemize items}[square]
         \begin{itemize}
             \item{\textbf{Dataset:} Amazon Fine Food Reviews (AFFR)}
+            \vspace{0.2cm}
             \item{\textbf{Max input words:} $200$}
+            \vspace{0.2cm}
             \item{\textbf{Classes:} $2$}
+            \vspace{0.2cm}
             \item{\textbf{Dataset size:} $568,454$ data points}
-            \item{The \textbf{goal} is predict if the given review is positive or negative\\\textbf{(Sentiment Analysis)}.}
+            \vspace{0.2cm}
+            \item{The \textbf{goal} is to predict if the given review is positive or negative\\\textbf{(Sentiment Analysis)}.}
         \end{itemize}
         }
     \end{itemize}
@@ -30,18 +74,61 @@
 
 \subsection{Safe Functions Comparison}\label{subsec:safe-functions-comparison}
 
-\begin{frame}{Experiment Setup}
-    \setbeamertemplate{itemize items}[square]
+\begin{frame}{Safe Zone Problem}
+    \setbeamertemplate{itemize items}[circle]
     \begin{itemize}
-        \item{This time, we compare the two safe functions\\using the \emph{same} protocol (\textbf{FGM}).}
-        \item{\textbf{Recall},}
+        \item{This time, we compare the two safe functions using the\\ \emph{same} protocol (\textbf{FGM}).}
+        \item{The two safe functions are,}
+        \vspace{0.2cm}
         \item[]{
         \begin{block}{Safe Function 1 (SF1) - \emph{'Simple norm'}}
             $\phi(\pmb{X_i},\pmb{E}) = ||\pmb{X_i}-\pmb{E}||_2^2 - T$
         \end{block}}
-        \vspace{0.1cm}
+        \vspace{0.3cm}
         \begin{block}{Safe Function 2 (SF2) - \emph{'Spherical cap'}}
             $\phi(\pmb{X_i},\pmb{E}) = \max\{-T||\pmb{E}|| - \pmb{X_i}\frac{\pmb{E}}{\pmb{||E||}}, ||\pmb{X_i}+\pmb{E}|| - (1+T)||\pmb{E}||\}$
         \end{block}
     \end{itemize}
+\end{frame}
+
+\begin{frame}{Results (1) - Accuracy}
+    \setbeamertemplate{itemize items}[circle]
+    \begin{itemize}
+        \item{\textbf{SF1} achieves a little bit \textbf{better} accuracy.}
+    \end{itemize}
+    \vspace{-0.35cm}
+    \begin{figure}
+        \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sf-comp/exp_Fig_1_1.png}}
+        \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sf-comp/exp_Fig_2_1.png}}
+        \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sf-comp/exp_Fig_3_1.png}}
+        \label{fig:sf_acc}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Results (2) - Number of rounds}
+%    \setbeamertemplate{itemize items}[circle]
+%    \begin{itemize}
+%        \item{A comment}
+%    \end{itemize}
+%    \vspace{-0.35cm}
+    \begin{figure}
+        \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sf-comp/exp_Fig_1_2.png}}
+        \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sf-comp/exp_Fig_2_2.png}}
+        \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sf-comp/exp_Fig_3_2.png}}
+        \label{fig:sf_rnds}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Results (3) - Scalabilty Analysis}
+    \setbeamertemplate{itemize items}[circle]
+    \begin{itemize}
+        \item{\textbf{SF2} is more \textbf{efficient} by up to 56\%.}
+    \end{itemize}
+    \vspace{-0.35cm}
+    \begin{figure}
+        \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sf-comp/exp_Fig_1_3.png}}
+        \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sf-comp/exp_Fig_2_3.png}}
+        \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sf-comp/exp_Fig_3_3.png}}
+        \label{fig:sf_trff}
+    \end{figure}
 \end{frame}

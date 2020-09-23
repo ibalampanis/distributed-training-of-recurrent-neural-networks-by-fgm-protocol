@@ -39,15 +39,20 @@
     \end{itemize}
 \end{frame}
 
-\begin{frame}{NN learning process}
+\begin{frame}{NN learning process (1)}
     \setbeamertemplate{itemize items}[circle]
     \begin{itemize}
         \item{Assume a set $D=\{(x,y)\:|\:x\in\mathbb{R}^n,y\in\mathbb{N}\}$ of training data points.}
-        \vspace{0.3cm}
+        \vspace{1cm}
         \item{A NN is a non-linear function $f$ parameterized by $w\in\mathbb{R}^d$.}
-        \vspace{0.3cm}
+        \vspace{1cm}
         \item{Consider a globally continuous and differentiable \textbf{loss function} $\mathcal{L}:\mathcal{F}\times\mathcal{X}\times\mathcal{Y}\rightarrow\mathbb{R}_+$.}
-        \vspace{0.3cm}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{NN learning process (2)}
+    \setbeamertemplate{itemize items}[circle]
+    \begin{itemize}
         \item{Training is performed by the mini-batch Gradient Descent (GD) algorithm
         \begin{itemize}
             \item[]{
@@ -62,7 +67,10 @@
             \end{algorithm}
             }
         \end{itemize}
-        with $|\beta| \ll |D|$.}
+        with $|\beta| \ll |D|$.
+        }
+        \vspace{0.3cm}
+        \item{This process is called \textbf{back propagation}.}
     \end{itemize}
 \end{frame}
 
@@ -157,7 +165,7 @@
     \end{algorithm}
 \end{frame}
 
-\begin{frame}{The environment of the GM protocol}
+\begin{frame}{The environment of the Geometric Monitoring (GM) protocol}
     \begin{columns}
         \column{0.5\textwidth}
         \setbeamertemplate{itemize items}[circle]
@@ -180,7 +188,7 @@
     \end{columns}
 \end{frame}
 
-\begin{frame}{The GM Protocol (1)}
+\begin{frame}{Definitions}
     \setbeamertemplate{itemize items}[circle]
     \begin{itemize}
         \item{Introduced for DL purposes by Michael Kamp et al. (2014).}
@@ -231,37 +239,61 @@
     \end{columns}
 \end{frame}
 
-\begin{frame}{The GM Protocol (2)}
+\begin{frame}{The GM Protocol (1)}
     \setbeamertemplate{itemize items}[circle]
     \begin{itemize}
         \item{At the \textbf{beginning} of a round,
+        \vspace{0.2cm}
         \setbeamertemplate{itemize items}[square]
         \begin{itemize}
             \item{The coordinator knows the model parameters from all workers $\pmb{W}_i$.}
+            \vspace{0.3cm}
             \item{The coordinator sends the estimate $\pmb{E}$ to all workers.}
+            \vspace{0.3cm}
             \item{Each worker initializes the parameters $\pmb{W}_i=\pmb{E}$.}
-        \end{itemize}}
-        \item{\textbf{During} a round
+        \end{itemize}
+        }
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{The GM Protocol (2)}
+    \setbeamertemplate{itemize items}[circle]
+    \begin{itemize}
+        \item{\textbf{During} a round,
+        \vspace{0.2cm}
         \setbeamertemplate{itemize items}[square]
         \begin{itemize}
             \item{Each worker updates $\pmb{W}_i$ by fitting a batch of samples.}
+            \vspace{0.3cm}
             \item{Next, each worker calculates its drift vector $\pmb{X}_i$.}
+            \vspace{0.3cm}
             \item{Each worker checks that $\pmb{X}_i\in A\Rightarrow||\pmb{X}_i(t)-\pmb{E}||_2^2 - T \leq 0$.}
+            \vspace{0.3cm}
             \item{If $\pmb{X}_i\not\in A$ occurs at a worker, then sends a \textbf{local violation} message to the coordinator.}
-        \end{itemize}}
-        \item{At the \textbf{end} of a round (\emph{the coordinator receives a local violation message})
-        \setbeamertemplate{itemize items}[square]
-        \begin{itemize}
-            \item{The coordinator receives from each worker for the current $\pmb{X}_i$.}
-            \item{The coordinator calculates the new estimate ($\pmb{E}$).}
-        \end{itemize}}
+        \end{itemize}
+        }
     \end{itemize}
 \end{frame}
 
 \begin{frame}{The GM Protocol (3)}
     \setbeamertemplate{itemize items}[circle]
     \begin{itemize}
-        \item{Uses the conditions which introduced by Sharfman et al. (2006).}
+        \item{At the \textbf{end} of a round (\emph{the coordinator receives a local violation message}),
+        \vspace{0.2cm}
+        \setbeamertemplate{itemize items}[square]
+        \begin{itemize}
+            \item{The coordinator receives from each worker for the current $\pmb{X}_i$.}
+            \vspace{0.3cm}
+            \item{The coordinator calculates the new estimate ($\pmb{E}$).}
+        \end{itemize}
+        }
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Conditions}
+    \setbeamertemplate{itemize items}[circle]
+    \begin{itemize}
+        \item{Uses the conditions which introduced by Keren et al. (2006).}
         \vspace{0.4cm}
         \item{The protocol totally monitors the \textbf{variance} of the distributed parameter vectors,
         \[\frac{1}{n}\sum_{i=1}^n||\pmb{X}_i(t)-\pmb{W}(t)||_2^2 \leq \frac{1}{n}\sum_{i=1}^n||\pmb{X}_i(t)-\pmb{E}||_2^2 - T \leq 0.\]}

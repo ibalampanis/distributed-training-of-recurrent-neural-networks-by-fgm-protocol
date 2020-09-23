@@ -30,7 +30,7 @@
 \begin{frame}{Machine Learning Problems (1)}
     \setbeamertemplate{itemize items}[circle]
     \begin{itemize}
-        \item{We compare the two protocols in \textbf{two} distinct ML problems using the \textbf{same safe function} (\textbf{spherical cap}).}
+        \item{We compare the two protocols in \textbf{two} distinct ML problems using the \textbf{same safe function} (spherical cap).}
         \vspace{0.3cm}
         \item{\textbf{Problem 1} - Classification
         \vspace{0.1cm}
@@ -70,6 +70,67 @@
         \end{itemize}
         }
     \end{itemize}
+\end{frame}
+
+\begin{frame}{Results (1) - Changing the threshold ($\pmb{T}$)}
+%    \begin{itemize}
+%        \item[]{A comment.}
+%    \end{itemize}
+%    \vspace{-0.4cm}
+    \begin{figure}
+        \subfigure{\includegraphics[width=3.9cm,height=3.5cm]{./images/results/sfc-plots/exp_Fig_1_1.png}}
+        \subfigure{\includegraphics[width=3.9cm,height=3.5cm]{./images/results/sfc-plots/exp_Fig_1_2.png}}
+        \subfigure{\includegraphics[width=3.9cm,height=3.5cm]{./images/results/sfc-plots/exp_Fig_1_3.png}}
+        \subfigure{\includegraphics[width=3.9cm,height=3.5cm]{./images/results/amazon-plots/exp_Fig_1_1.png}}
+        \subfigure{\includegraphics[width=3.9cm,height=3.5cm]{./images/results/amazon-plots/exp_Fig_1_2.png}}
+        \subfigure{\includegraphics[width=3.9cm,height=3.5cm]{./images/results/amazon-plots/exp_Fig_1_3.png}}
+        \label{fig:sfc-amazon-thres}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Results (2) - Changing the mini-batch size ($\pmb{|\beta|}$)}
+%    \begin{itemize}
+%        \item[]{A comment.}
+%    \end{itemize}
+%    \vspace{-0.4cm}
+    \begin{figure}
+        \subfigure{\includegraphics[width=3.9cm,height=3.5cm]{./images/results/sfc-plots/exp_Fig_2_1.png}}
+        \subfigure{\includegraphics[width=3.9cm,height=3.5cm]{./images/results/sfc-plots/exp_Fig_2_2.png}}
+        \subfigure{\includegraphics[width=3.9cm,height=3.5cm]{./images/results/sfc-plots/exp_Fig_2_3.png}}
+        \subfigure{\includegraphics[width=3.9cm,height=3.5cm]{./images/results/amazon-plots/exp_Fig_2_1.png}}
+        \subfigure{\includegraphics[width=3.9cm,height=3.5cm]{./images/results/amazon-plots/exp_Fig_2_2.png}}
+        \subfigure{\includegraphics[width=3.9cm,height=3.5cm]{./images/results/amazon-plots/exp_Fig_2_3.png}}
+        \label{fig:sfc-amazon-bs}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Results (3) - Changing the number of workers ($\pmb{n}$)}
+%    \begin{itemize}
+%        \item[]{A comment.}
+%    \end{itemize}
+%    \vspace{-0.4cm}
+    \begin{figure}
+        \subfigure{\includegraphics[width=3.9cm,height=3.5cm]{./images/results/sfc-plots/exp_Fig_3_1.png}}
+        \subfigure{\includegraphics[width=3.9cm,height=3.5cm]{./images/results/sfc-plots/exp_Fig_3_2.png}}
+        \subfigure{\includegraphics[width=3.9cm,height=3.5cm]{./images/results/sfc-plots/exp_Fig_3_3.png}}
+        \subfigure{\includegraphics[width=3.9cm,height=3.5cm]{./images/results/amazon-plots/exp_Fig_3_1.png}}
+        \subfigure{\includegraphics[width=3.9cm,height=3.5cm]{./images/results/amazon-plots/exp_Fig_3_2.png}}
+        \subfigure{\includegraphics[width=3.9cm,height=3.5cm]{./images/results/amazon-plots/exp_Fig_3_3.png}}
+        \label{fig:sfc-amazon-workers}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Results (4) - Focusing on a specific case}
+%    \begin{itemize}
+%        \item{A comment.}
+%    \end{itemize}
+%    \vspace{-0.35cm}
+    \begin{figure}
+        \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sfc-plots/exp_Fig_3_1_b.png}}
+        \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sfc-plots/exp_Fig_3_2_b.png}}
+        \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sfc-plots/exp_Fig_3_3_b.png}}
+        \label{fig:sfc_thres_workers}
+    \end{figure}
 \end{frame}
 
 \subsection{Safe Functions Comparison}\label{subsec:safe-functions-comparison}

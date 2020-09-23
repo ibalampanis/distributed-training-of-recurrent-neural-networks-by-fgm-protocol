@@ -283,10 +283,10 @@ y_fgm_2 = _sorted_fgm_2['accuracy']
 y_gm_2 = _sorted_gm_2['accuracy']
 y_centr = [99.59, 99.59, 99.59, 99.59, 99.59, 99.59]
 plt.figure(figsize=(16, 12))
-plt.plot(x, y_fgm, label="FGM, E=0.5", marker='D', linewidth=4)
-plt.plot(x, y_gm, label="GM, E=0.5", marker='D', linewidth=4)
-plt.plot(x, y_fgm_2, label="FGM, E=0.1", marker='D', linewidth=4)
-plt.plot(x, y_gm_2, label="GM, E=0.1", marker='D', linewidth=4)
+plt.plot(x, y_fgm, label="FGM, T=0.5", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="GM, T=0.5", marker='D', linewidth=4)
+plt.plot(x, y_fgm_2, label="FGM, T=0.1", marker='D', linewidth=4)
+plt.plot(x, y_gm_2, label="GM, T=0.1", marker='D', linewidth=4)
 plt.plot(x, y_centr, label="Centralized", linewidth=4)
 plt.xlabel('Workers', fontsize=FONT_SIZE)
 plt.ylabel('Accuracy', fontsize=FONT_SIZE)
@@ -303,10 +303,10 @@ y_gm = _sorted_gm['rounds']
 y_fgm_2 = _sorted_fgm_2['rounds']
 y_gm_2 = _sorted_gm_2['rounds']
 plt.figure(figsize=(16, 12))
-plt.plot(x, y_fgm, label="FGM, E=0.5", marker='D', linewidth=4)
-plt.plot(x, y_gm, label="GM, E=0.5", marker='D', linewidth=4)
-plt.plot(x, y_fgm_2, label="FGM, E=0.1", marker='D', linewidth=4)
-plt.plot(x, y_gm_2, label="GM, E=0.1", marker='D', linewidth=4)
+plt.plot(x, y_fgm, label="FGM, T=0.5", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="GM, T=0.5", marker='D', linewidth=4)
+plt.plot(x, y_fgm_2, label="FGM, T=0.1", marker='D', linewidth=4)
+plt.plot(x, y_gm_2, label="GM, T=0.1", marker='D', linewidth=4)
 plt.xlabel('Workers', fontsize=FONT_SIZE)
 plt.ylabel('Rounds', fontsize=FONT_SIZE)
 plt.legend(loc='best', fontsize=FONT_SIZE)
@@ -322,10 +322,10 @@ y_gm = _sorted_gm['traffic']
 y_fgm_2 = _sorted_fgm_2['traffic']
 y_gm_2 = _sorted_gm_2['traffic']
 plt.figure(figsize=(16, 12))
-plt.plot(x, y_fgm, label="FGM, E=0.5", marker='D', linewidth=4)
-plt.plot(x, y_gm, label="GM, E=0.5", marker='D', linewidth=4)
-plt.plot(x, y_fgm_2, label="FGM, E=0.1", marker='D', linewidth=4)
-plt.plot(x, y_gm_2, label="GM, E=0.1", marker='D', linewidth=4)
+plt.plot(x, y_fgm, label="FGM, T=0.5", marker='D', linewidth=4)
+plt.plot(x, y_gm, label="GM, T=0.5", marker='D', linewidth=4)
+plt.plot(x, y_fgm_2, label="FGM, T=0.1", marker='D', linewidth=4)
+plt.plot(x, y_gm_2, label="GM, T=0.1", marker='D', linewidth=4)
 plt.xlabel('Workers', fontsize=FONT_SIZE)
 plt.ylabel('Traffic', fontsize=FONT_SIZE)
 plt.legend(loc='best', fontsize=FONT_SIZE)

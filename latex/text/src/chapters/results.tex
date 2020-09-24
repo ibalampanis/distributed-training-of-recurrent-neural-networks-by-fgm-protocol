@@ -178,6 +178,7 @@ It arises not only from the nature of the problem but also the structure of the 
 The model for the AFFR dataset has two additional LSTM layers.
 For this reason, the traffic is much more in NLP model training (Fig.~\ref{fig:sfcc-affr_1} E,F).
 It is also notable that both curves about the number of rounds and traffic follow the same direction.
+In this case, the \textbf{batch size} equals to $16$ and the number of \textbf{workers} is $8$.
 
 \begin{figure}[H]
     \centering
@@ -221,7 +222,8 @@ It is also notable that both curves about the number of rounds and traffic follo
 \newpage
 
 Before a worker calculates its new drift vector, it fits to the local model a batch of samples.
-In this subgroup, the variable that changes is the batch size.
+In this subgroup, the variable that changes is the \textbf{batch size}.
+So, the \textbf{threshold} equals to $0.5$ and the number of \textbf{workers} is $8$.
 It is very interesting that the accuracy in SFCC is precisely the same (Fig.~\ref{fig:sfcc-affr_2_1} A).
 In AFFR (Fig.~\ref{fig:sfcc-affr_2_1} B), the FGM is better than GM, but the difference is just $0.5\%$ which is a negligible amount.
 
@@ -275,6 +277,8 @@ In AFFR, the percentage change is $100\%$.
     \label{fig:sfcc-affr_2_2_2_3}
 \end{figure}
 
+In this subgroup, the variable that changes is the number of \textbf{workers}.
+Hence, the \textbf{threshold} equals to $0.5$ and the \textbf{batch size} is $16$.
 In SFCC and especially in the case of $8$ workers, we see probably an outlier (Fig.~\ref{fig:sfcc-affr_3_1} A,B).
 After that, the accuracy decreases over the increase of scalability, but not too much to make a problem.
 In AFFR, there is no outlier and the accuracy follows the expected direction.

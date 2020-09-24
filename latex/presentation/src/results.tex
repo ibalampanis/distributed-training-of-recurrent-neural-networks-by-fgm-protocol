@@ -73,10 +73,11 @@
 \end{frame}
 
 \begin{frame}{Results (1) - Changing the threshold ($\pmb{T}$)}
-%    \begin{itemize}
-%        \item[]{A comment.}
-%    \end{itemize}
-%    \vspace{-0.4cm}
+    \begin{itemize}
+        \centering
+        \item[]{\lbrack mini-batch=$16$, workers=$8$\rbrack}
+    \end{itemize}
+    \vspace{-0.3cm}
     \begin{figure}
         \subfigure{\includegraphics[width=3.9cm,height=3.5cm]{./images/results/sfc-plots/exp_Fig_1_1.png}}
         \subfigure{\includegraphics[width=3.9cm,height=3.5cm]{./images/results/sfc-plots/exp_Fig_1_2.png}}
@@ -89,10 +90,11 @@
 \end{frame}
 
 \begin{frame}{Results (2) - Changing the mini-batch size ($\pmb{|\beta|}$)}
-%    \begin{itemize}
-%        \item[]{A comment.}
-%    \end{itemize}
-%    \vspace{-0.4cm}
+    \begin{itemize}
+        \centering
+        \item[]{\lbrack threshold=$0.5$, workers=$8$\rbrack}
+    \end{itemize}
+    \vspace{-0.3cm}
     \begin{figure}
         \subfigure{\includegraphics[width=3.9cm,height=3.5cm]{./images/results/sfc-plots/exp_Fig_2_1.png}}
         \subfigure{\includegraphics[width=3.9cm,height=3.5cm]{./images/results/sfc-plots/exp_Fig_2_2.png}}
@@ -105,10 +107,11 @@
 \end{frame}
 
 \begin{frame}{Results (3) - Changing the number of workers ($\pmb{n}$)}
-%    \begin{itemize}
-%        \item[]{A comment.}
-%    \end{itemize}
-%    \vspace{-0.4cm}
+    \begin{itemize}
+        \centering
+        \item[]{\lbrack threshold=$0.5$, mini-batch=$16$\rbrack}
+    \end{itemize}
+    \vspace{-0.3cm}
     \begin{figure}
         \subfigure{\includegraphics[width=3.9cm,height=3.5cm]{./images/results/sfc-plots/exp_Fig_3_1.png}}
         \subfigure{\includegraphics[width=3.9cm,height=3.5cm]{./images/results/sfc-plots/exp_Fig_3_2.png}}
@@ -121,10 +124,11 @@
 \end{frame}
 
 \begin{frame}{Results (4) - Focusing on a specific case}
-%    \begin{itemize}
-%        \item{A comment.}
-%    \end{itemize}
-%    \vspace{-0.35cm}
+    \begin{itemize}
+        \centering
+        \item[]{\lbrack threshold=$\{0.1, 0.5\}$, mini-batch=$16$\rbrack}
+    \end{itemize}
+    \vspace{-0.3cm}
     \begin{figure}
         \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sfc-plots/exp_Fig_3_1_b.png}}
         \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sfc-plots/exp_Fig_3_2_b.png}}
@@ -152,43 +156,43 @@
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Results (1) - Accuracy}
-    \setbeamertemplate{itemize items}[circle]
+\begin{frame}{Results (1) - Changing the threshold ($\pmb{T}$)}
     \begin{itemize}
-        \item{\textbf{SF1} achieves a little bit \textbf{better} accuracy.}
+        \centering
+        \item[]{\lbrack mini-batch=$16$, workers=$8$\rbrack}
     \end{itemize}
-    \vspace{-0.35cm}
+    \vspace{-0.3cm}
     \begin{figure}
         \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sf-comp/exp_Fig_1_1.png}}
-        \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sf-comp/exp_Fig_2_1.png}}
-        \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sf-comp/exp_Fig_3_1.png}}
+        \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sf-comp/exp_Fig_1_2.png}}
+        \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sf-comp/exp_Fig_1_3.png}}
         \label{fig:sf_acc}
     \end{figure}
 \end{frame}
 
-\begin{frame}{Results (2) - Number of rounds}
-%    \setbeamertemplate{itemize items}[circle]
-%    \begin{itemize}
-%        \item{A comment}
-%    \end{itemize}
-%    \vspace{-0.35cm}
+\begin{frame}{Results (2) - Changing the mini-batch size ($\pmb{|\beta|}$)}
+    \begin{itemize}
+        \centering
+        \item[]{\lbrack threshold=$0.5$, workers=$8$\rbrack}
+    \end{itemize}
+    \vspace{-0.3cm}
     \begin{figure}
-        \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sf-comp/exp_Fig_1_2.png}}
+        \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sf-comp/exp_Fig_2_1.png}}
         \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sf-comp/exp_Fig_2_2.png}}
-        \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sf-comp/exp_Fig_3_2.png}}
+        \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sf-comp/exp_Fig_2_3.png}}
         \label{fig:sf_rnds}
     \end{figure}
 \end{frame}
 
-\begin{frame}{Results (3) - Scalabilty Analysis}
-    \setbeamertemplate{itemize items}[circle]
+\begin{frame}{Results (3) - Changing the number of workers ($\pmb{n}$)}
     \begin{itemize}
-        \item{\textbf{SF2} is more \textbf{efficient} by up to 56\%.}
+        \centering
+        \item[]{\lbrack threshold=$0.5$, mini-batch=$16$\rbrack}
     \end{itemize}
-    \vspace{-0.35cm}
+    \vspace{-0.3cm}
     \begin{figure}
-        \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sf-comp/exp_Fig_1_3.png}}
-        \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sf-comp/exp_Fig_2_3.png}}
+        \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sf-comp/exp_Fig_3_1.png}}
+        \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sf-comp/exp_Fig_3_2.png}}
         \subfigure{\includegraphics[width=5.2cm,height=3.7cm]{./images/results/sf-comp/exp_Fig_3_3.png}}
         \label{fig:sf_trff}
     \end{figure}

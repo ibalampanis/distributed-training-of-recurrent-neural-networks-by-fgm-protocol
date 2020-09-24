@@ -2,6 +2,19 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
+def ps_rounds_calc(d, n, beta):
+    return d / (n * beta)
+
+
+def ps_traffic_calc(d, beta, model_cost):
+    return 2 * (d / beta) * model_cost
+
+
+class_model_cost = 0.012 * pow(10, 6)
+class_dataset_size = 878049
+nlp_model_cost = 1.2 * pow(10, 6)
+nlp_dataset_size = 568454
+
 FONT_SIZE = 32
 plt.rc('font', size=(FONT_SIZE - 8))
 plt.rc('figure', max_open_warning=0)
@@ -52,11 +65,14 @@ plt.yticks(fontsize=FONT_SIZE)
 plt.savefig('../results/sfc-plots/exp_Fig_1_1')
 
 # Rounds
+r_ps = ps_rounds_calc(class_dataset_size, 8, 16)
+y_ps = [r_ps, r_ps, r_ps, r_ps, r_ps, r_ps, r_ps]
 y_fgm = _sorted_fgm['rounds']
 y_gm = _sorted_gm['rounds']
 plt.figure(figsize=(16, 12))
 plt.plot(x, y_fgm, label="FGM", marker='D', linewidth=4)
 plt.plot(x, y_gm, label="GM", marker='D', linewidth=4)
+plt.plot(x, y_ps, label="PS", linewidth=4)
 plt.xlabel('Threshold', fontsize=FONT_SIZE)
 plt.ylabel('Rounds', fontsize=FONT_SIZE)
 plt.legend(loc='best', fontsize=FONT_SIZE)
@@ -67,11 +83,14 @@ plt.yticks(fontsize=FONT_SIZE)
 plt.savefig('../results/sfc-plots/exp_Fig_1_2')
 
 # Traffic
+tr_ps = ps_traffic_calc(class_dataset_size, 16, class_model_cost)
+y_ps = [tr_ps, tr_ps, tr_ps, tr_ps, tr_ps, tr_ps, tr_ps]
 y_fgm = _sorted_fgm['traffic']
 y_gm = _sorted_gm['traffic']
 plt.figure(figsize=(16, 12))
 plt.plot(x, y_fgm, label="FGM", marker='D', linewidth=4)
 plt.plot(x, y_gm, label="GM", marker='D', linewidth=4)
+plt.plot(x, y_ps, label="PS", linewidth=4)
 plt.xlabel('Threshold', fontsize=FONT_SIZE)
 plt.ylabel('Traffic', fontsize=FONT_SIZE)
 plt.legend(loc='best', fontsize=FONT_SIZE)
@@ -111,11 +130,15 @@ plt.yticks(fontsize=FONT_SIZE)
 plt.savefig('../results/sfc-plots/exp_Fig_2_1')
 
 # Rounds
+y_ps = [ps_rounds_calc(class_dataset_size, 8, 1), ps_rounds_calc(class_dataset_size, 8, 4),
+        ps_rounds_calc(class_dataset_size, 8, 16), ps_rounds_calc(class_dataset_size, 8, 32),
+        ps_rounds_calc(class_dataset_size, 8, 64), ps_rounds_calc(class_dataset_size, 8, 128)]
 y_fgm = _sorted_fgm['rounds']
 y_gm = _sorted_gm['rounds']
 plt.figure(figsize=(16, 12))
 plt.plot(x, y_fgm, label="FGM", marker='D', linewidth=4)
 plt.plot(x, y_gm, label="GM", marker='D', linewidth=4)
+plt.plot(x, y_ps, label="PS", linewidth=4)
 plt.xlabel('Batch Size', fontsize=FONT_SIZE)
 plt.ylabel('Rounds', fontsize=FONT_SIZE)
 plt.legend(loc='best', fontsize=FONT_SIZE)
@@ -126,11 +149,18 @@ plt.yticks(fontsize=FONT_SIZE)
 plt.savefig('../results/sfc-plots/exp_Fig_2_2')
 
 # Traffic
+y_ps = [ps_traffic_calc(class_dataset_size, 1, class_model_cost),
+        ps_traffic_calc(class_dataset_size, 4, class_model_cost),
+        ps_traffic_calc(class_dataset_size, 16, class_model_cost),
+        ps_traffic_calc(class_dataset_size, 32, class_model_cost),
+        ps_traffic_calc(class_dataset_size, 64, class_model_cost),
+        ps_traffic_calc(class_dataset_size, 128, class_model_cost)]
 y_fgm = _sorted_fgm['traffic']
 y_gm = _sorted_gm['traffic']
 plt.figure(figsize=(16, 12))
 plt.plot(x, y_fgm, label="FGM", marker='D', linewidth=4)
 plt.plot(x, y_gm, label="GM", marker='D', linewidth=4)
+plt.plot(x, y_ps, label="PS", linewidth=4)
 plt.xlabel('Batch Size', fontsize=FONT_SIZE)
 plt.ylabel('Traffic', fontsize=FONT_SIZE)
 plt.legend(loc='best', fontsize=FONT_SIZE)
@@ -170,11 +200,15 @@ plt.yticks(fontsize=FONT_SIZE)
 plt.savefig('../results/sfc-plots/exp_Fig_3_1')
 
 # Rounds
+y_ps = [ps_rounds_calc(class_dataset_size, 4, 16), ps_rounds_calc(class_dataset_size, 8, 16),
+        ps_rounds_calc(class_dataset_size, 16, 16), ps_rounds_calc(class_dataset_size, 32, 16),
+        ps_rounds_calc(class_dataset_size, 64, 16), ps_rounds_calc(class_dataset_size, 128, 16)]
 y_fgm = _sorted_fgm['rounds']
 y_gm = _sorted_gm['rounds']
 plt.figure(figsize=(16, 12))
 plt.plot(x, y_fgm, label="FGM", marker='D', linewidth=4)
 plt.plot(x, y_gm, label="GM", marker='D', linewidth=4)
+plt.plot(x, y_ps, label="PS", linewidth=4)
 plt.xlabel('Workers', fontsize=FONT_SIZE)
 plt.ylabel('Rounds', fontsize=FONT_SIZE)
 plt.legend(loc='best', fontsize=FONT_SIZE)
@@ -185,11 +219,18 @@ plt.yticks(fontsize=FONT_SIZE)
 plt.savefig('../results/sfc-plots/exp_Fig_3_2')
 
 # Traffic
+y_ps = [ps_traffic_calc(class_dataset_size, 16, class_model_cost),
+        ps_traffic_calc(class_dataset_size, 16, class_model_cost),
+        ps_traffic_calc(class_dataset_size, 16, class_model_cost),
+        ps_traffic_calc(class_dataset_size, 16, class_model_cost),
+        ps_traffic_calc(class_dataset_size, 16, class_model_cost),
+        ps_traffic_calc(class_dataset_size, 16, class_model_cost)]
 y_fgm = _sorted_fgm['traffic']
 y_gm = _sorted_gm['traffic']
 plt.figure(figsize=(16, 12))
 plt.plot(x, y_fgm, label="FGM", marker='D', linewidth=4)
 plt.plot(x, y_gm, label="GM", marker='D', linewidth=4)
+plt.plot(x, y_ps, label="PS", linewidth=4)
 plt.xlabel('Workers', fontsize=FONT_SIZE)
 plt.ylabel('Traffic', fontsize=FONT_SIZE)
 plt.legend(loc='best', fontsize=FONT_SIZE)
@@ -380,11 +421,14 @@ plt.yticks(fontsize=FONT_SIZE)
 plt.savefig('../results/amazon-plots/exp_Fig_1_1')
 
 # Rounds
+r_ps = ps_rounds_calc(nlp_dataset_size, 8, 16)
+y_ps = [r_ps, r_ps, r_ps, r_ps, r_ps, r_ps, r_ps]
 y_fgm = _sorted_fgm['rounds']
 y_gm = _sorted_gm['rounds']
 plt.figure(figsize=(16, 12))
 plt.plot(x, y_fgm, label="FGM", marker='D', linewidth=4)
 plt.plot(x, y_gm, label="GM", marker='D', linewidth=4)
+plt.plot(x, y_ps, label="PS", linewidth=4)
 plt.xlabel('Threshold', fontsize=FONT_SIZE)
 plt.ylabel('Rounds', fontsize=FONT_SIZE)
 plt.legend(loc='best', fontsize=FONT_SIZE)
@@ -395,11 +439,14 @@ plt.yticks(fontsize=FONT_SIZE)
 plt.savefig('../results/amazon-plots/exp_Fig_1_2')
 
 # Traffic
+tr_ps = ps_traffic_calc(nlp_dataset_size, 16, nlp_model_cost)
+y_ps = [tr_ps, tr_ps, tr_ps, tr_ps, tr_ps, tr_ps, tr_ps]
 y_fgm = _sorted_fgm['traffic']
 y_gm = _sorted_gm['traffic']
 plt.figure(figsize=(16, 12))
 plt.plot(x, y_fgm, label="FGM", marker='D', linewidth=4)
 plt.plot(x, y_gm, label="GM", marker='D', linewidth=4)
+plt.plot(x, y_ps, label="PS", linewidth=4)
 plt.xlabel('Threshold', fontsize=FONT_SIZE)
 plt.ylabel('Traffic', fontsize=FONT_SIZE)
 plt.legend(loc='best', fontsize=FONT_SIZE)
@@ -439,11 +486,15 @@ plt.yticks(fontsize=FONT_SIZE)
 plt.savefig('../results/amazon-plots/exp_Fig_2_1')
 
 # Rounds
+y_ps = [ps_rounds_calc(nlp_dataset_size, 8, 1), ps_rounds_calc(nlp_dataset_size, 8, 4),
+        ps_rounds_calc(nlp_dataset_size, 8, 16), ps_rounds_calc(nlp_dataset_size, 8, 32),
+        ps_rounds_calc(nlp_dataset_size, 8, 64), ps_rounds_calc(nlp_dataset_size, 8, 128)]
 y_fgm = _sorted_fgm['rounds']
 y_gm = _sorted_gm['rounds']
 plt.figure(figsize=(16, 12))
 plt.plot(x, y_fgm, label="FGM", marker='D', linewidth=4)
 plt.plot(x, y_gm, label="GM", marker='D', linewidth=4)
+plt.plot(x, y_ps, label="PS", linewidth=4)
 plt.xlabel('Batch Size', fontsize=FONT_SIZE)
 plt.ylabel('Rounds', fontsize=FONT_SIZE)
 plt.legend(loc='best', fontsize=FONT_SIZE)
@@ -454,11 +505,18 @@ plt.yticks(fontsize=FONT_SIZE)
 plt.savefig('../results/amazon-plots/exp_Fig_2_2')
 
 # Traffic
+y_ps = [ps_traffic_calc(nlp_dataset_size, 1, nlp_model_cost),
+        ps_traffic_calc(nlp_dataset_size, 4, nlp_model_cost),
+        ps_traffic_calc(nlp_dataset_size, 16, nlp_model_cost),
+        ps_traffic_calc(nlp_dataset_size, 32, nlp_model_cost),
+        ps_traffic_calc(nlp_dataset_size, 64, nlp_model_cost),
+        ps_traffic_calc(nlp_dataset_size, 128, nlp_model_cost)]
 y_fgm = _sorted_fgm['traffic']
 y_gm = _sorted_gm['traffic']
 plt.figure(figsize=(16, 12))
 plt.plot(x, y_fgm, label="FGM", marker='D', linewidth=4)
 plt.plot(x, y_gm, label="GM", marker='D', linewidth=4)
+plt.plot(x, y_ps, label="PS", linewidth=4)
 plt.xlabel('Batch Size', fontsize=FONT_SIZE)
 plt.ylabel('Traffic', fontsize=FONT_SIZE)
 plt.legend(loc='best', fontsize=FONT_SIZE)
@@ -498,11 +556,15 @@ plt.yticks(fontsize=FONT_SIZE)
 plt.savefig('../results/amazon-plots/exp_Fig_3_1')
 
 # Rounds
+y_ps = [ps_rounds_calc(nlp_dataset_size, 4, 16), ps_rounds_calc(nlp_dataset_size, 8, 16),
+        ps_rounds_calc(nlp_dataset_size, 16, 16), ps_rounds_calc(nlp_dataset_size, 32, 16),
+        ps_rounds_calc(nlp_dataset_size, 64, 16), ps_rounds_calc(nlp_dataset_size, 128, 16)]
 y_fgm = _sorted_fgm['rounds']
 y_gm = _sorted_gm['rounds']
 plt.figure(figsize=(16, 12))
 plt.plot(x, y_fgm, label="FGM", marker='D', linewidth=4)
 plt.plot(x, y_gm, label="GM", marker='D', linewidth=4)
+plt.plot(x, y_ps, label="PS", linewidth=4)
 plt.xlabel('Workers', fontsize=FONT_SIZE)
 plt.ylabel('Rounds', fontsize=FONT_SIZE)
 plt.legend(loc='best', fontsize=FONT_SIZE)
@@ -513,11 +575,18 @@ plt.yticks(fontsize=FONT_SIZE)
 plt.savefig('../results/amazon-plots/exp_Fig_3_2')
 
 # Traffic
+y_ps = [ps_traffic_calc(nlp_dataset_size, 16, nlp_model_cost),
+        ps_traffic_calc(nlp_dataset_size, 16, nlp_model_cost),
+        ps_traffic_calc(nlp_dataset_size, 16, nlp_model_cost),
+        ps_traffic_calc(nlp_dataset_size, 16, nlp_model_cost),
+        ps_traffic_calc(nlp_dataset_size, 16, nlp_model_cost),
+        ps_traffic_calc(nlp_dataset_size, 16, nlp_model_cost)]
 y_fgm = _sorted_fgm['traffic']
 y_gm = _sorted_gm['traffic']
 plt.figure(figsize=(16, 12))
 plt.plot(x, y_fgm, label="FGM", marker='D', linewidth=4)
 plt.plot(x, y_gm, label="GM", marker='D', linewidth=4)
+plt.plot(x, y_ps, label="PS", linewidth=4)
 plt.xlabel('Workers', fontsize=FONT_SIZE)
 plt.ylabel('Traffic', fontsize=FONT_SIZE)
 plt.legend(loc='best', fontsize=FONT_SIZE)

@@ -22,66 +22,47 @@ The three major learning paradigms are supervised learning, unsupervised learnin
 They each correspond to a particular learning task.
 Below, I will try to introduce them.
 
-\newpage
-
 {\large \textbf{Supervised Learning}}
 
-Supervised learning algorithms construct a mathematical model of a set of data that holds both the
-inputs and the desired outputs.
-The data is known as training data and comprises a set of training examples.
-Each training example has one or more inputs and the desired output, also known as a label.
-In the mathematical model, each training sample is expressed by a vector, the feature vector,
-and the training data is expressed by a matrix.
-Through iterative optimization of an objective function, supervised learning algorithms construct a function that
-can be used to predict the output correlated with new inputs.
-An optimal function will let the algorithm to correctly determine the output for inputs that were
-not a part of the training data.
-An algorithm that increases the accuracy of its predictions is recognized as successful.
+Supervised learning algorithms construct a model of data that have both the
+inputs and the correct outputs.
+The training data and comprises a set of examples.
+Each training example has at least one input and the correct output.
+Supervised learning algorithms construct an optimized function that predicts the output correlated with new inputs.
+The percentage of the prediction accuracy determines how successful the model is.
 
-Types of supervised learning algorithms cover classification and regression.
-Classification algorithms are used when the outputs are limited to a set of values, and regression algorithms are
-utilized when the outputs may have any numerical value within a range.
-As an instance, for a classification algorithm that separates tumors, the input would be an image of a
-medical instrument, and the output would be the type of the tumor,
-namely benign or malignant.
+The types of ML problems that fits in this type of learning are the regression and the classification.
+Classification algorithms are used when the outputs are  a set of values, and in regression are a range of arithmetical values.
+For example, a classification algorithm that separates tumors, would have an image of a
+medical instrument as input, and the type of the tumor as output, namely benign or malignant.
 
 {\large \textbf{Unsupervised Learning}}
 
-In contrast to supervised learning, unsupervised learning algorithms need a collection of data that carries only inputs
-and aims to discover any structure in the data,
-like grouping or clustering of data points.
-Consequently, these algorithms learn from data that have not been labeled, classified, or categorized.
-Rather than acknowledging feedback, unsupervised learning algorithms recognize similarities in the data and respond
-based on the presence or absence of such
-similarities in each fresh bunch of data.
-A principal application of unsupervised learning is in the field of density estimation in Statistics, for instance,
-obtaining the probability density function.
-Though unsupervised learning encircles other domains involving summarizing and explaining data features.
+In contrast to supervised learning, unsupervised learning algorithms need a collection of data that carries only inputs and aims to discover any pattern in the data, such as groups or clusters of data points.
+Consequently, these algorithms use data that have not been labeled to learn from.
+Rather than evaluating, unsupervised learning algorithms recognize data patterns and respond
+based on the presence or absence of such similarities in each fresh bunch of data.
+Unsupervised learning algorithms are mainly applied in Statistics for density estimation.
+Yet unsupervised learning encircles more domains such as data feature summary and explain.
 
-Cluster analysis is the assignment of a set of observations into subsets which are named clusters.
-Thus, observations within the same cluster are similar according to one or more predesignated criteria,
+In cluster analysis a set of observations is divided into batches subgroups named clusters.
+Thus, according to one or more predefined criteria, observations within the same cluster are similar,
 while observations extracted from other clusters are divergent.
-Different clustering methods make various assumptions on the structure of the data that usually
-characterized by some similarity metric.
-These methods are evaluated by the similarity between members of the corresponding cluster.
+Various clustering methods generate various assumptions on the structure of the data.
+The similarity between members of the corresponding cluster define the success of the method.
 Other methods are based on calculated density and graph connectivity.
-
-\newpage
 
 {\large \textbf{Reinforcement learning}}
 
 Reinforcement learning (RL) is a field of machine learning concerned with how software agents should perform
 actions in an environment to maximize some concept of aggregate reward.
-Reinforcement learning differs from supervised learning in not needing labeled input/output pairs to be defined,
+RL differs from supervised learning in not needing labeled input/output pairs to be defined,
 and in not needing sub-optimal actions to be explicitly corrected.
 Instead, the focus is on balancing between exploration (of an unknown area) and exploitation (of current knowledge).
-Due to its abstraction, the field is analyzed in many other disciplines, such as game theory, control theory,
-information theory, simulation-based optimization,
-multi-agent systems, statistics, and genetic algorithms.
-In machine learning, the environment is typically modeled as a Markov Decision Process (MDP).
-Many reinforcement learning algorithms use dynamic programming techniques.
-Reinforcement learning algorithms do not assume the information of a specific mathematical model of the
-MDP and are used when exact models are infeasible.
+As a result of its abstraction, reinforcement learning is used in many AI fields.
+In ML, the environment is modeled as a Markov Decision Process (MDP).
+Dynamic programming techniques are used in many RL algorithms.
+RL algorithms do not presume the information of a specific algebraic model of the MDP and are used when exact models are infeasible.
 RL is a good stuff for Robotics, Bidding and Advertising and building bots for games.
 
 \subsection{Deep Learning}\label{subsec:deep-learning}
@@ -93,13 +74,13 @@ The number of layers that contribute to a model of the data is called the depth 
 Modern deep learning often involves tens or even hundreds of successive layers of representations and they
 have all learned automatically from exposure to training data.
 Meanwhile, other approaches to machine learning tend to concentrate on learning only one or two layers of
-representations of the data and is named shallow learning.
+representations of the data.
 
-In deep learning, these layered representations are always learned via models called neural networks.
+In DL, the representations of these layered are trained on models called neural networks.
 The fundamental part of these networks is the neurons (see figure 2.1).
-These are structured in layers stacked on top of each other.
-The phrase neural network is a reference to neurobiology, but although some basic thoughts in deep learning were
-developed influenced by the biological brain, deep learning models are not models of the brain.
+These are stacked in layers.
+The phrase neural network is a reference to neurobiology, but even though basic thoughts in deep learning were
+developed influenced by the brain's neural system, DL models differ.
 For our purposes, deep learning is a mathematical framework for learning representations from data.
 
 \begin{figure}[H]
@@ -112,16 +93,16 @@ For our purposes, deep learning is a mathematical framework for learning represe
 The simplest architecture of an Artificial Neural Network (ANN) is shown in Figure 2.2.
 This architecture is known as Feed forward Neural Network (FFNN) and is the most basic and widely used artificial neural network.
 Consider dealing with an image classification problem.
-At the input of the network, we have the unique feature values of the input sample.
-For this example, this is the pixels of an image.
-It propagates the values forward through the hidden layers via the connections which are weighted until it reaches the last layer.
+The input of the network, consists of the distinct dataset sample.
+For this instance, this is an image pixels.
+It propagates the values over the hidden layers via the edges which are weighted until the last layer is reached.
 This is the output layer.
 The output represents the odds of the sample to belong to each one of the different classes, for example,
 the probabilities that the input image represents a benign tumor or a malignant one.
-At every node, a non-linear function can be triggered.
-Although this type of neural network has been successfully tested in many tasks, it does not take into account the
-temporal condition that it describes sequential data.
-Each sample has the fate to be independent of previous data samples.
+At every neuron, a non-linear function can be triggered.
+Although this type of neural network has been successfully tested in many tasks, the
+temporal condition that it describes sequential data is not taken into account.
+Each sample has the fate to be distinct.
 
 \begin{figure}[H]
     \centering
@@ -281,39 +262,32 @@ hidden nodes and closing at the output nodes.
     \label{fig:rnn}
 \end{figure}
 
-Since a convolutional network is a neural network that is functional for processing a grid of values $X$ such as an image,
-a recurrent neural network is a neural network that is specialized for processing a sequence of
+Since a CNN is functional for dealing with a grid of values $X$ such as a photo,
+a RNN is a network that is specially designed for dealing with a sequence of
 values $x^{(1)} , \ldots , x^{(\tau)}$.
-Just as convolutional networks can efficiently scale to images with large width and height,
-and some convolutional networks can process images of variable size, recurrent networks can scale to much longer sequences
-than would be practical for networks without sequence-based specialization.
-Most recurrent networks can also process sequences of variable length.
 
-To jump from a multi-layer network to a recurrent network, we need to consider the idea of sharing parameters across different parts of a model.
-Parameter sharing makes it feasible to extend and apply the model to examples of different lengths and generalize across them.
-If we had separate parameters for each value of the time index, we could not generalize to sequence lengths not seen during training.
-Such sharing is especially important when a specific piece of information can happen at multiple positions within the sequence.
-For example, consider the two sentences “I visited Italy in 2019” and “In 2019, I visited Italy.”
-If we request an ML model to read each sentence and obtain the year in which the reciter visited Italy, we would like it to see
+To jump from a FFNN to a RNN, we need to consider the idea of splitting parameters through other parts of a model.
+Such splitting is especially significant when an exact chunk of information can happen at various positions within the sequence.
+For instance, look at  the two sentences “I visited Italy in 2019” and “In 2019, I visited Italy.”
+If we request a ML model to read each words and obtain the year in which the reciter visited Italy, we would like it to see
 the year 2019 as the important piece of information, either it appears in the sixth word or the second word of the sentence.
 Assume that we have trained an FFNN that processes sentences of fixed length.
 A conventional fully connected FFNN would have separate parameters for each input feature, so it would need to learn
 all of the rules of the language separately at each position in the sentence.
-By comparison, an RNN shares the same weights across several time steps.
+By comparison, an RNN shares the same parameters across a lot of time steps.
 
 
 {\large \textbf{Basic Structure}}
 
-Now, I introduce the forward propagation equations for the RNN represented in Figure~\ref{fig:rnn_unfolded}.
+Now, I will introduce the forward pass equations of an RNN represented in Figure~\ref{fig:rnn_unfolded}.
 The figure does not define either the type of activation function for the hidden units or the loss function.
 Suppose we have the hyperbolic tangent (tanh) activation function and the MSE as the loss function.
-Additionally, we suppose that the output is discrete as if the RNN is used to predict words or characters.
+Additionally, we suppose that the output is distinct as if the RNN is used to forecast characters or words.
 
-A straightforward way to describe discrete variables is to rate the output $\textbf{o}$ as providing the unnormalized log
-probabilities of each possible value of the discrete variable.
-We can then apply the softmax operation as a post-processing step to get a vector $\hat{y}$ of normalized probabilities across the output.
-Forward propagation begins with a definition of the initial state $h^{(0)}$.
-Next, for each time step from $t=1$ to $t=\tau$, we use the latter update equations:
+A straightforward manner to describe discrete variables is to rate the output $\textbf{o}$ as providing the probabilities of each possible value.
+Now, it can be applied the softmax function to get a vector $\hat{y}$ across the output.
+Forward pass starts with a definition of the initial state $h^{(0)}$.
+Next, for each time step from $t=1$ to $t=\tau$, we use the latter equations for updating:
 
 \begin{equation}
     a^{(t)} = b + W \cdot h^{(t-1)} + U \cdot x^{(t)}\label{eq:equation6}
@@ -328,21 +302,18 @@ Next, for each time step from $t=1$ to $t=\tau$, we use the latter update equati
     \hat{y}^{(t)} = softmax(o^{(t)})\label{eq:equation8}
 \end{equation}
 
-where the parameters are the bias vectors $\textbf{b}$ and $\textbf{c}$ along with the weight matrices $\textbf{U}$,
+where $\textbf{b}$ and $\textbf{c}$ are the biases along with the weight matrices $\textbf{U}$,
 $\textbf{V}$, and $\textbf{W}$, for input-to-hidden, hidden-to-output, and hidden-to-hidden connections, respectively.
-This is an instance of a recurrent network that maps an input sequence to an output of the same length.
-The entire loss for a given sequence of $\textbf{x}$ values matched with a sequence of $\textbf{y}$ values would
-then be merely the sum of the losses over all the time steps.
+This is an example of a RNN that connects an input sequence to an output one.
+Both sequences have the same length.
+The entire loss for a given sequence matched with a sequence of output values would
+then be the summation of the losses over all the steps.
 
-Calculating the gradient of this loss function concerning the parameters is an expensive operation.
-The gradient computation requires making a forward propagation pass moving left to right through our illustration
-of the unfolded graph in figure 2.6, tailgated by a backward propagation pass the opposite direction this time.
-The runtime is $O(\tau)$ cannot be reduced by parallel execution because the forward propagation graph is essentially
+Calculating the loss function gradient concerning the weights has a lot of cost.
+The gradient calculation requires making a forward pass moving left to right, tailgated by a backward pass.
+The runtime is $O(\tau)$ cannot be cut by parallel execution because the forward pass graph is essentially
 sequential since each time step needs to be calculated after the previous one.
-States computed in the forward pass ought to be stored until they are reused during the backward pass.
-Hence, the memory cost is also $O(\tau)$.
-The backpropagation algorithm utilized to the unrolled graph with $O(\tau)$ cost is called backpropagation through time (BPTT).
-Consequently, a network with recurrence between hidden units is very powerful but is too expensive to train.
+The backpropagation algorithm utilized to the unfolded graph is called backpropagation through time (BPTT).
 
 \begin{figure}[H]
     \centering
@@ -352,27 +323,17 @@ Consequently, a network with recurrence between hidden units is very powerful bu
 \end{figure}
 
 In Figure~\ref{fig:rnn_unfolded}, at left we have the RNN and its loss have described with recurrent connections.
-At right, it is the same scene as a time-unfolded computational graph,
-where each node is now associated with one particular time instance.
-This is a computational graph that calculates the training loss of a recurrent network that maps an input sequence
-of $\textbf{x}$ values to a correlated sequence of output $\textbf{o}$ values.
-A loss L covers how far each $\textbf{o}$ is from the analogous training target $\textbf{y}$.
-When using softmax outputs, we suppose $\textbf{o}$ is the unnormalized log probabilities.
-The loss L within computes $\hat{y} = softmax(\textbf{o})$ and relates this to the target $\textbf{y}$.
-The RNN has input-to-hidden connections parametrized by a weight matrix $\textbf{U}$, hidden-to-hidden recurrent connections
-parametrized by a weight matrix $\textbf{W}$, and hidden-to-output connections parametrized by a weight matrix $\textbf{V}$.
-Algorithm~\ref{alg:nn_forward_pass} places forward propagation in this model.
+At right, it is the same scene as a time-unrolled graph,
+where each node is now correlated with a specific time step.
 
 
 {\large \textbf{Training and Evaluation}}
 
 Calculating the gradient through a recurrent neural network is straightforward.
 One simply applies the generalized backpropagation Algorithm~\ref{alg:nn_backward_pass} to the unfolded graph.
-There are no specialized algorithms necessary.
-Gradients taken by backpropagation may then be used with any general-purpose gradient-based techniques to train an RNN\@.
 
-To obtain some feeling for how the BPTT algorithm acts, we present an example of how to compute gradients by BPTT for the RNN equation 2.4 above.
-The nodes of our graph combine the parameters $U, V, W, b$, and $c$ as well as the sequence of nodes indexed by $t$ for $x^{(t)}, h^{(t)}, o^{(t)}$, and $L^{(t)}$.
+To obtain some feeling for how the BPTT acts, we present an example of how to compute gradients by BPTT for the RNN equation 2.4 above.
+The nodes of our graph combine the weights $U, V, W, b$, and $c$ as well as the sequence of nodes indexed by $t$ for $x^{(t)}, h^{(t)}, o^{(t)}$, and $L^{(t)}$.
 For each node $N$, we ought to calculate the gradient $\nabla_N L$ recursively, based on the gradient calculated at nodes that follow it in the graph.
 We begin the recursion with the nodes directly preceding the terminal loss
 
@@ -381,7 +342,7 @@ We begin the recursion with the nodes directly preceding the terminal loss
 \end{equation}
 
 In this derivation, we suppose that the outputs $o^{(t)}$ are managed as the argument to the softmax function to get the vector $\hat{y}$ of probabilities over the output.
-Besides, we suppose that the loss is the negative log-likelihood of the true target $y^{(t)}$ given the input so far.
+Besides, we suppose that the loss is the negative log-likelihood of the true target $y^{(t)}$.
 The gradient $\nabla_{o^{(t)}} L$ on the outputs at time step $t$, for all $i, t$, is as arises:
 
 \begin{equation}
@@ -408,17 +369,13 @@ Consequently, its gradient is provided by,
 \end{equation}
 
 where $diag(1-(h^{(t+1)})^2)$ registers to the diagonal matrix containing the elements.
-This is the Jacobian of the hyperbolic tangent correlated with the
-hidden unit $i$ at time $t+1$.
 
-Once the gradients on the inner nodes of the computational graph are
-collected, we can get the gradients on the parameter nodes.
-Because the parameters are shared across many time steps, we should take some concern when expressing calculus processes including these variables.
-The equations we hope to complete working with the backpropagation method of the previous section,
-which computes the contribution of a single edge in the computational graph to the gradient.
-Nevertheless, the $\nabla_W f$ operator applied in calculus takes into account the contribution of $W$ to the value of $f$ due to all edges in the graph.
-To fix this ambiguity, we import dummy variables $W^{(t)}$ that are set to be copies of $W$ but with each $W^{(t)}$ used hardly at time step $t$.
-We may then use $\nabla_{W^{(t)}}$ to indicate the contribution of the weights at a time step t to the gradient.
+Once the gradients on the inner nodes of the graph are collected, we can get the gradients on the parameter nodes.
+Due to the weights are shared through many steps, we should get some concern when expressing calculus processes including these variables.
+The types we hope to complete working with the backpropagation method of the previous subsection,
+which calculates the addition of a single edge in the graph to the gradient.
+Nevertheless, the $\nabla_W f$ operator applied in calculus considers the contribution of $W$ to the value of $f$ because of the all edges in the graph.
+To fix this doubt, we import fool variables $W^{(t)}$ that are set to be clones of $W$ but with each $W^{(t)}$ used hardly at time step $t$.
 Using these symbols, the gradient on the parameters that left is provided by:
 
 \begin{equation}
@@ -443,32 +400,19 @@ Using these symbols, the gradient on the parameters that left is provided by:
     \nabla_U L = \sum_t diag(1-(h^{(t)}))^2 (\nabla_{h^{(t)}} L) x^{(t-1)^\top}\label{eq:equation21}
 \end{equation}
 
-There is no need to compute the gradient with respect to $x^{(t)}$ for training because
-it does not have any parameters as ancestors in the computational graph defining
-the loss.
-
-\newpage
-
 {\large \textbf{Possible issues and Optimization}}
 
 These architectures regularly face long-term dependencies.
-The primary problem is that gradients propagated over many stages and conduce to either vanish or explode resulting in much damage to the optimization.
-Even if we suppose that the parameters make the recurrent network stable,
-the difficulty with long-term dependencies appears from the exponentially smaller weights given to long-term interactions associated with short-term ones.
+The primary problem is that gradients propagated over many stages and conduce to either vanish or explode resulting in much contamination to the optimization.
+Even if we suppose that the weights make a reliable network,
+the difficulty with long-term dependencies appears from the hugely smaller parameters given to long-term interactions associated with short-term ones.
 
-This problem is particular to RNN. Imagine multiplying a weight w by itself many times.
+This problem is particular to RNN. Figure multiplying a weight w by itself a lot of times.
 The product $w^t$ will either vanish or explode depending on the magnitude of $w$.
-The vanishing and exploding gradient problem for RNNs were separately discovered by separate researchers (Bengio, 1994;
-Hochreiter, 1991).
-One may believe that the problem could be avoided directly by waiting in an area of parameter range where the gradients do not vanish or explode.
-Unluckily, to store memories in a way that is robust to small perturbations, the RNN must enter an area of parameter range where gradients vanish.
-Particularly, whenever the model can serve long term dependencies,
-the gradient of a long term interaction has an exponentially smaller magnitude than the gradient of a short term interaction.
-It does not mean that it is difficult to learn, but that it might take a very long time to learn long-term dependencies
+The vanishing and exploding gradient problem for RNNs were separately discovered by many researchers.
+Unluckily, to save memories in a way that is robust to small perturbations, the RNN must get in an area of weight range where gradients vanish.
+It does not mean that it is difficult to train, but that it may cost much time to learn long-term dependencies
 because the signal about these dependencies will tend to be hidden by the smallest changes resulting from short-term dependencies.
-Realistically, the experiments in Bengio (1994) confirm that as we increase the span of the dependencies that need to be caught,
-gradient-based optimization becomes more difficult, with the likelihood of successful training of a conventional
-RNN through Stochastic Gradient Descent (SGD) quickly approaching zero for sequences who have a length equal to 10 or 20.
 
 {\large \textbf{Long Short Term Memory Networks}}
 
@@ -488,8 +432,7 @@ In a traditional RNN, this repeating module will have a very simple composition,
 \end{figure}
 
 The smart idea of entering self-loops to build paths where the gradient can remain for long durations is the core of the initial LSTM model.
-A vital extension has been to make the weight on this self-loop adapted on the context, rather than fixed (Gers, 2000).
-By securing the weight of this self-loop gated (controlled by another hidden unit), the time scale of integration can be adjusted dynamically.
+By securing the parameters of this self-loop gated (controlled by another hidden unit), the time scale of integration can be adjusted dynamically.
 The LSTM has been observed notably successful in many applications, such as unconstrained handwriting recognition, speech recognition, and
 handwriting generation.
 
@@ -500,7 +443,7 @@ except that the outer recurrence of the RNN\@.
 Each cell has the same inputs and outputs as a common RNN\@.
 However, it has more parameters and a system of gating units that control the flow of information.
 The most significant part is the state unit $s^{(t)}_i$ that has a linear self-loop.
-This self-loop weight is controlled by a forget gate unit $f^{(t)}_i$ (for time step $t$ and cell $i$ ), that sets this weight to a value between 0 and 1 by a sigmoid unit:
+This self-loop weight is controlled by a forget gate unit $f^{(t)}_i$ (for time step $t$ and cell $i$ ), that defines this parameter between 0 and 1 using a sigmoid function:
 
 \begin{equation}
     f^{(t)}_i = \sigma (b^f_i + \sum_j U^f_{i,j} x^{(t)}_j + \sum_j W^f_{i,j} h^{(t-1)}_j) ,\label{eq:equation22}

@@ -29,4 +29,6 @@ and to run this target, type:
 ./cmake-build-debug/bin/FGMLearn absolute/path/to/input/gm_sample.json
 ```
 
-For more information about this work, please check the thesis [here](https://dias.library.tuc.gr/view/86833).
+For more information about this work, please check the thesis [here](http://bit.ly/3q1fvYM).
+
+The presentation of this work can be found [here](https://bit.ly/3ox4heq).

@@ -2,7 +2,10 @@
 # Distributed Training of Recurrent Neural Networks by FGM protocol #
 
 ### Abstract
+
+<div align="justify">
 Artificial Neural Networks are appealing because they learn by example and are strongly supportedby statistical and optimization theories. The usage of recurrent neural networks as identifiers andpredictors in non linear dynamic systems has increased significantly. They can present a wide range of dynamics, due to feedback and are also flexible nonlinear maps. Based on this, there is a need for distributed training on these networks, because of the enormous datasets. One of the most known protocols for distributed training is the Geometric Monitoring protocol. Our conviction is that this is a very expensive protocol regarding the communication of nodes. Recently, the Functional Geometric Protocol has tested training on Convolutional Neural Networks and has had encouraging results. The goal of this work is to test and compare these two protocols on Recurrent Neural Networks.
+</div>
 
 For more information about this work, please check [here](http://bit.ly/3q1fvYM) the thesis.
 

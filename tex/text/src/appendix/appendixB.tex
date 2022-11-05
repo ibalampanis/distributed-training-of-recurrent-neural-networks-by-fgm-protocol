@@ -1,0 +1,309 @@
+\chapter{Detailed Experimental Results}\label{ch:detailed-experimental-results}
+
+
+\section{SFCC Dataset Results}\label{sec:sfcc-dataset-results}
+
+\begin{table}[H]
+    \begin{tabular}{|c|c|c|c|c|c|c|c|}
+        \hline
+        \textbf{id}            & \textbf{Threshold}    & \textbf{Batch Size}   & \textbf{Workers}      & \textbf{Rounds}       & \textbf{Rebalances}   & \textbf{Accuracy}     & \textbf{Traffic (bytes)} \\
+        \hline
+        1                      & 0.01                  & 16                    & 8                     & 1296                  & 8424                  & 99.42                 & 660,214,152              \\
+        2                      & 0.1                   & 16                    & 8                     & 781                   & 5075                  & 99.01                 & 397,758,650              \\
+        3                      & 0.3                   & 16                    & 8                     & 589                   & 3827                  & 98.97                 & 299,949,146              \\
+        4                      & 0.5                   & 16                    & 8                     & 192                   & 1248                  & 98.74                 & 97,809,504               \\
+        5                      & 0.7                   & 16                    & 8                     & 149                   & 968                   & 98.77                 & 75,802,366               \\
+        6                      & 0.9                   & 16                    & 8                     & 98                    & 635                   & 98.25                 & 49,719,832               \\
+        7                      & 1                     & 16                    & 8                     & 67                    & 437                   & 97.36                 & 34,233,326               \\
+        \hline
+        \multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}    \\
+        \hline
+        8                      & 0.5                   & 1                     & 8                     & 222                   & 1443                  & 99.18                 & 113,015,826              \\
+        9                      & 0.5                   & 4                     & 8                     & 198                   & 1235                  & 98.78                 & 96,765,185               \\
+        10                     & 0.5                   & 16                    & 8                     & 192                   & 1248                  & 98.74                 & 97,809,504               \\
+        11                     & 0.5                   & 32                    & 8                     & 78                    & 510                   & 98.67                 & 39,938,881               \\
+        12                     & 0.5                   & 64                    & 8                     & 76                    & 495                   & 98.65                 & 38,797,770               \\
+        13                     & 0.5                   & 128                   & 8                     & 74                    & 480                   & 98.55                 & 37,656,659               \\
+        \hline
+        \multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}    \\
+        \hline
+        14                     & 0.5                   & 16                    & 4                     & 198                   & 1291                  & 98.72                 & 49,516,061               \\
+        15                     & 0.5                   & 16                    & 8                     & 192                   & 1248                  & 98.74                 & 97,809,504               \\
+        16                     & 0.5                   & 16                    & 16                    & 138                   & 895                   & 98.76                 & 113,886,941              \\
+        17                     & 0.5                   & 16                    & 32                    & 105                   & 684                   & 98.54                 & 149,191,893              \\
+        18                     & 0.5                   & 16                    & 64                    & 76                    & 491                   & 98.24                 & 198,425,217              \\
+        19                     & 0.5                   & 16                    & 128                   & 61                    & 396                   & 97.92                 & 269,858,295              \\
+        \hline
+    \end{tabular}
+    \caption{(SFCC) Training by GM protocol using as safe function the \emph{'simple norm'}}
+    \label{tab:table-gm-sf1-class-exp}
+\end{table}
+
+\newpage
+
+\begin{table}[H]
+    \begin{tabular}{|c|c|c|c|c|c|c|c|}
+        \hline
+        \textbf{id}            & \textbf{Threshold}    & \textbf{Batch Size}   & \textbf{Workers}      & \textbf{Rounds}       & \textbf{Rebalances}   & \textbf{Accuracy}     & \textbf{Traffic (bytes)} \\
+        \hline
+        1                      & 0.01                  & 16                    & 8                     & 810                   & 5,265                 & 98.31                 & 412,633,845              \\
+        2                      & 0.1                   & 16                    & 8                     & 488                   & 3,172                 & 98.29                 & 248,599,156              \\
+        3                      & 0.3                   & 16                    & 8                     & 368                   & 2,392                 & 98.3                  & 187,468,216              \\
+        4                      & 0.5                   & 16                    & 8                     & 120                   & 780                   & 97.99                 & 61,130,940               \\
+        5                      & 0.7                   & 16                    & 8                     & 93                    & 605                   & 97.81                 & 47,376,479               \\
+        6                      & 0.9                   & 16                    & 8                     & 61                    & 397                   & 97.63                 & 31,074,895               \\
+        7                      & 1                     & 16                    & 8                     & 42                    & 273                   & 96.45                 & 21,395,829               \\
+        \hline
+        \multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}    \\
+        \hline
+        8                      & 0.5                   & 1                     & 8                     & 153                   & 995                   & 99.12                 & 77,941,949               \\
+        9                      & 0.5                   & 4                     & 8                     & 131                   & 852                   & 98.72                 & 66,734,610               \\
+        10                     & 0.5                   & 16                    & 8                     & 120                   & 780                   & 97.99                 & 61,130,940               \\
+        11                     & 0.5                   & 32                    & 8                     & 70                    & 455                   & 98.61                 & 35,659,715               \\
+        12                     & 0.5                   & 64                    & 8                     & 68                    & 442                   & 98.59                 & 34,640,866               \\
+        13                     & 0.5                   & 128                   & 8                     & 66                    & 429                   & 98.49                 & 33,622,017               \\
+        \hline
+        \multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}    \\
+        \hline
+        14                     & 0.5                   & 16                    & 4                     & 147                   & 956                   & 98.66                 & 36,678,564               \\
+        15                     & 0.5                   & 16                    & 8                     & 120                   & 780                   & 97.99                 & 61,130,940               \\
+        16                     & 0.5                   & 16                    & 16                    & 102                   & 663                   & 98.7                  & 84,360,697               \\
+        17                     & 0.5                   & 16                    & 32                    & 78                    & 507                   & 98.48                 & 110,512,513              \\
+        18                     & 0.5                   & 16                    & 64                    & 56                    & 364                   & 98.18                 & 146,981,642              \\
+        19                     & 0.5                   & 16                    & 128                   & 45                    & 293                   & 97.86                 & 199,895,033              \\
+        \hline
+    \end{tabular}
+    \caption{(SFCC) Training by GM protocol using as safe function the \emph{'spherical cap'}}
+    \label{tab:table-gm-sf2-class-exp}
+\end{table}
+
+\newpage
+
+\begin{table}[H]
+    \begin{tabular}{|c|c|c|c|c|c|c|c|}
+        \hline
+        \textbf{id}            & \textbf{Threshold}    & \textbf{Batch Size}   & \textbf{Workers}      & \textbf{Rounds}       & \textbf{Subrounds}    & \textbf{Accuracy}     & \textbf{Traffic (bytes)} \\
+        \hline
+        1                      & 0.01                  & 16                    & 8                     & 818                   & 6133                  & 99.24                 & 160,453,182              \\
+        2                      & 0.1                   & 16                    & 8                     & 416                   & 3120                  & 98.79                 & 81,639,584               \\
+        3                      & 0.3                   & 16                    & 8                     & 250                   & 1872                  & 98.75                 & 48,983,750               \\
+        4                      & 0.5                   & 16                    & 8                     & 136                   & 1021                  & 98.74                 & 26,689,864               \\
+        5                      & 0.7                   & 16                    & 8                     & 122                   & 912                   & 98.77                 & 23,863,878               \\
+        6                      & 0.9                   & 16                    & 8                     & 83                    & 624                   & 97.57                 & 16,327,917               \\
+        7                      & 1                     & 16                    & 8                     & 62                    & 469                   & 96.38                 & 12,245,938               \\
+        \hline
+        \multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}    \\
+        \hline
+        8                      & 0.5                   & 1                     & 8                     & 146                   & 1099                  & 99.08                 & 28,740,666               \\
+        9                      & 0.5                   & 4                     & 8                     & 138                   & 1034                  & 98.76                 & 27,033,300               \\
+        10                     & 0.5                   & 16                    & 8                     & 136                   & 1021                  & 98.74                 & 26,689,864               \\
+        11                     & 0.5                   & 32                    & 8                     & 67                    & 504                   & 98.67                 & 13,168,308               \\
+        12                     & 0.5                   & 64                    & 8                     & 62                    & 467                   & 98.65                 & 12,210,613               \\
+        13                     & 0.5                   & 128                   & 8                     & 60                    & 449                   & 98.55                 & 11,731,765               \\
+        \hline
+        \multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}    \\
+        \hline
+        14                     & 0.5                   & 16                    & 4                     & 143                   & 972                   & 98.72                 & 22,294,377               \\
+        15                     & 0.5                   & 16                    & 8                     & 136                   & 1021                  & 98.74                 & 26,689,864               \\
+        16                     & 0.5                   & 16                    & 16                    & 89                    & 668                   & 98.76                 & 27,645,551               \\
+        17                     & 0.5                   & 16                    & 32                    & 78                    & 587                   & 98.44                 & 28,064,284               \\
+        18                     & 0.5                   & 16                    & 64                    & 48                    & 362                   & 98.08                 & 29,081,419               \\
+        19                     & 0.5                   & 16                    & 128                   & 43                    & 319                   & 97.72                 & 30,774,446               \\
+        \hline
+    \end{tabular}
+    \caption{(SFCC) Training by FGM protocol using as safe function the \emph{'simple norm'}}
+    \label{tab:table-fgm-sf1-class-exp}
+\end{table}
+
+\newpage
+
+\begin{table}[H]
+    \begin{tabular}{|c|c|c|c|c|c|c|c|}
+        \hline
+        \textbf{id}            & \textbf{Threshold}    & \textbf{Batch Size}   & \textbf{Workers}      & \textbf{Rounds}       & \textbf{Subrounds}    & \textbf{Accuracy}     & \textbf{Traffic (bytes)} \\
+        \hline
+        1                      & 0.01                  & 16                    & 8                     & 511                   & 3,833                 & 98.28                 & 100,283,239              \\
+        2                      & 0.1                   & 16                    & 8                     & 260                   & 1,950                 & 98.25                 & 51,024,740               \\
+        3                      & 0.3                   & 16                    & 8                     & 156                   & 1,170                 & 98.1                  & 30,614,844               \\
+        4                      & 0.5                   & 16                    & 8                     & 85                    & 638                   & 97.98                 & 16,681,165               \\
+        5                      & 0.7                   & 16                    & 8                     & 76                    & 570                   & 97.71                 & 14,914,924               \\
+        6                      & 0.9                   & 16                    & 8                     & 52                    & 390                   & 97.51                 & 10,204,948               \\
+        7                      & 1                     & 16                    & 8                     & 39                    & 293                   & 96.32                 & 7,653,711                \\
+        \hline
+        \multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}    \\
+        \hline
+        8                      & 0.5                   & 1                     & 8                     & 101                   & 758                   & 99.02                 & 19,821,149               \\
+        9                      & 0.5                   & 4                     & 8                     & 95                    & 713                   & 98.68                 & 18,643,655               \\
+        10                     & 0.5                   & 16                    & 8                     & 85                    & 638                   & 97.98                 & 16,681,165               \\
+        11                     & 0.5                   & 32                    & 8                     & 55                    & 413                   & 98.61                 & 10,793,695               \\
+        12                     & 0.5                   & 64                    & 8                     & 51                    & 383                   & 98.59                 & 10,008,699               \\
+        13                     & 0.5                   & 128                   & 8                     & 49                    & 368                   & 98.49                 & 9,616,201                \\
+        \hline
+        \multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}    \\
+        \hline
+        14                     & 0.5                   & 16                    & 4                     & 96                    & 720                   & 98.66                 & 16,514,353               \\
+        15                     & 0.5                   & 16                    & 8                     & 85                    & 638                   & 97.98                 & 16,681,165               \\
+        16                     & 0.5                   & 16                    & 16                    & 66                    & 495                   & 98.7                  & 17,515,223               \\
+        17                     & 0.5                   & 16                    & 32                    & 58                    & 435                   & 98.38                 & 18,566,136               \\
+        18                     & 0.5                   & 16                    & 64                    & 43                    & 323                   & 98.02                 & 20,608,410               \\
+        19                     & 0.5                   & 16                    & 128                   & 38                    & 285                   & 97.66                 & 23,905,755               \\
+        \hline
+    \end{tabular}
+    \caption{(SFCC) Training by FGM protocol using as safe function the \emph{'spherical cap'}}
+    \label{tab:table-fgm-sf2-class-exp}
+\end{table}
+
+\newpage
+
+
+\section{AFFR Dataset Results}\label{sec:affr-dataset-results}
+
+\begin{table}[H]
+    \begin{tabular}{|c|c|c|c|c|c|c|c|}
+        \hline
+        \textbf{id}            & \textbf{Threshold}    & \textbf{Batch Size}   & \textbf{Workers}      & \textbf{Rounds}       & \textbf{Rebalances}   & \textbf{Accuracy}     & \textbf{Traffic (bytes)} \\
+        \hline
+        1                      & 0.01                  & 16                    & 8                     & 6747                  & 8859                  & 98.07                 & 56,461,271,587           \\
+        2                      & 0.1                   & 16                    & 8                     & 2542                  & 712                   & 97.48                 & 18,657,422,040           \\
+        3                      & 0.3                   & 16                    & 8                     & 1285                  & 1037                  & 97.1                  & 15,478,253,016           \\
+        4                      & 0.5                   & 16                    & 8                     & 1203                  & 848                   & 96.99                 & 14,513,127,048           \\
+        5                      & 0.7                   & 16                    & 8                     & 768                   & 581                   & 96.98                 & 9,975,494,304            \\
+        6                      & 0.9                   & 16                    & 8                     & 605                   & 483                   & 96.65                 & 8,292,636,408            \\
+        7                      & 1                     & 16                    & 8                     & 293                   & 389                   & 96.54                 & 6,192,102,888            \\
+        \hline
+        \multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}    \\
+        \hline
+        8                      & 0.5                   & 1                     & 8                     & 1492                  & 2416                  & 97.38                 & 62,086,540,644           \\
+        9                      & 0.5                   & 4                     & 8                     & 1418                  & 3795                  & 97.22                 & 40,020,099,414           \\
+        10                     & 0.5                   & 16                    & 8                     & 1203                  & 848                   & 96.99                 & 14,513,127,048           \\
+        11                     & 0.5                   & 32                    & 8                     & 677                   & 1877                  & 96.6                  & 19,996,243,164           \\
+        12                     & 0.5                   & 64                    & 8                     & 662                   & 1866                  & 96.59                 & 19,996,242,993           \\
+        13                     & 0.5                   & 128                   & 8                     & 633                   & 1807                  & 96.56                 & 19,996,241,454           \\
+        \hline
+        \multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}    \\
+        \hline
+        14                     & 0.5                   & 16                    & 4                     & 1296                  & 2075                  & 96.98                 & 17,851,868,737           \\
+        15                     & 0.5                   & 16                    & 8                     & 1203                  & 848                   & 96.99                 & 14,513,127,048           \\
+        16                     & 0.5                   & 16                    & 16                    & 898                   & 975                   & 96.97                 & 41,059,298,095           \\
+        17                     & 0.5                   & 16                    & 32                    & 340                   & 834                   & 96.94                 & 59,946,575,218           \\
+        18                     & 0.5                   & 16                    & 64                    & 205                   & 762                   & 96.78                 & 75,097,517,043           \\
+        19                     & 0.5                   & 16                    & 128                   & 95                    & 407                   & 96.67                 & 117,152,126,588          \\
+        \hline
+    \end{tabular}
+    \caption{(AFFR) Training by GM protocol using as safe function the \emph{'simple norm'}}
+    \label{tab:table-gm-sf1-nlp-exp}
+\end{table}
+
+\newpage
+
+\begin{table}[H]
+    \begin{tabular}{|c|c|c|c|c|c|c|c|}
+        \hline
+        \textbf{id}            & \textbf{Threshold}    & \textbf{Batch Size}   & \textbf{Workers}      & \textbf{Rounds}       & \textbf{Rebalances}   & \textbf{Accuracy}     & \textbf{Traffic (bytes)} \\
+        \hline
+        1                      & 0.01                  & 16                    & 8                     & 4,217                 & 5,537                 & 98.01                 & 35,288,294,742           \\
+        2                      & 0.1                   & 16                    & 8                     & 1,589                 & 445                   & 97.42                 & 11,660,888,775           \\
+        3                      & 0.3                   & 16                    & 8                     & 803                   & 648                   & 97.04                 & 9,673,908,135            \\
+        4                      & 0.5                   & 16                    & 8                     & 752                   & 530                   & 96.93                 & 9,070,704,405            \\
+        5                      & 0.7                   & 16                    & 8                     & 480                   & 363                   & 96.92                 & 6,234,683,940            \\
+        6                      & 0.9                   & 16                    & 8                     & 378                   & 302                   & 96.59                 & 5,182,897,755            \\
+        7                      & 1                     & 16                    & 8                     & 183                   & 243                   & 96.48                 & 3,870,064,305            \\
+        \hline
+        \multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}    \\
+        \hline
+        8                      & 0.5                   & 1                     & 8                     & 1,223                 & 1,980                 & 97.32                 & 50,890,607,085           \\
+        9                      & 0.5                   & 4                     & 8                     & 781                   & 2,090                 & 97.05                 & 22,039,344,380           \\
+        10                     & 0.5                   & 16                    & 8                     & 752                   & 530                   & 96.93                 & 22,039,344,120           \\
+        11                     & 0.5                   & 32                    & 8                     & 373                   & 1034                  & 96.42                 & 11,012,068,832           \\
+        12                     & 0.5                   & 64                    & 8                     & 365                   & 1028                  & 96.41                 & 11,012,068,738           \\
+        13                     & 0.5                   & 128                   & 8                     & 348                   & 995                   & 96.38                 & 11,012,067,890           \\
+        \hline
+        \multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}    \\
+        \hline
+        14                     & 0.5                   & 16                    & 4                     & 960                   & 1537                  & 96.92                 & 13,223,606,472           \\
+        15                     & 0.5                   & 16                    & 8                     & 752                   & 530                   & 96.93                 & 22,039,344,120           \\
+        16                     & 0.5                   & 16                    & 16                    & 665                   & 722                   & 96.91                 & 30,414,294,885           \\
+        17                     & 0.5                   & 16                    & 32                    & 252                   & 618                   & 96.88                 & 44,404,870,532           \\
+        18                     & 0.5                   & 16                    & 64                    & 183                   & 680                   & 96.72                 & 67,051,354,503           \\
+        19                     & 0.5                   & 16                    & 128                   & 85                    & 363                   & 96.61                 & 104,600,113,025          \\
+        \hline
+    \end{tabular}
+    \caption{(AFFR) Training by GM protocol using as safe function the \emph{'spherical cap'}}
+    \label{tab:table-gm-sf2-nlp-exp}
+\end{table}
+
+\newpage
+
+\begin{table}[H]
+    \begin{tabular}{|c|c|c|c|c|c|c|c|}
+        \hline
+        \textbf{id}            & \textbf{Threshold}    & \textbf{Batch Size}   & \textbf{Workers}      & \textbf{Rounds}       & \textbf{Subrounds}    & \textbf{Accuracy}     & \textbf{Traffic (bytes)} \\
+        \hline
+        1                      & 0.01                  & 16                    & 8                     & 4498                  & 4498                  & 98.04                 & 48,636,137,741           \\
+        2                      & 0.1                   & 16                    & 8                     & 1694                  & 1760                  & 96.97                 & 18,322,918,669           \\
+        3                      & 0.3                   & 16                    & 8                     & 856                   & 1085                  & 96.61                 & 9,256,664,346            \\
+        4                      & 0.5                   & 16                    & 8                     & 802                   & 1062                  & 96.52                 & 8,668,401,869            \\
+        5                      & 0.7                   & 16                    & 8                     & 512                   & 869                   & 96.47                 & 5,536,744,634            \\
+        6                      & 0.9                   & 16                    & 8                     & 403                   & 635                   & 96.17                 & 4,360,177,235            \\
+        7                      & 1                     & 16                    & 8                     & 195                   & 296                   & 96.07                 & 2,110,876,838            \\
+        \hline
+        \multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}    \\
+        \hline
+        8                      & 0.5                   & 1                     & 8                     & 633                   & 743                   & 97.83                 & 6,846,804,429            \\
+        9                      & 0.5                   & 4                     & 8                     & 601                   & 657                   & 97.51                 & 6,494,812,347            \\
+        10                     & 0.5                   & 16                    & 8                     & 802                   & 1062                  & 96.52                 & 8,668,401,869            \\
+        11                     & 0.5                   & 32                    & 8                     & 622                   & 784                   & 97.03                 & 6,732,350,582            \\
+        12                     & 0.5                   & 64                    & 8                     & 569                   & 754                   & 97.02                 & 6,150,543,055            \\
+        13                     & 0.5                   & 128                   & 8                     & 395                   & 542                   & 96.97                 & 4,280,445,178            \\
+        \hline
+        \multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}    \\
+        \hline
+        14                     & 0.5                   & 16                    & 4                     & 802                   & 1062                  & 96.52                 & 8,668,401,869            \\
+        15                     & 0.5                   & 16                    & 8                     & 676                   & 896                   & 96.52                 & 1,799,367,206            \\
+        16                     & 0.5                   & 16                    & 16                    & 173                   & 470                   & 96.5                  & 1,890,244,338            \\
+        17                     & 0.5                   & 16                    & 32                    & 135                   & 410                   & 96.46                 & 1,984,756,554            \\
+        18                     & 0.5                   & 16                    & 64                    & 64                    & 241                   & 96.27                 & 1,811,274,129            \\
+        19                     & 0.5                   & 16                    & 128                   & 55                    & 109                   & 96.19                 & 2,064,852,507            \\
+        \hline
+    \end{tabular}
+    \caption{(AFFR) Training by FGM protocol using as safe function the \emph{'simple norm'}}
+    \label{tab:table-fgm-sf1-nlp-exp}
+\end{table}
+
+\newpage
+
+\begin{table}[H]
+    \begin{tabular}{|c|c|c|c|c|c|c|c|}
+        \hline
+        \textbf{id}            & \textbf{Threshold}    & \textbf{Batch Size}   & \textbf{Workers}      & \textbf{Rounds}       & \textbf{Subrounds}    & \textbf{Accuracy}     & \textbf{Traffic (bytes)} \\
+        \hline
+        1                      & 0.01                  & 16                    & 8                     & 2,811                 & 2,811                 & 97.98                 & 30,397,586,088           \\
+        2                      & 0.1                   & 16                    & 8                     & 1,059                 & 1,100                 & 96.91                 & 11,451,824,168           \\
+        3                      & 0.3                   & 16                    & 8                     & 535                   & 678                   & 96.55                 & 5,785,415,216            \\
+        4                      & 0.5                   & 16                    & 8                     & 501                   & 664                   & 96.46                 & 5,417,751,168            \\
+        5                      & 0.7                   & 16                    & 8                     & 320                   & 543                   & 96.41                 & 3,460,465,396            \\
+        6                      & 0.9                   & 16                    & 8                     & 252                   & 397                   & 96.11                 & 2,725,110,772            \\
+        7                      & 1                     & 16                    & 8                     & 122                   & 185                   & 96.01                 & 1,319,298,024            \\
+        \hline
+        \multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}    \\
+        \hline
+        8                      & 0.5                   & 1                     & 8                     & 633                   & 743                   & 97.83                 & 6,846,804,429            \\
+        9                      & 0.5                   & 4                     & 8                     & 601                   & 657                   & 97.51                 & 6,494,812,347            \\
+        10                     & 0.5                   & 16                    & 8                     & 501                   & 664                   & 96.46                 & 5,417,751,168            \\
+        11                     & 0.5                   & 32                    & 8                     & 510                   & 643                   & 96.97                 & 5,518,320,149            \\
+        12                     & 0.5                   & 64                    & 8                     & 466                   & 618                   & 96.96                 & 5,041,428,734            \\
+        13                     & 0.5                   & 128                   & 8                     & 324                   & 444                   & 96.91                 & 3,508,561,621            \\
+        \hline
+        \multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}    \\
+        \hline
+        14                     & 0.5                   & 16                    & 4                     & 501                   & 664                   & 96.43                 & 1,332,864,597            \\
+        15                     & 0.5                   & 16                    & 8                     & 249                   & 321                   & 96.46                 & 1,346,327,876            \\
+        16                     & 0.5                   & 16                    & 16                    & 128                   & 348                   & 96.44                 & 1,400,180,991            \\
+        17                     & 0.5                   & 16                    & 32                    & 100                   & 304                   & 96.4                  & 1,470,190,040            \\
+        18                     & 0.5                   & 16                    & 64                    & 57                    & 215                   & 96.21                 & 1,617,209,044            \\
+        19                     & 0.5                   & 16                    & 128                   & 49                    & 97                    & 96.13                 & 1,843,618,310            \\
+        \hline
+    \end{tabular}
+    \caption{(AFFR) Training by FGM protocol using as safe function the \emph{'spherical cap'}}
+    \label{tab:table-fgm-sf2-nlp-exp}
+\end{table}
